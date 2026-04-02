@@ -3,19 +3,18 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>用戶榮譽排行榜 - Tokens 規格版</title>
+<title>用戶榮譽排行榜 - 視覺優化版</title>
 <style>
-  /* 根據 Token 檔案定義的變數 */
   :root {
-    --font-main: "PingFang TC", sans-serif;
+    --font-main: "PingFang TC", "Microsoft JhengHei", sans-serif;
     --surface: #191919;
     --surface-container: #232323;
-    --primary: #00D2BE;
+    --primary: #F6418D; /* 預設即時榜顏色 */
     --loverse-pink: #F6418D;
     --asset-purple: #8238BA;
     --text-primary: #FFFFFF;
     --text-secondary: #C8C8C8;
-    --outline: #474747;
+    --outline: #383838;
     --gold: #FFA500;
   }
 
@@ -32,8 +31,8 @@
   }
 
   .phone-container {
-    width: 360px; /* Mobile.tokens Device-width */
-    height: 740px; /* Mobile.tokens Device-height */
+    width: 360px;
+    height: 740px;
     background-color: var(--surface);
     box-shadow: 0 0 50px rgba(0,0,0,0.8);
     position: relative;
@@ -45,19 +44,20 @@
   .content-scroll {
     height: calc(100% - 110px);
     overflow-y: auto;
+    padding-bottom: 20px;
   }
   .content-scroll::-webkit-scrollbar { width: 0px; }
 
   /* Header */
   .header {
-    padding: 24px 16px;
+    padding: 24px 16px 12px;
     text-align: center;
-    border-bottom: 1px solid var(--outline);
   }
   .header h1 {
     margin: 0;
-    font-size: 28px; /* Headline Small */
+    font-size: 24px;
     font-weight: 600;
+    letter-spacing: 1px;
   }
 
   /* Main Tabs */
@@ -65,82 +65,100 @@
     display: flex;
     justify-content: space-around;
     background-color: var(--surface-container);
-    padding: 12px 0;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--outline);
   }
   .tab-item {
-    font-size: 14px; /* Body Medium */
+    font-size: 14px;
     color: var(--text-secondary);
     cursor: pointer;
-    padding: 4px 8px;
+    padding: 4px 10px;
     position: relative;
+    transition: color 0.3s;
   }
   .tab-item.active { color: var(--primary); font-weight: 600; }
   .tab-item.active::after {
-    content: ''; position: absolute; bottom: -12px; left: 0; width: 100%; height: 2px; background-color: var(--primary);
+    content: ''; position: absolute; bottom: -15px; left: 0; width: 100%; height: 3px; background-color: var(--primary);
   }
 
-  /* Sub Tabs for Cumulative */
+  /* Sub Tabs for All (累積榜二級選單) */
   .tabs-sub {
-    display: none; /* 預設隱藏，累積榜時顯示 */
-    background-color: #2a2a2a;
-    padding: 8px 16px;
-    gap: 8px;
+    display: none;
+    background-color: #1e1e1e;
+    padding: 10px 16px;
+    gap: 10px;
     overflow-x: auto;
+    border-bottom: 1px solid var(--outline);
   }
   .sub-item {
     font-size: 12px;
     color: var(--text-secondary);
-    background: var(--surface-container);
-    padding: 6px 12px;
+    background: #2a2a2a;
+    padding: 6px 14px;
     border-radius: 100px;
     white-space: nowrap;
     cursor: pointer;
     border: 1px solid transparent;
   }
-  .sub-item.active { border-color: var(--asset-purple); color: var(--asset-purple); }
+  .sub-item.active { border-color: var(--asset-purple); color: var(--asset-purple); background: rgba(130, 56, 186, 0.1); }
 
-  /* Podium */
+  /* Podium (即時榜前三名) */
   .podium {
     display: flex;
     justify-content: center;
     align-items: flex-end;
-    padding: 40px 10px 20px;
-    background: linear-gradient(180deg, rgba(0,210,190,0.1) 0%, transparent 100%);
+    padding: 40px 10px 30px;
+    background: linear-gradient(180deg, rgba(246, 65, 141, 0.1) 0%, transparent 100%);
   }
   .podium-item { text-align: center; width: 100px; position: relative; }
-  .avatar-round { width: 64px; height: 64px; border-radius: 50%; border: 2px solid var(--outline); object-fit: cover; }
-  .no1 .avatar-round { width: 84px; height: 84px; border-color: var(--gold); }
-  .rank-pill { position: absolute; bottom: -5px; left: 50%; transform: translateX(-50%); background: var(--primary); color: #000; font-size: 10px; font-weight: bold; border-radius: 10px; padding: 2px 8px; }
+  .avatar-round { width: 68px; height: 68px; border-radius: 50%; border: 3px solid var(--outline); object-fit: cover; }
+  .no1 .avatar-round { width: 88px; height: 88px; border-color: var(--gold); box-shadow: 0 0 20px rgba(255, 165, 0, 0.3); }
+  .rank-pill { position: absolute; bottom: -5px; left: 50%; transform: translateX(-50%); background: var(--primary); color: #fff; font-size: 11px; font-weight: bold; border-radius: 10px; padding: 2px 10px; border: 1px solid rgba(255,255,255,0.2); }
 
-  /* List Table Style */
-  .list-table { padding: 0; }
+  .nickname { margin-top: 15px; font-size: 14px; color: var(--text-primary); }
+  .val-text { font-size: 13px; margin-top: 4px; font-weight: bold; }
+
+  /* List Table (排行清單) */
   .list-row {
     display: flex;
     align-items: center;
-    padding: 16px;
+    padding: 16px 20px;
     border-bottom: 1px solid var(--outline);
   }
-  .rank-num { width: 32px; font-weight: 600; font-size: 16px; color: var(--text-secondary); }
-  .avatar-square { width: 40px; height: 40px; border-radius: 4px; margin-right: 12px; object-fit: cover; }
-  .user-name { flex: 1; font-size: 14px; }
-  .data-value { font-weight: 600; color: var(--primary); }
+  .rank-num { 
+    width: 40px; /* 增加寬度，避免跟頭像卡住 */
+    font-weight: 600; 
+    font-size: 16px; 
+    color: var(--text-secondary);
+    text-align: left;
+  }
+  .avatar-square { 
+    width: 44px; 
+    height: 44px; 
+    border-radius: 8px; 
+    margin-right: 16px; /* 增加與名字的間距 */
+    object-fit: cover; 
+    border: 1px solid var(--outline);
+  }
+  .user-name { flex: 1; font-size: 15px; color: var(--text-primary); }
+  .data-value { font-weight: 600; font-size: 15px; text-align: right; }
 
-  /* Sticky Footer */
+  /* Sticky Footer (我的排名) */
   .sticky-footer {
     position: absolute;
-    bottom: 24px;
+    bottom: 25px; /* 向上移動一點，不貼底 */
     left: 12px;
     right: 12px;
     background: var(--surface-container);
-    border: 1px solid var(--primary);
+    border: 1.5px solid var(--primary);
     border-radius: 16px;
-    padding: 12px 16px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    padding: 12px 18px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.6);
   }
-  .my-info { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-  .my-avatar { width: 32px; height: 32px; border-radius: 4px; margin-right: 8px; }
-  .footer-tip { display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: var(--text-secondary); border-top: 1px solid var(--outline); padding-top: 8px; }
-  .btn-action { background: var(--primary); color: #000; border: none; padding: 4px 12px; border-radius: 100px; font-size: 12px; font-weight: 600; }
+  .my-info { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+  .my-avatar { width: 34px; height: 34px; border-radius: 6px; margin-right: 12px; border: 1px solid var(--primary); }
+  .footer-tip { display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: var(--text-secondary); border-top: 1px solid #3d3d3d; padding-top: 10px; }
+  .btn-action { background: var(--primary); color: #fff; border: none; padding: 6px 16px; border-radius: 100px; font-size: 12px; font-weight: 600; cursor: pointer; }
 
 </style>
 </head>
@@ -170,8 +188,7 @@
       <div class="podium" id="podiumContent"></div>
     </div>
     
-    <div class="list-table" id="listView">
-      </div>
+    <div class="list-table" id="listView"></div>
   </div>
 
   <div class="sticky-footer" id="footerBar">
@@ -180,25 +197,35 @@
         <img src="https://api.dicebear.com/8.x/avataaars/svg?seed=Me" class="my-avatar">
         <span style="font-size:14px;">我的排名：<strong id="myRankNum" style="color:var(--primary)">#7</strong></span>
       </div>
-      <span id="myValueText" style="font-size:14px; font-weight:600;">48,000 💎</span>
+      <span id="myValueText" style="font-size:15px; font-weight:600;">48,520 💎</span>
     </div>
     <div class="footer-tip">
-      <span id="gapText">距離上一名還差 3,200 💎</span>
+      <span id="gapText">距離上一名還差 3,280 💎</span>
       <button class="btn-action">立即衝榜</button>
     </div>
   </div>
 </div>
 
 <script>
+// 使用完整數字的模擬數據
 const data = {
   hour: {
     color: "#F6418D",
     isPodium: true,
     title: "小時即時榜",
     unit: "💎",
-    top3: [{n:"大佬一號",v:"120k",s:"1"},{n:"玩家二號",v:"98k",s:"2"},{n:"老手三號",v:"85k",s:"3"}],
-    list: [{r:4,n:"貓奴",v:"70k"},{r:5,n:"衝榜人",v:"62k"},{r:7,n:"我是七號(Me)",v:"48k",me:true}],
-    my: {r:"#7", v:"48,000 💎", g:"距離上一名還差 3,200 💎"}
+    top3: [
+      {n:"耗鑽狂魔哥", v:"120,500", s:"King"},
+      {n:"隔壁老王", v:"89,200", s:"Wang"},
+      {n:"小美愛跳舞", v:"75,000", s:"Mei"}
+    ],
+    list: [
+      {r:4, n:"貓奴一號", v:"62,300"},
+      {r:5, n:"衝榜小弟", v:"58,500"},
+      {r:6, n:"天天解鎖", v:"51,800"},
+      {r:7, n:"我是七號(Me)", v:"48,520", me:true}
+    ],
+    my: {r:"#7", v:"48,520 💎", g:"距離上一名還差 3,280 💎"}
   },
   all: {
     color: "#8238BA",
@@ -206,20 +233,23 @@ const data = {
     title: "傳奇奪冠累積榜",
     unit: "次",
     list: [
-      {r:1,n:"教父",v:"425"}, {r:2,n:"大亨",v:"312"}, {r:3,n:"收藏家",v:"280"},
-      {r:4,n:"神秘人",v:"150"}, {r:12,n:"我是七號(Me)",v:"18",me:true}
+      {r:1, n:"全站教父", v:"1,250"},
+      {r:2, n:"大亨傳奇", v:"892"},
+      {r:3, n:"資深收藏家", v:"750"},
+      {r:4, n:"神秘大戶", v:"620"},
+      {r:12, n:"我是七號(Me)", v:"128", me:true}
     ],
-    my: {r:"#12", v:"累積奪冠：18 次", g:"再拿 3 次冠軍可提升排名"}
+    my: {r:"#12", v:"累計奪冠：128 次", g:"再拿 3 次冠軍可提升排名"}
   }
 };
 
 function renderList(modeData) {
   const listArea = document.getElementById('listView');
   listArea.innerHTML = modeData.list.map(item => `
-    <div class="list-row" ${item.me ? 'style="background:rgba(0,210,190,0.05)"' : ''}>
+    <div class="list-row" ${item.me ? 'style="background:rgba(246,65,141,0.05)"' : ''}>
       <div class="rank-num" ${item.me ? 'style="color:var(--primary)"' : ''}>${item.r}</div>
-      <img src="https://api.dicebear.com/8.x/initials/svg?seed=${item.n}" class="avatar-square">
-      <div class="user-name">${item.n}</div>
+      <img src="https://api.dicebear.com/8.x/initials/svg?seed=${item.n}" class="avatar-square" ${item.me ? 'style="border-color:var(--primary)"' : ''}>
+      <div class="user-name" ${item.me ? 'style="color:var(--primary); font-weight:600;"' : ''}>${item.n}</div>
       <div class="data-value" style="color:${modeData.color}">${item.v} ${modeData.unit}</div>
     </div>
   `).join('');
@@ -239,9 +269,24 @@ function changeMode(type, el) {
   
   if(modeData.isPodium) {
     document.getElementById('podiumContent').innerHTML = `
-      <div class="podium-item no2"><img src="https://api.dicebear.com/8.x/avataaars/svg?seed=2" class="avatar-round"><div class="rank-pill">2</div><div class="nickname">${modeData.top3[1].n}</div></div>
-      <div class="podium-item no1"><img src="https://api.dicebear.com/8.x/avataaars/svg?seed=1" class="avatar-round"><div class="rank-pill" style="background:var(--gold)">1</div><div class="nickname">${modeData.top3[0].n}</div></div>
-      <div class="podium-item no3"><img src="https://api.dicebear.com/8.x/avataaars/svg?seed=3" class="avatar-round"><div class="rank-pill">3</div><div class="nickname">${modeData.top3[2].n}</div></div>
+      <div class="podium-item no2">
+        <img src="https://api.dicebear.com/8.x/avataaars/svg?seed=${modeData.top3[1].s}" class="avatar-round">
+        <div class="rank-pill" style="background:var(--outline); color:var(--text-secondary)">2</div>
+        <div class="nickname">${modeData.top3[1].n}</div>
+        <div class="val-text" style="color:${themeColor}">${modeData.top3[1].v}</div>
+      </div>
+      <div class="podium-item no1">
+        <img src="https://api.dicebear.com/8.x/avataaars/svg?seed=${modeData.top3[0].s}" class="avatar-round">
+        <div class="rank-pill" style="background:var(--gold); color:#000">1</div>
+        <div class="nickname" style="font-weight:600">${modeData.top3[0].n}</div>
+        <div class="val-text" style="color:${themeColor}">${modeData.top3[0].v}</div>
+      </div>
+      <div class="podium-item no3">
+        <img src="https://api.dicebear.com/8.x/avataaars/svg?seed=${modeData.top3[2].s}" class="avatar-round">
+        <div class="rank-pill" style="background:var(--outline); color:var(--text-secondary)">3</div>
+        <div class="nickname">${modeData.top3[2].n}</div>
+        <div class="val-text" style="color:${themeColor}">${modeData.top3[2].v}</div>
+      </div>
     `;
   }
   
@@ -255,9 +300,9 @@ function changeMode(type, el) {
 function changeSub(sub, el) {
   document.querySelectorAll('.sub-item').forEach(s => s.classList.remove('active'));
   el.classList.add('active');
-  // 這裡可以根據 sub 類型載入不同的累積數據
 }
 
+// 預設啟動
 window.onload = () => changeMode('hour', document.querySelector('.tab-item'));
 </script>
 </body>
