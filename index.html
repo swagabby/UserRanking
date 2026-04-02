@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>用戶榮譽排行榜 - 隱身模式與長列表擬真版</title>
+<title>用戶榮譽排行榜 - 置頂頒獎台與隱身模式</title>
 <style>
   /* =========================================
      1. Design Tokens (系統化設計規範)
@@ -45,7 +45,7 @@
   }
 
   /* =========================================
-     2. Base & Layout
+     2. Base & Layout (Flexbox 架構重構)
      ========================================= */
   body {
     font-family: var(--font-family);
@@ -69,13 +69,28 @@
     border-radius: 28px;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8), inset 0 1px 1px rgba(255, 255, 255, 0.1);
     border: 6px solid #222;
+    /* 改用 Flexbox 讓上半部固定，下半部滑動 */
+    display: flex;
+    flex-direction: column;
   }
 
+  /* 上半部固定區域 (Header + Tabs + Top 3) */
+  .top-fixed-section {
+    flex-shrink: 0;
+    background-color: var(--surface);
+    z-index: 20;
+    position: relative;
+    /* 懸浮陰影，創造前後景深 */
+    box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+    border-bottom: 1px solid var(--outline-variant);
+  }
+
+  /* 下半部滾動區域 (List 4~25) */
   .content-scroll {
-    height: 100%;
+    flex-grow: 1;
     overflow-y: auto;
-    /* 加大 padding-bottom 確保 20 多名的資料滑到底不會被 footer 遮住 */
-    padding-bottom: 140px; 
+    /* 預留底部 Footer 的空間，避免最後一名被擋住 */
+    padding-bottom: 120px; 
     scrollbar-width: none;
   }
   .content-scroll::-webkit-scrollbar { display: none; }
@@ -102,9 +117,9 @@
     z-index: 9999;
   }
 
-  /* Header 包含倒數計時與規則按鈕 */
+  /* Header */
   .header {
-    padding: var(--space-6) var(--space-5) var(--space-3);
+    padding: var(--space-5) var(--space-5) var(--space-2);
     text-align: center;
   }
   .header-title-row {
@@ -130,7 +145,7 @@
     border-radius: 50%;
   }
   .countdown-banner {
-    margin-top: var(--space-2);
+    margin-top: 4px;
     font-size: var(--font-body-s);
     color: var(--text-secondary);
     background: rgba(255, 255, 255, 0.05);
@@ -179,7 +194,7 @@
     height: 3px; border-radius: 3px 3px 0 0; background-color: var(--primary);
   }
 
-  /* Sub Tabs (累積榜專用) */
+  /* Sub Tabs */
   .tabs-sub {
     display: none;
     background-color: var(--surface);
@@ -210,17 +225,18 @@
     background: rgba(246, 65, 141, 0.1); 
   }
 
-  /* Podium */
+  /* Podium (置頂區) - 微調 padding 以節省空間 */
   .podium {
     display: flex;
     justify-content: center;
     align-items: flex-end;
-    padding: 60px 10px 30px;
+    padding: 45px 10px 16px;
     background: linear-gradient(180deg, rgba(246, 65, 141, 0.08) 0%, transparent 100%);
     gap: var(--space-3);
+    transition: opacity 0.3s;
   }
   .podium-item { text-align: center; width: 100px; display: flex; flex-direction: column; align-items: center; }
-  .avatar-wrapper { position: relative; margin-bottom: var(--space-4); }
+  .avatar-wrapper { position: relative; margin-bottom: var(--space-3); }
   .avatar-round { width: 64px; height: 64px; border-radius: 50%; border: 2px solid var(--outline); object-fit: cover; background: var(--surface-container); }
   .no1 .avatar-round { width: 84px; height: 84px; border: 3px solid var(--gold); box-shadow: 0 0 24px rgba(255, 165, 0, 0.25); }
   
@@ -231,9 +247,9 @@
   .badge-3 { background: var(--bronze); }
 
   .nickname { font-size: var(--font-body-m); color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 90px; }
-  .val-text { font-size: var(--font-body-s); margin-top: 4px; font-weight: 600; }
+  .val-text { font-size: var(--font-body-s); margin-top: 2px; font-weight: 600; }
 
-  /* List Table */
+  /* List Table (滑動區) */
   .list-row {
     display: flex;
     align-items: center;
@@ -253,7 +269,7 @@
   .is-me .user-name { font-weight: 600; color: var(--primary); }
   .data-value { font-weight: 600; font-size: var(--font-body-m); text-align: right; padding-left: 8px;}
 
-  /* Sticky Footer (高度擴充以容納開關) */
+  /* Sticky Footer */
   .sticky-footer {
     position: absolute;
     bottom: 24px; left: var(--space-4); right: var(--space-4);
@@ -263,7 +279,7 @@
     border-radius: var(--radius-l);
     padding: var(--space-4) var(--space-4);
     box-shadow: 0 12px 32px rgba(0,0,0,0.8);
-    z-index: 10;
+    z-index: 30; /* 確保在整個畫面最上層 */
   }
   .my-info { display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-4); }
   .my-avatar { width: 40px; height: 40px; border-radius: var(--radius-s); margin-right: var(--space-3); border: 1px solid var(--primary); }
@@ -329,7 +345,8 @@
     </div>
   </div>
 
-  <div class="content-scroll" id="scrollArea">
+  <!-- [更新] 頂部固定區域 (不會隨頁面滾動) -->
+  <div class="top-fixed-section">
     <div class="header">
       <div class="header-title-row">
         <h1 id="mainTitle">即時榮譽榜</h1>
@@ -356,12 +373,15 @@
       <div class="sub-item" onclick="changeSub('w_win', this)">週冠軍累積</div>
     </div>
 
-    <!-- Podium View -->
+    <!-- Podium View (前三名頒獎台) -->
     <div id="podiumView">
       <div class="podium" id="podiumContent"></div>
     </div>
-    
-    <!-- List View -->
+  </div>
+  <!-- 頂部固定區域結束 -->
+
+  <!-- [更新] 內容滾動區域 (僅此區域會滾動) -->
+  <div class="content-scroll" id="scrollArea">
     <div class="list-table" id="listView">
       <!-- 預設骨架屏 -->
       <div class="list-row"><div class="rank-num skeleton sk-text-short" style="width:20px"></div><div class="sk-avatar skeleton"></div><div class="user-info"><div class="skeleton sk-text"></div></div></div>
@@ -406,7 +426,7 @@
    隱身模式 (Anonymous Mode) 狀態與邏輯
    ========================================= */
 let isAnonymous = false;
-let currentMode = 'hour'; // 紀錄當前所在榜單
+let currentMode = 'hour'; 
 
 function toggleAnonymous() {
   isAnonymous = document.getElementById('anonToggle').checked;
@@ -426,11 +446,10 @@ function toggleAnonymous() {
     footerName.innerText = "我是七號(Me)";
   }
 
-  // 瞬間重繪當前榜單資料，不觸發骨架屏
+  // 瞬間重繪當前榜單，體驗零延遲
   renderContent(data[currentMode]);
 }
 
-// 取得暱稱與頭像的 Helper (判斷是否觸發神秘人)
 function getRenderName(item) {
   return (item.me && isAnonymous) ? "神秘人" : item.n;
 }
@@ -447,7 +466,7 @@ function getRenderAvatar(item, type = 'avataaars') {
 function generateList(startRank, endRank, hasMeAt) {
   const names =["夜之王者", "孤獨的狼", "財富密碼", "只想躺平", "戰神", "吃瓜群眾", "打醬油的", "努力衝刺", "週末狂歡", "星空小孩", "不屈靈魂", "狂暴之路", "微笑天使", "幸運星", "夢想家", "時間旅人", "風中承諾", "破壞王", "閃耀鑽石", "默默守護", "守夜人", "探險家"];
   let list =[];
-  let currentScore = 80000 - (startRank * 1500); // 遞減分數
+  let currentScore = 80000 - (startRank * 1500); 
   
   for(let r = startRank; r <= endRank; r++) {
     let isMe = (r === hasMeAt);
@@ -471,17 +490,17 @@ const data = {
       {n:"隔壁老王", v:"89,200", s:"Wang"}, 
       {n:"小美愛跳舞", v:"75,000", s:"Mei"}
     ],
-    list: generateList(4, 25, 7), // 產生 4~25 名，自己(Me)在第 7 名
+    list: generateList(4, 25, 7), // 第7名
     my: {r:"#7", v:"68,230 💎", g:"距離前一名還差 1,200 💎"} 
   },
   day: {
     color: "#FFA500", isPodium: true, title: "日榜即時榜", unit: "💎",
     top3:[
       {n:"富豪傳奇", v:"820,000", s:"Rich"}, 
-      {n:"我是七號(Me)", v:"600,000", s:"Me", me: true}, // 自己在第 2 名 (測試頒獎台隱身)
+      {n:"我是七號(Me)", v:"600,000", s:"Me", me: true}, // 測試頒獎台隱身
       {n:"安靜看戲", v:"450,000", s:"Silent"}
     ],
-    list: generateList(4, 25, -1), // 列表沒有自己
+    list: generateList(4, 25, -1),
     my: {r:"#2", v:"600,000 💎", g:"距離第 1 名還差 220,000 💎"} 
   },
   week: {
@@ -501,7 +520,7 @@ const data = {
       {n:"全站第二", v:"14,800,000", s:"M2"}, 
       {n:"全站第三", v:"13,900,000", s:"M3"}
     ],
-    list: generateList(4, 25, 23), // 自己在第 23 名 (測試深層滑動)
+    list: generateList(4, 25, 23), // 測試深層滑動
     my: {r:"#23", v:"38,500 💎", g:"距離前一名還差 500 💎"} 
   },
   all: {
@@ -510,7 +529,7 @@ const data = {
       {r:1, n:"全站教父", v:"1,250", s:"A1"}, 
       {r:2, n:"大亨傳奇", v:"892", s:"A2"}, 
       {r:3, n:"資深收藏家", v:"750", s:"A3"},
-      ...generateList(4, 25, 12) // 自己在第 12 名
+      ...generateList(4, 25, 12) 
     ],
     my: {r:"#12", v:"128 次", g:"再拿 3 次冠軍可提升排名"}
   }
@@ -539,7 +558,6 @@ function renderContent(modeData) {
   document.getElementById('podiumView').style.display = modeData.isPodium ? 'block' : 'none';
   document.getElementById('podiumView').style.opacity = '1';
   
-  // 渲染頒獎台 (套用神秘人判定)
   if (modeData.isPodium) {
     document.getElementById('podiumContent').innerHTML = `
       <div class="podium-item no2">
@@ -557,7 +575,6 @@ function renderContent(modeData) {
     `;
   }
   
-  // 渲染長列表 (套用神秘人判定)
   document.getElementById('listView').innerHTML = modeData.list.map(item => `
     <div class="list-row ${item.me ? 'is-me' : ''}">
       <div class="rank-num">${item.r}</div>
@@ -567,7 +584,6 @@ function renderContent(modeData) {
     </div>
   `).join('');
 
-  // 處理 Footer 資訊
   document.getElementById('myRankNum').innerText = modeData.my.r;
   document.getElementById('myRankNum').style.color = (modeData.my.r === '未入榜') ? 'var(--text-secondary)' : 'var(--primary)';
   document.getElementById('myValueText').innerText = modeData.my.v;
@@ -594,7 +610,7 @@ function changeMode(type, el) {
   showSkeleton();
   setTimeout(() => {
     renderContent(modeData);
-    document.getElementById('scrollArea').scrollTop = 0;
+    document.getElementById('scrollArea').scrollTop = 0; // 重置下方列表的滾動條
   }, 400);
 }
 
