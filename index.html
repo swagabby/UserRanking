@@ -3,22 +3,24 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>用戶耗鑽榮譽榜 - 互動功能版</title>
+<title>用戶榮譽排行榜 - Tokens 規格版</title>
 <style>
+  /* 根據 Token 檔案定義的變數 */
   :root {
-    --bg-color: #121212;
-    --card-bg: #1e1e1e;
-    --text-primary: #ffffff;
-    --text-secondary: #b0b0b0;
-    --accent-gold: #ffd700;
-    --accent-silver: #c0c0c0;
-    --accent-bronze: #cd7f32;
-    --highlight: #ff4081; /* 即時榜顏色 */
-    --legend-purple: #a155ff; /* 累積榜顏色 */
+    --font-main: "PingFang TC", sans-serif;
+    --surface: #191919;
+    --surface-container: #232323;
+    --primary: #00D2BE;
+    --loverse-pink: #F6418D;
+    --asset-purple: #8238BA;
+    --text-primary: #FFFFFF;
+    --text-secondary: #C8C8C8;
+    --outline: #474747;
+    --gold: #FFA500;
   }
 
   body {
-    font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif;
+    font-family: var(--font-main);
     background-color: #000;
     color: var(--text-primary);
     margin: 0;
@@ -30,9 +32,9 @@
   }
 
   .phone-container {
-    width: 375px;
-    height: 812px;
-    background-color: var(--card-bg);
+    width: 360px; /* Mobile.tokens Device-width */
+    height: 740px; /* Mobile.tokens Device-height */
+    background-color: var(--surface);
     box-shadow: 0 0 50px rgba(0,0,0,0.8);
     position: relative;
     overflow: hidden;
@@ -40,288 +42,223 @@
     border-radius: 40px;
   }
 
-  /* 動態更換的主題色 */
-  .theme-accent { color: var(--highlight); transition: 0.3s; }
-  .theme-bg { background-color: var(--highlight); transition: 0.3s; }
-  .theme-border { border-color: var(--highlight); transition: 0.3s; }
-
   .content-scroll {
     height: calc(100% - 110px);
     overflow-y: auto;
-    padding-bottom: 20px;
   }
   .content-scroll::-webkit-scrollbar { width: 0px; }
 
+  /* Header */
   .header {
-    background: linear-gradient(180deg, rgba(255, 64, 129, 0.2) 0%, rgba(30,30,30,1) 100%);
-    padding: 20px;
+    padding: 24px 16px;
     text-align: center;
-    transition: 0.3s;
+    border-bottom: 1px solid var(--outline);
+  }
+  .header h1 {
+    margin: 0;
+    font-size: 28px; /* Headline Small */
+    font-weight: 600;
   }
 
-  .header h1 { margin: 0; font-size: 20px; font-weight: 600; }
-
-  .tabs {
+  /* Main Tabs */
+  .tabs-main {
     display: flex;
     justify-content: space-around;
-    background-color: rgba(0,0,0,0.3);
-    padding: 10px 0;
-    border-bottom: 1px solid #333;
+    background-color: var(--surface-container);
+    padding: 12px 0;
   }
-
-  .tab {
+  .tab-item {
+    font-size: 14px; /* Body Medium */
     color: var(--text-secondary);
-    font-size: 13px;
-    padding: 5px 5px;
     cursor: pointer;
+    padding: 4px 8px;
     position: relative;
-    transition: 0.3s;
+  }
+  .tab-item.active { color: var(--primary); font-weight: 600; }
+  .tab-item.active::after {
+    content: ''; position: absolute; bottom: -12px; left: 0; width: 100%; height: 2px; background-color: var(--primary);
   }
 
-  .tab.active { color: var(--highlight); font-weight: 600; }
-  .tab.active::after {
-    content: '';
-    position: absolute;
-    bottom: -10px;
-    left: 0;
-    width: 100%;
-    height: 2px;
-    background-color: var(--highlight);
+  /* Sub Tabs for Cumulative */
+  .tabs-sub {
+    display: none; /* 預設隱藏，累積榜時顯示 */
+    background-color: #2a2a2a;
+    padding: 8px 16px;
+    gap: 8px;
+    overflow-x: auto;
   }
-
-  .countdown-banner {
-    background-color: rgba(255, 64, 129, 0.1);
-    color: var(--highlight);
-    text-align: center;
-    padding: 8px;
-    font-size: 13px;
-    border-bottom: 1px solid rgba(255, 64, 129, 0.1);
+  .sub-item {
+    font-size: 12px;
+    color: var(--text-secondary);
+    background: var(--surface-container);
+    padding: 6px 12px;
+    border-radius: 100px;
+    white-space: nowrap;
+    cursor: pointer;
+    border: 1px solid transparent;
   }
+  .sub-item.active { border-color: var(--asset-purple); color: var(--asset-purple); }
 
   /* Podium */
   .podium {
     display: flex;
     justify-content: center;
     align-items: flex-end;
-    padding: 30px 10px;
-    background: linear-gradient(180deg, rgba(30,30,30,1) 0%, rgba(0,0,0,0.3) 100%);
+    padding: 40px 10px 20px;
+    background: linear-gradient(180deg, rgba(0,210,190,0.1) 0%, transparent 100%);
   }
   .podium-item { text-align: center; width: 100px; position: relative; }
-  .podium-item.no1 { width: 120px; margin: 0 10px; }
-  .avatar { width: 70px; height: 70px; border-radius: 50%; border: 3px solid #555; object-fit: cover; }
-  .podium-item.no1 .avatar { width: 90px; height: 90px; border-color: var(--highlight); box-shadow: 0 0 15px rgba(255, 64, 129, 0.3); }
-  .crown { position: absolute; top: -20px; left: 50%; transform: translateX(-50%); font-size: 24px; }
-  .rank-badge { position: absolute; bottom: -5px; left: 50%; transform: translateX(-50%); background-color: var(--highlight); color: #fff; border-radius: 10px; padding: 2px 8px; font-size: 11px; font-weight: bold; }
+  .avatar-round { width: 64px; height: 64px; border-radius: 50%; border: 2px solid var(--outline); object-fit: cover; }
+  .no1 .avatar-round { width: 84px; height: 84px; border-color: var(--gold); }
+  .rank-pill { position: absolute; bottom: -5px; left: 50%; transform: translateX(-50%); background: var(--primary); color: #000; font-size: 10px; font-weight: bold; border-radius: 10px; padding: 2px 8px; }
 
-  /* List */
-  .list-item { display: flex; align-items: center; padding: 15px 20px; border-bottom: 1px solid #2a2a2a; }
-  .list-rank { width: 35px; font-size: 16px; font-weight: 600; color: var(--text-secondary); }
-  .list-avatar-square { width: 44px; height: 44px; border-radius: 8px; margin-right: 12px; object-fit: cover; }
-  .list-nickname { flex: 1; font-size: 15px; }
-  .list-value { color: var(--highlight); font-size: 15px; font-weight: 500; text-align: right; }
-
-  /* Sticky Bar */
-  .my-status-bar {
-    position: absolute;
-    bottom: 25px;
-    left: 10px;
-    width: calc(100% - 20px);
-    height: 90px;
-    background-color: #262626;
-    border: 2px solid var(--highlight);
-    border-radius: 20px;
-    padding: 15px 20px;
-    box-sizing: border-box;
+  /* List Table Style */
+  .list-table { padding: 0; }
+  .list-row {
     display: flex;
-    flex-direction: column;
-    box-shadow: 0 -5px 20px rgba(0,0,0,0.6);
-    transition: 0.3s;
+    align-items: center;
+    padding: 16px;
+    border-bottom: 1px solid var(--outline);
   }
-  .my-info-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 5px; }
-  .my-rank-info { display: flex; align-items: center; font-size: 14px; }
-  .my-avatar-square { width: 32px; height: 32px; border-radius: 6px; margin-right: 10px; border: 1px solid var(--highlight); object-fit: cover; }
-  .my-rank-text span { color: var(--highlight); font-weight: bold; font-size: 16px; }
-  .my-val-display { color: var(--highlight); font-size: 14px; font-weight: 600; }
-  .tip-row { display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: var(--text-secondary); border-top: 1px solid #444; padding-top: 8px; }
-  .action-btn { background-color: var(--highlight); color: white; border: none; border-radius: 15px; padding: 4px 12px; font-size: 12px; font-weight: 600; cursor: pointer; }
+  .rank-num { width: 32px; font-weight: 600; font-size: 16px; color: var(--text-secondary); }
+  .avatar-square { width: 40px; height: 40px; border-radius: 4px; margin-right: 12px; object-fit: cover; }
+  .user-name { flex: 1; font-size: 14px; }
+  .data-value { font-weight: 600; color: var(--primary); }
 
-  @media (max-width: 400px) {
-    .phone-container { width: 100%; height: 100vh; border: none; border-radius: 0; }
-    .my-status-bar { bottom: 15px; }
+  /* Sticky Footer */
+  .sticky-footer {
+    position: absolute;
+    bottom: 24px;
+    left: 12px;
+    right: 12px;
+    background: var(--surface-container);
+    border: 1px solid var(--primary);
+    border-radius: 16px;
+    padding: 12px 16px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.5);
   }
+  .my-info { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .my-avatar { width: 32px; height: 32px; border-radius: 4px; margin-right: 8px; }
+  .footer-tip { display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: var(--text-secondary); border-top: 1px solid var(--outline); padding-top: 8px; }
+  .btn-action { background: var(--primary); color: #000; border: none; padding: 4px 12px; border-radius: 100px; font-size: 12px; font-weight: 600; }
+
 </style>
 </head>
 <body>
 
 <div class="phone-container">
-  <div class="content-scroll" id="scrollContent">
-    <div class="header" id="mainHeader">
-      <h1 id="titleDisplay">榮譽巔峰榜</h1>
-      <span class="rule-icon">❓</span>
+  <div class="content-scroll" id="scrollArea">
+    <div class="header">
+      <h1 id="mainTitle">即時榮譽榜</h1>
     </div>
 
-    <div class="tabs">
-      <div class="tab active" onclick="switchTab('hour', this)">小時榜</div>
-      <div class="tab" onclick="switchTab('day', this)">日榜</div>
-      <div class="tab" onclick="switchTab('week', this)">週榜</div>
-      <div class="tab" onclick="switchTab('month', this)">月榜</div>
-      <div class="tab" onclick="switchTab('all', this)">累積榜</div>
+    <div class="tabs-main">
+      <div class="tab-item active" onclick="changeMode('hour', this)">小時</div>
+      <div class="tab-item" onclick="changeMode('day', this)">日</div>
+      <div class="tab-item" onclick="changeMode('week', this)">週</div>
+      <div class="tab-item" onclick="changeMode('month', this)">月</div>
+      <div class="tab-item" onclick="changeMode('all', this)">累積榜</div>
     </div>
 
-    <div class="countdown-banner" id="bannerDisplay">
-      ⏱️ 距離 14:00 結算剩餘：12分43秒
+    <div class="tabs-sub" id="subTabs">
+      <div class="sub-item active" onclick="changeSub('h_win', this)">小時冠軍累積</div>
+      <div class="sub-item" onclick="changeSub('d_win', this)">日冠軍累積</div>
+      <div class="sub-item" onclick="changeSub('w_win', this)">週冠軍累積</div>
     </div>
 
-    <div id="podiumArea" class="podium">
-      </div>
-
-    <div id="listArea" class="list-container">
+    <div id="podiumView">
+      <div class="podium" id="podiumContent"></div>
+    </div>
+    
+    <div class="list-table" id="listView">
       </div>
   </div>
 
-  <div class="my-status-bar" id="myStatusBar">
-    <div class="my-info-row">
-      <div class="my-rank-info">
-        <img src="https://api.dicebear.com/8.x/avataaars/svg?seed=Me" class="my-avatar-square" id="myAvatarBorder">
-        <div class="my-rank-text">我的排名：<span id="myRank">#7</span></div>
+  <div class="sticky-footer" id="footerBar">
+    <div class="my-info">
+      <div style="display:flex; align-items:center;">
+        <img src="https://api.dicebear.com/8.x/avataaars/svg?seed=Me" class="my-avatar">
+        <span style="font-size:14px;">我的排名：<strong id="myRankNum" style="color:var(--primary)">#7</strong></span>
       </div>
-      <div class="my-val-display" id="myValue">本期：48,000 💎</div>
+      <span id="myValueText" style="font-size:14px; font-weight:600;">48,000 💎</span>
     </div>
-    <div class="tip-row">
-      <div id="gapText">距離第 6 名還差 <span>3,200</span> 💎</div>
-      <button class="action-btn" id="myBtn">去衝榜 ></button>
+    <div class="footer-tip">
+      <span id="gapText">距離上一名還差 3,200 💎</span>
+      <button class="btn-action">立即衝榜</button>
     </div>
   </div>
 </div>
 
 <script>
-// 模擬數據
-const dataStore = {
+const data = {
   hour: {
-    title: "榮譽巔峰榜",
-    banner: "⏱️ 距離 14:00 結算剩餘：12分43秒",
+    color: "#F6418D",
+    isPodium: true,
+    title: "小時即時榜",
     unit: "💎",
-    theme: "#ff4081",
-    top3: [
-      { name: "耗鑽狂魔哥", val: "120,500", seed: "King" },
-      { name: "隔壁老王", val: "89,200", seed: "Wang" },
-      { name: "小美愛跳舞", val: "75,000", seed: "Mei" }
-    ],
-    list: [
-      { rank: 4, name: "貓奴一號", val: "62,000", seed: "Cat" },
-      { rank: 5, name: "衝榜小弟", val: "58,500", seed: "Boy" },
-      { rank: 6, name: "天天解鎖", val: "51,200", seed: "Un" },
-      { rank: 7, name: "我是七號 (Me)", val: "48,000", seed: "Me", isMe: true }
-    ],
-    my: { rank: "#7", val: "本期：48,000 💎", gap: "距離第 6 名還差 <span>3,200</span> 💎" }
+    top3: [{n:"大佬一號",v:"120k",s:"1"},{n:"玩家二號",v:"98k",s:"2"},{n:"老手三號",v:"85k",s:"3"}],
+    list: [{r:4,n:"貓奴",v:"70k"},{r:5,n:"衝榜人",v:"62k"},{r:7,n:"我是七號(Me)",v:"48k",me:true}],
+    my: {r:"#7", v:"48,000 💎", g:"距離上一名還差 3,200 💎"}
   },
   all: {
-    title: "傳奇榮譽累積榜",
-    banner: "🏆 勳章榮耀：統計全站獲得冠軍次數排行",
-    unit: "次冠軍",
-    theme: "#a155ff",
-    top3: [
-      { name: "鑽石教父", val: "156", seed: "Godfather" },
-      { name: "古董大亨", val: "112", seed: "Rich" },
-      { name: "傳奇收藏家", val: "89", seed: "Collector" }
-    ],
+    color: "#8238BA",
+    isPodium: false,
+    title: "傳奇奪冠累積榜",
+    unit: "次",
     list: [
-      { rank: 4, name: "神秘大戶", val: "72", seed: "Secret" },
-      { rank: 5, name: "老牌贊助者", val: "54", seed: "Old" },
-      { rank: 11, name: "路人甲", val: "21", seed: "Passer" },
-      { rank: 12, name: "我是七號 (Me)", val: "18", seed: "Me", isMe: true }
+      {r:1,n:"教父",v:"425"}, {r:2,n:"大亨",v:"312"}, {r:3,n:"收藏家",v:"280"},
+      {r:4,n:"神秘人",v:"150"}, {r:12,n:"我是七號(Me)",v:"18",me:true}
     ],
-    my: { rank: "#12", val: "總奪冠：18 次", gap: "再拿 <span>3</span> 次冠軍提升排名" }
+    my: {r:"#12", v:"累積奪冠：18 次", g:"再拿 3 次冠軍可提升排名"}
   }
 };
 
-// 切換邏輯
-function switchTab(type, el) {
-  // 處理 Tab 樣式
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  el.classList.add('active');
-
-  const content = (type === 'all') ? dataStore.all : dataStore.hour; // 其他暫用 hour 數據
-  
-  // 更新主題色
-  const themeColor = content.theme;
-  document.documentElement.style.setProperty('--highlight', themeColor);
-  document.getElementById('mainHeader').style.background = `linear-gradient(180deg, ${themeColor}33 0%, rgba(30,30,30,1) 100%)`;
-  document.getElementById('myStatusBar').style.borderColor = themeColor;
-  document.querySelector('.tab.active').style.color = themeColor;
-  
-  // 更新文字
-  document.getElementById('titleDisplay').innerText = content.title;
-  document.getElementById('bannerDisplay').innerText = content.banner;
-  document.getElementById('bannerDisplay').style.color = themeColor;
-  document.getElementById('bannerDisplay').style.backgroundColor = `${themeColor}1a`;
-  
-  // 更新 Podium (前三名)
-  const podiumHTML = `
-    <div class="podium-item no2">
-      <div class="avatar-container">
-        <div class="crown">🥈</div>
-        <img src="https://api.dicebear.com/8.x/avataaars/svg?seed=${content.top3[1].seed}" class="avatar" style="border-color:var(--accent-silver)">
-        <div class="rank-badge" style="background-color:var(--accent-silver)">2</div>
-      </div>
-      <div class="nickname">${content.top3[1].name}</div>
-      <div class="diamond-count" style="color:${themeColor}">${content.top3[1].val} ${content.unit}</div>
+function renderList(modeData) {
+  const listArea = document.getElementById('listView');
+  listArea.innerHTML = modeData.list.map(item => `
+    <div class="list-row" ${item.me ? 'style="background:rgba(0,210,190,0.05)"' : ''}>
+      <div class="rank-num" ${item.me ? 'style="color:var(--primary)"' : ''}>${item.r}</div>
+      <img src="https://api.dicebear.com/8.x/initials/svg?seed=${item.n}" class="avatar-square">
+      <div class="user-name">${item.n}</div>
+      <div class="data-value" style="color:${modeData.color}">${item.v} ${modeData.unit}</div>
     </div>
-    <div class="podium-item no1">
-      <div class="avatar-container">
-        <div class="crown">🥇</div>
-        <img src="https://api.dicebear.com/8.x/avataaars/svg?seed=${content.top3[0].seed}" class="avatar" style="border-color:${themeColor}">
-        <div class="rank-badge" style="background-color:${themeColor}">1</div>
-      </div>
-      <div class="nickname">${content.top3[0].name}</div>
-      <div class="diamond-count" style="color:${themeColor}">${content.top3[0].val} ${content.unit}</div>
-    </div>
-    <div class="podium-item no3">
-      <div class="avatar-container">
-        <div class="crown">🥉</div>
-        <img src="https://api.dicebear.com/8.x/avataaars/svg?seed=${content.top3[2].seed}" class="avatar" style="border-color:var(--accent-bronze)">
-        <div class="rank-badge" style="background-color:var(--accent-bronze)">3</div>
-      </div>
-      <div class="nickname">${content.top3[2].name}</div>
-      <div class="diamond-count" style="color:${themeColor}">${content.top3[2].val} ${content.unit}</div>
-    </div>
-  `;
-  document.getElementById('podiumArea').innerHTML = podiumHTML;
-
-  // 更新 List (4名以後)
-  let listHTML = '';
-  content.list.forEach(item => {
-    const isMeStyle = item.isMe ? `style="background-color: ${themeColor}14; color: ${themeColor};"` : '';
-    const rankColor = item.isMe ? `style="color:${themeColor}"` : '';
-    listHTML += `
-      <div class="list-item" ${isMeStyle}>
-        <div class="list-rank" ${rankColor}>${item.rank}</div>
-        <img src="https://api.dicebear.com/8.x/avataaars/svg?seed=${item.seed}" class="list-avatar-square" ${item.isMe ? `style="border:1px solid ${themeColor}"` : ''}>
-        <div class="list-nickname">${item.name}</div>
-        <div class="list-value" style="color:${themeColor}">${item.val} ${content.unit}</div>
-      </div>
-    `;
-  });
-  document.getElementById('listArea').innerHTML = listHTML;
-
-  // 更新 My Status Bar
-  document.getElementById('myRank').innerText = content.my.rank;
-  document.getElementById('myRank').style.color = themeColor;
-  document.getElementById('myValue').innerText = content.my.val;
-  document.getElementById('myValue').style.color = themeColor;
-  document.getElementById('gapText').innerHTML = content.my.gap;
-  document.getElementById('myAvatarBorder').style.borderColor = themeColor;
-  document.getElementById('myBtn').style.backgroundColor = themeColor;
-  
-  // 回到頂端
-  document.getElementById('scrollContent').scrollTop = 0;
+  `).join('');
 }
 
-// 初始化
-window.onload = () => {
-  switchTab('hour', document.querySelector('.tab'));
-};
-</script>
+function changeMode(type, el) {
+  document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  
+  const modeData = (type === 'all') ? data.all : data.hour;
+  const themeColor = modeData.color;
+  
+  document.documentElement.style.setProperty('--primary', themeColor);
+  document.getElementById('mainTitle').innerText = modeData.title;
+  document.getElementById('subTabs').style.display = (type === 'all') ? 'flex' : 'none';
+  document.getElementById('podiumView').style.display = modeData.isPodium ? 'block' : 'none';
+  
+  if(modeData.isPodium) {
+    document.getElementById('podiumContent').innerHTML = `
+      <div class="podium-item no2"><img src="https://api.dicebear.com/8.x/avataaars/svg?seed=2" class="avatar-round"><div class="rank-pill">2</div><div class="nickname">${modeData.top3[1].n}</div></div>
+      <div class="podium-item no1"><img src="https://api.dicebear.com/8.x/avataaars/svg?seed=1" class="avatar-round"><div class="rank-pill" style="background:var(--gold)">1</div><div class="nickname">${modeData.top3[0].n}</div></div>
+      <div class="podium-item no3"><img src="https://api.dicebear.com/8.x/avataaars/svg?seed=3" class="avatar-round"><div class="rank-pill">3</div><div class="nickname">${modeData.top3[2].n}</div></div>
+    `;
+  }
+  
+  renderList(modeData);
+  document.getElementById('myRankNum').innerText = modeData.my.r;
+  document.getElementById('myValueText').innerText = modeData.my.v;
+  document.getElementById('gapText').innerHTML = modeData.my.g;
+  document.getElementById('scrollArea').scrollTop = 0;
+}
 
+function changeSub(sub, el) {
+  document.querySelectorAll('.sub-item').forEach(s => s.classList.remove('active'));
+  el.classList.add('active');
+  // 這裡可以根據 sub 類型載入不同的累積數據
+}
+
+window.onload = () => changeMode('hour', document.querySelector('.tab-item'));
+</script>
 </body>
 </html>
