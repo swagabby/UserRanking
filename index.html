@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>用戶耗鑽榮譽榜 Mockup (邏輯修正版)</title>
+<title>用戶耗鑽榮譽榜 Mockup (視覺優化版)</title>
 <style>
   :root {
     --bg-color: #121212;
@@ -16,39 +16,38 @@
     --highlight: #ff4081;
   }
 
-  /* 修正電腦顯示比例 */
+  /* 電腦顯示比例 */
   body {
     font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif;
-    background-color: #000; /* 背景全黑 */
+    background-color: #000;
     color: var(--text-primary);
     margin: 0;
     padding: 0;
     display: flex;
-    justify-content: center; /* 電腦版置中 */
+    justify-content: center;
     align-items: center;
     min-height: 100vh;
   }
 
-  /* 修正電腦顯示比例 (手機模式外殼) */
+  /* 手機外殼 */
   .phone-container {
-    width: 375px;        /* 固定手機寬度 */
-    height: 812px;       /* 固定手機高度 */
+    width: 375px;
+    height: 812px;
     background-color: var(--card-bg);
     box-shadow: 0 0 50px rgba(0,0,0,0.8);
     position: relative;
-    overflow: hidden;    /* 讓內容捲動 (下面設) */
-    border: 8px solid #333; /* 增加手機邊框 */
-    border-radius: 40px;    /* 圓角 */
+    overflow: hidden;
+    border: 8px solid #333;
+    border-radius: 40px;
   }
 
-  /* 內容可捲動區 */
+  /* 內容可捲動區 (底部留白增加) */
   .content-scroll {
-    height: calc(100% - 80px); /* 扣掉吸底列高度 */
+    height: calc(100% - 110px); /* 扣掉吸底列高度與向上移動的間距 */
     overflow-y: auto;
     padding-bottom: 20px;
   }
   
-  /* 隱藏捲動條 (美化) */
   .content-scroll::-webkit-scrollbar {
     width: 0px;
   }
@@ -144,6 +143,7 @@
     display: inline-block;
   }
 
+  /* 前三名仍維持圓形頭像框 (選配) */
   .avatar {
     width: 70px;
     height: 70px;
@@ -230,12 +230,14 @@
     color: var(--text-secondary);
   }
 
-  .list-avatar {
+  /* 修改為方形頭像框 */
+  .list-avatar-square {
     width: 40px;
     height: 40px;
-    border-radius: 50%;
+    border-radius: 8px; /* 方形帶點圓角 */
     background-color: #444;
     margin-right: 15px;
+    object-fit: cover;
   }
 
   .list-info {
@@ -257,21 +259,23 @@
     color: var(--text-secondary);
   }
 
-  /* Sticky My Status Bar */
+  /* Sticky My Status Bar (向上移動並增加留白) */
   .my-status-bar {
     position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 80px;
+    bottom: 20px; /* 從 0 改為 20px，向上移動 */
+    left: 10px;   /* 增加左右留白 */
+    width: calc(100% - 20px); /* 對應調整寬度 */
+    height: 90px; /* 增加一點高度放內容 */
     z-index: 100;
     background-color: #2c2c2c;
-    border-top: 2px solid var(--highlight);
-    padding: 10px 20px;
+    border-top: none; /* 移除原本的頂部邊框 */
+    border: 2px solid var(--highlight); /* 改為全邊框 */
+    border-radius: 20px; /* 方形帶圓角外殼 */
+    padding: 15px 20px;
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
-    box-shadow: 0 -5px 10px rgba(0,0,0,0.3);
+    box-shadow: 0 -5px 20px rgba(0,0,0,0.6);
   }
 
   .my-info-row {
@@ -287,13 +291,15 @@
     font-size: 14px;
   }
 
-  .my-avatar {
+  /* 修改為方形頭像框 */
+  .my-avatar-square {
     width: 30px;
     height: 30px;
-    border-radius: 50%;
+    border-radius: 6px;
     background-color: #555;
     margin-right: 10px;
     border: 1px solid var(--highlight);
+    object-fit: cover;
   }
 
   .my-rank-text span {
@@ -341,6 +347,11 @@
         border: none;
         border-radius: 0;
     }
+    .my-status-bar {
+        bottom: 10px; /* 手機上可以留白小一點 */
+        left: 5px;
+        width: calc(100% - 10px);
+    }
   }
 
 </style>
@@ -371,8 +382,7 @@
       <div class="podium-item no2">
         <div class="avatar-container">
           <div class="crown">🥈</div>
-          <img src="https://via.placeholder.com/70/555555/FFFFFF?text=User2" alt="User 2" class="avatar">
-          <div class="rank-badge">2</div>
+          <img src="https://api.dicebear.com/8.x/lorelei/svg?seed=Wang" alt="Wang" class="avatar"> <div class="rank-badge">2</div>
         </div>
         <div class="nickname">隔壁老王</div>
         <div class="diamond-count">89,200 💎</div>
@@ -381,8 +391,7 @@
       <div class="podium-item no1">
         <div class="avatar-container">
           <div class="crown">🥇</div>
-          <img src="https://via.placeholder.com/90/FFD700/000000?text=Winner" alt="Winner" class="avatar">
-          <div class="rank-badge">1</div>
+          <img src="https://api.dicebear.com/8.x/lorelei/svg?seed=Winner" alt="Winner" class="avatar"> <div class="rank-badge">1</div>
         </div>
         <div class="nickname">耗鑽狂魔哥</div>
         <div class="diamond-count">120,500 💎</div>
@@ -391,8 +400,7 @@
       <div class="podium-item no3">
         <div class="avatar-container">
           <div class="crown">🥉</div>
-          <img src="https://via.placeholder.com/70/CD7F32/FFFFFF?text=User3" alt="User 3" class="avatar">
-          <div class="rank-badge">3</div>
+          <img src="https://api.dicebear.com/8.x/lorelei/svg?seed=Mei" alt="Mei" class="avatar"> <div class="rank-badge">3</div>
         </div>
         <div class="nickname">小美愛跳舞</div>
         <div class="diamond-count">75,000 💎</div>
@@ -402,8 +410,7 @@
     <div class="list-container">
       <div class="list-item">
         <div class="list-rank">4</div>
-        <img src="https://via.placeholder.com/40/444444/FFFFFF?text=U4" alt="U4" class="list-avatar">
-        <div class="list-info">
+        <img src="https://api.dicebear.com/8.x/initials/svg?seed=Cat" alt="Cat" class="list-avatar-square"> <div class="list-info">
           <div class="list-nickname">貓奴一號</div>
           <div class="list-diamonds">62,000 💎</div>
         </div>
@@ -412,8 +419,7 @@
       
       <div class="list-item">
         <div class="list-rank">5</div>
-        <img src="https://via.placeholder.com/40/444444/FFFFFF?text=U5" alt="U5" class="list-avatar">
-        <div class="list-info">
+        <img src="https://api.dicebear.com/8.x/initials/svg?seed=Boy" alt="Boy" class="list-avatar-square"> <div class="list-info">
           <div class="list-nickname">衝榜小弟</div>
           <div class="list-diamonds">58,500 💎</div>
         </div>
@@ -422,8 +428,7 @@
       
       <div class="list-item">
         <div class="list-rank">6</div>
-        <img src="https://via.placeholder.com/40/444444/FFFFFF?text=U6" alt="U6" class="list-avatar">
-        <div class="list-info">
+        <img src="https://api.dicebear.com/8.x/initials/svg?seed=Un" alt="Un" class="list-avatar-square"> <div class="list-info">
           <div class="list-nickname">天天解鎖</div>
           <div class="list-diamonds">51,200 💎</div>
         </div>
@@ -432,23 +437,24 @@
       
       <div class="list-item">
         <div class="list-rank">7</div>
-        <img src="https://via.placeholder.com/40/444444/FFFFFF?text=U7" alt="U7" class="list-avatar">
-        <div class="list-info">
+        <img src="https://api.dicebear.com/8.x/initials/svg?seed=Me" alt="Me" class="list-avatar-square"> <div class="list-info">
           <div class="list-nickname">我是七號 (Me)</div>
-          <div class="list-diamonds">48,000 💎</div> </div>
+          <div class="list-diamonds">48,000 💎</div>
+        </div>
         <div class="list-badge">-</div>
       </div>
     </div>
   </div> <div class="my-status-bar">
     <div class="my-info-row">
       <div class="my-rank-info">
-        <img src="https://via.placeholder.com/30/FF4081/FFFFFF?text=Me" alt="Me" class="my-avatar">
-        <div class="my-rank-text">我的排名：<span>#7</span></div>
+        <img src="https://api.dicebear.com/8.x/initials/svg?seed=Me" alt="Me" class="my-avatar-square"> <div class="my-rank-text">我的排名：<span>#7</span></div>
       </div>
-      <div class="my-diamonds">本期：<strong>48,000</strong> 💎</div> </div>
+      <div class="my-diamonds">本期：<strong>48,000</strong> 💎</div>
+    </div>
     <div class="tip-row">
       <div class="gap-info">
-        距離第 6 名還差 <span>3,200</span> 💎 </div>
+        距離第 6 名還差 <span>3,200</span> 💎
+      </div>
       <button class="action-btn">立即衝榜 ></button>
     </div>
   </div>
