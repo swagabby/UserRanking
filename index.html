@@ -3,13 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>用戶榮譽排行榜 - Token Driven</title>
+<title>用戶榮譽排行榜 - 完整版 (含倒數與規則)</title>
 <style>
   /* =========================================
      1. Design Tokens (系統化設計規範)
      ========================================= */
   :root {
-    /* Font */
     --font-family: "PingFang TC", "Microsoft JhengHei", sans-serif;
     --font-title-l: 22px;
     --font-title-m: 20px;
@@ -17,29 +16,26 @@
     --font-body-m: 14px;
     --font-body-s: 12px;
 
-    /* Semantic Color - Dark Mode */
     --surface: #191919;
     --surface-container: #232323;
-    --surface-container-variant: #474747; /* Opacity/Gray 700/40p */
+    --surface-container-variant: #474747;
     --text-primary: #FFFFFF;
-    --text-secondary: #C8C8C8; /* Grey/400 */
+    --text-secondary: #C8C8C8;
     --text-tertiary: #646464;
     --outline: #474747;
     --outline-variant: rgba(71, 71, 71, 0.4);
     
-    /* Brand & Preset Colors */
-    --primary: #F6418D; /* Loverse Theme Default */
+    --primary: #F6418D;
     --primary-hover: rgba(246, 65, 141, 0.8);
     --asset-purple: #8238BA;
     --gold: #FFA500;
     --silver: #C8C8C8;
     --bronze: #CD7F32;
-    --info-blue: #60C4E8;
 
-    /* Shape & Spacing */
     --radius-s: 8px;
     --radius-m: 12px;
     --radius-l: 16px;
+    --radius-xl: 24px;
     --radius-full: 1000px;
     
     --space-2: 4px;
@@ -54,7 +50,7 @@
      ========================================= */
   body {
     font-family: var(--font-family);
-    background-color: #0A0A0A; /* 外圍背景更暗，突顯手機框 */
+    background-color: #0A0A0A;
     color: var(--text-primary);
     margin: 0;
     padding: 0;
@@ -65,7 +61,6 @@
     -webkit-tap-highlight-color: transparent;
   }
 
-  /* Device Token (Mobile) */
   .device-container {
     width: 360px;
     height: 740px;
@@ -80,16 +75,15 @@
   .content-scroll {
     height: 100%;
     overflow-y: auto;
-    padding-bottom: 100px; /* 給 Footer 留空間 */
-    scrollbar-width: none; /* Firefox */
+    padding-bottom: 100px;
+    scrollbar-width: none;
   }
-  .content-scroll::-webkit-scrollbar { display: none; /* Chrome/Safari */ }
+  .content-scroll::-webkit-scrollbar { display: none; }
 
   /* =========================================
-     3. UI Components (符合 40px Touch Target)
+     3. UI Components
      ========================================= */
   
-  /* I18n Button (Phase 2 強制) */
   .i18n-btn {
     position: fixed;
     top: var(--space-5);
@@ -107,19 +101,59 @@
     align-items: center;
     cursor: pointer;
     z-index: 9999;
-    transition: all 0.3s ease;
   }
-  .i18n-btn:hover { background: var(--surface-container-variant); }
 
-  /* Header */
+  /* Header 包含倒數計時與規則按鈕 */
   .header {
-    padding: var(--space-6) var(--space-5) var(--space-4);
+    padding: var(--space-6) var(--space-5) var(--space-3);
     text-align: center;
+  }
+  .header-title-row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: var(--space-2);
   }
   .header h1 {
     margin: 0;
     font-size: var(--font-title-l);
     font-weight: 600;
+  }
+  /* 規則說明圖示：確保觸控熱區大於 40px */
+  .info-icon {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    width: 40px;
+    height: 40px;
+    font-size: 18px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    border-radius: 50%;
+    transition: background 0.3s, color 0.3s;
+  }
+  .info-icon:active {
+    background: var(--surface-container);
+    color: var(--text-primary);
+  }
+  
+  /* 倒數計時區塊 */
+  .countdown-banner {
+    margin-top: var(--space-2);
+    font-size: var(--font-body-s);
+    color: var(--text-secondary);
+    background: rgba(255, 255, 255, 0.05);
+    display: inline-block;
+    padding: 4px 16px;
+    border-radius: var(--radius-full);
+    border: 1px solid var(--outline-variant);
+  }
+  .countdown-time {
+    color: var(--primary);
+    font-family: 'Courier New', Courier, monospace; /* 等寬字體防晃動 */
+    font-weight: bold;
+    font-size: var(--font-body-m);
+    margin-left: 4px;
   }
 
   /* Main Tabs */
@@ -134,122 +168,35 @@
     color: var(--text-secondary);
     cursor: pointer;
     flex: 1;
-    text-align: center;
-    /* 確保觸控高度大於 40px */
     min-height: 48px;
     display: flex;
     justify-content: center;
     align-items: center;
     position: relative;
-    transition: color 0.3s;
   }
-  .tab-item.active { 
-    color: var(--primary); 
-    font-weight: 600; 
-  }
+  .tab-item.active { color: var(--primary); font-weight: 600; }
   .tab-item.active::after {
-    content: ''; 
-    position: absolute; 
-    bottom: -1px; 
-    left: 20%; 
-    width: 60%; 
-    height: 3px; 
-    border-radius: 3px 3px 0 0;
-    background-color: var(--primary);
+    content: ''; position: absolute; bottom: -1px; left: 20%; width: 60%; 
+    height: 3px; border-radius: 3px 3px 0 0; background-color: var(--primary);
   }
 
-  /* Sub Tabs */
-  .tabs-sub {
-    display: none;
-    background-color: var(--surface);
-    padding: var(--space-4) var(--space-5);
-    gap: var(--space-3);
-    overflow-x: auto;
-    border-bottom: 1px solid var(--outline-variant);
-    scrollbar-width: none;
-  }
-  .tabs-sub::-webkit-scrollbar { display: none; }
-  .sub-item {
-    font-size: var(--font-body-s);
-    color: var(--text-secondary);
-    background: var(--surface-container);
-    /* 觸控高度優化 */
-    padding: 0 var(--space-5);
-    min-height: 40px;
-    display: flex;
-    align-items: center;
-    border-radius: var(--radius-full);
-    white-space: nowrap;
-    cursor: pointer;
-    border: 1px solid transparent;
-    transition: all 0.2s;
-  }
-  .sub-item.active { 
-    border-color: var(--primary); 
-    color: var(--primary); 
-    background: rgba(246, 65, 141, 0.1); /* 對應 primary 加上透明度 */
-  }
-
-  /* Podium (2025 優化版：皇冠與上方 Badge) */
+  /* Podium */
   .podium {
     display: flex;
     justify-content: center;
     align-items: flex-end;
-    padding: 60px 10px 30px; /* 增加上方 Padding 容納皇冠 */
+    padding: 60px 10px 30px;
     background: linear-gradient(180deg, rgba(246, 65, 141, 0.08) 0%, transparent 100%);
     gap: var(--space-3);
   }
-  .podium-item { 
-    text-align: center; 
-    width: 100px; 
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-  .avatar-wrapper {
-    position: relative;
-    margin-bottom: var(--space-4);
-  }
-  .avatar-round { 
-    width: 64px; 
-    height: 64px; 
-    border-radius: 50%; 
-    border: 2px solid var(--outline); 
-    object-fit: cover; 
-    background: var(--surface-container);
-  }
-  .no1 .avatar-round { 
-    width: 84px; 
-    height: 84px; 
-    border: 3px solid var(--gold); 
-    box-shadow: 0 0 24px rgba(255, 165, 0, 0.25); 
-  }
+  .podium-item { text-align: center; width: 100px; display: flex; flex-direction: column; align-items: center; }
+  .avatar-wrapper { position: relative; margin-bottom: var(--space-4); }
+  .avatar-round { width: 64px; height: 64px; border-radius: 50%; border: 2px solid var(--outline); object-fit: cover; background: var(--surface-container); }
+  .no1 .avatar-round { width: 84px; height: 84px; border: 3px solid var(--gold); box-shadow: 0 0 24px rgba(255, 165, 0, 0.25); }
   
-  /* 皇冠與名次 Badge 置頂設計 */
-  .crown-icon {
-    position: absolute;
-    top: -28px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 32px;
-    height: 32px;
-    filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5));
-  }
-  .rank-badge { 
-    position: absolute; 
-    top: -10px; 
-    left: 50%; 
-    transform: translateX(-50%); 
-    color: #fff; 
-    font-size: 12px; 
-    font-weight: 600; 
-    border-radius: var(--radius-full); 
-    padding: 2px 8px; 
-    border: 2px solid var(--surface);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.4);
-    min-width: 24px;
-  }
-  .badge-1 { background: var(--gold); color: #000; top: auto; bottom: -12px; /* 第一名 Badge 放下面，皇冠在上面 */ }
+  .crown-icon { position: absolute; top: -28px; left: 50%; transform: translateX(-50%); width: 32px; height: 32px; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5)); }
+  .rank-badge { position: absolute; top: -10px; left: 50%; transform: translateX(-50%); color: #fff; font-size: 12px; font-weight: 600; border-radius: var(--radius-full); padding: 2px 8px; border: 2px solid var(--surface); box-shadow: 0 4px 8px rgba(0,0,0,0.4); min-width: 24px; }
+  .badge-1 { background: var(--gold); color: #000; top: auto; bottom: -12px; }
   .badge-2 { background: var(--silver); color: #000; }
   .badge-3 { background: var(--bronze); }
 
@@ -262,109 +209,121 @@
     align-items: center;
     padding: var(--space-4) var(--space-5);
     border-bottom: 1px solid var(--outline-variant);
-    transition: background 0.2s;
   }
-  .list-row:active { background: var(--surface-container); }
   .list-row.is-me {
     background: linear-gradient(90deg, rgba(246, 65, 141, 0.1) 0%, transparent 100%);
     border-left: 3px solid var(--primary);
   }
-  .rank-num { 
-    width: 36px; 
-    font-weight: 600; 
-    font-size: var(--font-body-l); 
-    color: var(--text-secondary);
-  }
+  .rank-num { width: 36px; font-weight: 600; font-size: var(--font-body-l); color: var(--text-secondary); }
   .is-me .rank-num { color: var(--primary); }
-  .avatar-square { 
-    width: 44px; 
-    height: 44px; 
-    border-radius: var(--radius-m); 
-    margin-right: var(--space-4); 
-    object-fit: cover; 
-    border: 1px solid var(--outline);
-    background: var(--surface-container);
-  }
+  .avatar-square { width: 44px; height: 44px; border-radius: var(--radius-m); margin-right: var(--space-4); object-fit: cover; border: 1px solid var(--outline); background: var(--surface-container); }
   .is-me .avatar-square { border-color: var(--primary); }
   .user-info { flex: 1; display: flex; flex-direction: column; justify-content: center; }
   .user-name { font-size: var(--font-body-m); color: var(--text-primary); }
   .is-me .user-name { font-weight: 600; color: var(--primary); }
   .data-value { font-weight: 600; font-size: var(--font-body-m); text-align: right; }
 
-  /* Sticky Footer (Glassmorphism) */
+  /* Sticky Footer */
   .sticky-footer {
     position: absolute;
-    bottom: 24px;
-    left: var(--space-4);
-    right: var(--space-4);
-    background: rgba(35, 35, 35, 0.7);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    bottom: 24px; left: var(--space-4); right: var(--space-4);
+    background: rgba(35, 35, 35, 0.8);
+    backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
     border-radius: var(--radius-l);
     padding: var(--space-4) var(--space-5);
     box-shadow: 0 12px 32px rgba(0,0,0,0.8);
     z-index: 10;
   }
-  .sticky-footer::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0; bottom: 0;
-    border-radius: inherit;
-    padding: 1px;
-    background: linear-gradient(135deg, var(--primary) 0%, transparent 100%);
-    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-    -webkit-mask-composite: xor;
-    mask-composite: exclude;
-    pointer-events: none;
-  }
   .my-info { display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-4); }
   .my-avatar { width: 36px; height: 36px; border-radius: var(--radius-s); margin-right: var(--space-4); border: 1px solid var(--primary); }
-  .footer-tip { 
-    display: flex; justify-content: space-between; align-items: center; 
-    font-size: var(--font-body-s); color: var(--text-secondary); 
-    border-top: 1px solid var(--outline-variant); 
-    padding-top: var(--space-4); 
-  }
+  .footer-tip { display: flex; justify-content: space-between; align-items: center; font-size: var(--font-body-s); color: var(--text-secondary); border-top: 1px solid var(--outline-variant); padding-top: var(--space-4); }
   .btn-action { 
-    background: var(--primary); 
-    color: #fff; 
-    border: none; 
-    min-height: 40px; /* Touch Target */
-    padding: 0 var(--space-5); 
-    border-radius: var(--radius-full); 
-    font-size: var(--font-body-m); 
-    font-weight: 600; 
-    cursor: pointer;
-    transition: background 0.3s;
+    background: var(--primary); color: #fff; border: none; min-height: 40px; 
+    padding: 0 var(--space-5); border-radius: var(--radius-full); font-size: var(--font-body-m); font-weight: 600; cursor: pointer; 
   }
-  .btn-action:active { background: var(--surface-container-variant); }
 
-  /* Skeleton Loading Animation */
-  @keyframes shimmer {
-    0% { background-position: -200px 0; }
-    100% { background-position: 200px 0; }
-  }
-  .skeleton {
-    background: linear-gradient(90deg, var(--surface-container) 25%, var(--surface-container-variant) 50%, var(--surface-container) 75%);
-    background-size: 400px 100%;
-    animation: shimmer 1.5s infinite linear;
-    border-radius: var(--radius-s);
-  }
+  /* Skeleton Loading */
+  @keyframes shimmer { 0% { background-position: -200px 0; } 100% { background-position: 200px 0; } }
+  .skeleton { background: linear-gradient(90deg, var(--surface-container) 25%, var(--surface-container-variant) 50%, var(--surface-container) 75%); background-size: 400px 100%; animation: shimmer 1.5s infinite linear; border-radius: var(--radius-s); }
   .sk-avatar { width: 44px; height: 44px; }
-  .sk-text { height: 16px; width: 120px; margin-bottom: 6px; }
+  .sk-text { height: 16px; width: 120px; }
   .sk-text-short { height: 14px; width: 60px; }
+
+  /* Modal (毛玻璃規則說明) */
+  .modal-overlay {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(8px);
+    z-index: 100;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .modal-overlay.show {
+    display: flex;
+    opacity: 1;
+  }
+  .modal-content {
+    background: var(--surface-container);
+    width: 80%;
+    border-radius: var(--radius-xl);
+    padding: var(--space-6);
+    border: 1px solid var(--outline);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.8);
+    transform: translateY(20px);
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+  .modal-overlay.show .modal-content {
+    transform: translateY(0);
+  }
+  .modal-content h2 {
+    margin-top: 0;
+    font-size: var(--font-title-m);
+    text-align: center;
+    color: var(--primary);
+  }
+  .modal-content p {
+    font-size: var(--font-body-m);
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin-bottom: var(--space-3);
+  }
+  .modal-close-btn {
+    width: 100%;
+    margin-top: var(--space-5);
+    background: var(--outline);
+  }
 </style>
 </head>
 <body>
 
-<!-- I18n Button -->
 <div class="i18n-btn" onclick="toggleLang()">繁</div>
 
 <div class="device-container">
+  <!-- Modal Overlay -->
+  <div class="modal-overlay" id="ruleModal" onclick="closeModal(event)">
+    <div class="modal-content" onclick="event.stopPropagation()">
+      <h2>活動規則</h2>
+      <p>1. 小時榜：依據每小時累積消耗鑽石總額進行排名。</p>
+      <p>2. 日/週/月榜：依照對應週期結算，結算後積分歸零重置。</p>
+      <p>3. 未進榜的用戶將顯示「未入榜」，請努力為喜愛的創作者應援！</p>
+      <p>4. 系統每 5 分鐘同步一次最新數據。</p>
+      <button class="btn-action modal-close-btn" onclick="closeModal()">我知道了</button>
+    </div>
+  </div>
+
   <div class="content-scroll" id="scrollArea">
     <div class="header">
-      <h1 id="mainTitle">即時榮譽榜</h1>
+      <div class="header-title-row">
+        <h1 id="mainTitle">即時榮譽榜</h1>
+        <div class="info-icon" onclick="openModal()">ⓘ</div>
+      </div>
+      <div class="countdown-banner">
+        距離結算 <span class="countdown-time" id="countdownTimer">--:--:--</span>
+      </div>
     </div>
 
     <!-- Main Tabs -->
@@ -372,26 +331,16 @@
       <div class="tab-item active" onclick="changeMode('hour', this)">小時</div>
       <div class="tab-item" onclick="changeMode('day', this)">日</div>
       <div class="tab-item" onclick="changeMode('week', this)">週</div>
-      <div class="tab-item" onclick="changeMode('all', this)">累積榜</div>
-    </div>
-
-    <!-- Sub Tabs -->
-    <div class="tabs-sub" id="subTabs">
-      <div class="sub-item active" onclick="changeSub('h_win', this)">小時冠軍累積</div>
-      <div class="sub-item" onclick="changeSub('d_win', this)">日冠軍累積</div>
-      <div class="sub-item" onclick="changeSub('w_win', this)">週冠軍累積</div>
+      <div class="tab-item" onclick="changeMode('month', this)">月</div>
     </div>
 
     <!-- Podium View -->
     <div id="podiumView">
-      <div class="podium" id="podiumContent">
-        <!-- JS 渲染 -->
-      </div>
+      <div class="podium" id="podiumContent"></div>
     </div>
     
     <!-- List View -->
     <div class="list-table" id="listView">
-      <!-- 預設顯示骨架屏 -->
       <div class="list-row"><div class="rank-num skeleton sk-text-short" style="width:20px"></div><div class="sk-avatar skeleton"></div><div class="user-info"><div class="skeleton sk-text"></div></div></div>
       <div class="list-row"><div class="rank-num skeleton sk-text-short" style="width:20px"></div><div class="sk-avatar skeleton"></div><div class="user-info"><div class="skeleton sk-text"></div></div></div>
     </div>
@@ -408,7 +357,6 @@
     </div>
     <div class="footer-tip">
       <span id="gapText">資料載入中...</span>
-      <!-- 加上 href 測試 PWA Interceptor 攔截邏輯 -->
       <a href="https://swag.live/go" target="_blank" style="text-decoration:none;">
         <button class="btn-action">立即衝榜</button>
       </a>
@@ -418,45 +366,69 @@
 
 <script>
 /* =========================================
-   Phase 2 規範：PWA Navigation Interceptor & User ID 提取
+   Modal (規則說明) 邏輯
+   ========================================= */
+function openModal() {
+  const modal = document.getElementById('ruleModal');
+  modal.style.display = 'flex';
+  // Trigger reflow for animation
+  void modal.offsetWidth;
+  modal.classList.add('show');
+}
+function closeModal(e) {
+  const modal = document.getElementById('ruleModal');
+  modal.classList.remove('show');
+  setTimeout(() => { modal.style.display = 'none'; }, 300);
+}
+
+/* =========================================
+   倒數計時器 (Countdown Timer) 邏輯
+   ========================================= */
+let countdownInterval;
+function startCountdown() {
+  clearInterval(countdownInterval);
+  // 模擬距離結算還有 24小時 15分 30秒
+  let totalSeconds = 24 * 3600 + 15 * 60 + 30; 
+  const timerEl = document.getElementById('countdownTimer');
+  
+  countdownInterval = setInterval(() => {
+    if (totalSeconds <= 0) {
+      clearInterval(countdownInterval);
+      timerEl.innerText = "00:00:00";
+      return;
+    }
+    totalSeconds--;
+    const h = String(Math.floor(totalSeconds / 3600)).padStart(2, '0');
+    const m = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, '0');
+    const s = String(totalSeconds % 60).padStart(2, '0');
+    timerEl.innerText = `${h}:${m}:${s}`;
+  }, 1000);
+}
+
+/* =========================================
+   PWA 攔截與 Mock Data 邏輯
    ========================================= */
 document.addEventListener('DOMContentLoaded', () => {
-  // 1. 提取 User ID (Query -> Hash -> Fallback)
-  const urlParams = new URLSearchParams(window.location.search);
-  let userId = urlParams.get('user_id') || window.location.hash.replace('#', '') || 'unknown_user';
-  console.log('[Init] Current User ID:', userId);
+  startCountdown(); // 啟動倒數
 
-  // 2. 攔截 <a> 標籤，處理 iOS PWA Iframe 跨域跳轉問題
   document.body.addEventListener('click', (e) => {
     const link = e.target.closest('a[target="_blank"]');
     if (!link) return;
-
-    // 判斷是否處於 Iframe 中
     if (window.self !== window.top) {
       try {
         const targetUrl = new URL(link.href);
-        // 主站網域進行攔截並 postMessage 讓父層跳轉
         if (targetUrl.hostname === 'swag.live' || targetUrl.hostname === 'www.swag.live') {
           e.preventDefault();
           window.parent.postMessage({ type: 'PWA_NAVIGATE', url: link.href }, '*');
-          console.log('[PWA Interceptor] Navigating via Parent:', link.href);
-        } else {
-          // 創作者或其他網域放行，交由原生開新分頁
-          console.log('[PWA Interceptor] Allowed external link:', link.href);
         }
-      } catch (err) {
-        console.error('[PWA Interceptor] URL Parse Error', err);
-      }
+      } catch (err) {}
     }
   });
 });
 
-/* =========================================
-   Mock Data & Rendering Logic
-   ========================================= */
 const data = {
   hour: {
-    color: "#F6418D", // Loverse Pink
+    color: "#F6418D",
     isPodium: true,
     title: "小時即時榜",
     unit: "💎",
@@ -471,96 +443,67 @@ const data = {
       {r:6, n:"天天解鎖", v:"51,800"},
       {r:7, n:"我是七號(Me)", v:"48,520", me:true}
     ],
-    my: {r:"#7", v:"48,520 💎", g:"距離上一名還差 3,280 💎"}
+    // 依據提示詞加入「未入榜」的情境範例 (可在日榜/週榜測試切換)
+    my: {r:"#7", v:"48,520 💎", g:"距離前一名還差 150 💎"} 
   },
-  all: {
-    color: "#8238BA", // Asset Purple
-    isPodium: false,
-    title: "傳奇奪冠累積榜",
-    unit: "次",
-    list:[
-      {r:1, n:"全站教父", v:"1,250"},
-      {r:2, n:"大亨傳奇", v:"892"},
-      {r:3, n:"資深收藏家", v:"750"},
-      {r:4, n:"神秘大戶", v:"620"},
-      {r:12, n:"我是七號(Me)", v:"128", me:true}
+  day: {
+    color: "#FFA500",
+    isPodium: true,
+    title: "日榜即時榜",
+    unit: "💎",
+    top3:[
+      {n:"富豪傳奇", v:"820,000", s:"Rich"},
+      {n:"榜一大哥", v:"600,000", s:"Bro"},
+      {n:"安靜看戲", v:"450,000", s:"Silent"}
     ],
-    my: {r:"#12", v:"累計奪冠：128 次", g:"再拿 3 次冠軍可提升排名"}
+    list:[
+      {r:4, n:"路人甲", v:"300,000"}
+    ],
+    // 未進榜狀態
+    my: {r:"未入榜", v:"0 💎", g:"距離第 1 名還差 820,000 💎"} 
   }
 };
 
-// SVG 皇冠 (Zero Dependency)
-const crownSVG = `
-<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="crown-icon">
-  <path d="M2 19H22V21H2V19ZM3 5L7 12L12 3L17 12L21 5L19 17H5L3 5Z" fill="var(--gold)"/>
-  <path d="M12 9C12.5523 9 13 8.55228 13 8C13 7.44772 12.5523 7 12 7C11.4477 7 11 7.44772 11 8C11 8.55228 11.4477 9 12 9Z" fill="#FFF"/>
-</svg>
-`;
+const crownSVG = `<svg viewBox="0 0 24 24" fill="none" class="crown-icon"><path d="M2 19H22V21H2V19ZM3 5L7 12L12 3L17 12L21 5L19 17H5L3 5Z" fill="var(--gold)"/><path d="M12 9C12.5523 9 13 8.55228 13 8C13 7.44772 12.5523 7 12 7C11.4477 7 11 7.44772 11 8C11 8.55228 11.4477 9 12 9Z" fill="#FFF"/></svg>`;
 
-// 顯示骨架屏
 function showSkeleton() {
   const listArea = document.getElementById('listView');
-  let skeletons = '';
-  for(let i=0; i<4; i++) {
-    skeletons += `<div class="list-row"><div class="rank-num skeleton sk-text-short" style="width:20px"></div><div class="sk-avatar skeleton"></div><div class="user-info"><div class="skeleton sk-text"></div></div></div>`;
-  }
-  listArea.innerHTML = skeletons;
+  listArea.innerHTML = Array(4).fill(`<div class="list-row"><div class="rank-num skeleton sk-text-short" style="width:20px"></div><div class="sk-avatar skeleton"></div><div class="user-info"><div class="skeleton sk-text"></div></div></div>`).join('');
   document.getElementById('podiumView').style.opacity = '0.5';
 }
 
 function renderContent(modeData) {
   const themeColor = modeData.color;
   document.documentElement.style.setProperty('--primary', themeColor);
-  document.getElementById('mainTitle').innerText = modeData.title;
+  document.querySelector('.modal-content h2').style.color = themeColor;
+  
   document.getElementById('podiumView').style.opacity = '1';
-  document.getElementById('podiumView').style.display = modeData.isPodium ? 'block' : 'none';
+  document.getElementById('podiumContent').innerHTML = `
+    <div class="podium-item no2">
+      <div class="avatar-wrapper"><div class="rank-badge badge-2">2</div><img src="https://api.dicebear.com/8.x/avataaars/svg?seed=${modeData.top3[1].s}" class="avatar-round"></div>
+      <div class="nickname">${modeData.top3[1].n}</div><div class="val-text" style="color:${themeColor}">${modeData.top3[1].v}</div>
+    </div>
+    <div class="podium-item no1">
+      <div class="avatar-wrapper">${crownSVG}<img src="https://api.dicebear.com/8.x/avataaars/svg?seed=${modeData.top3[0].s}" class="avatar-round"><div class="rank-badge badge-1">1</div></div>
+      <div class="nickname" style="font-weight:600">${modeData.top3[0].n}</div><div class="val-text" style="color:${themeColor}">${modeData.top3[0].v}</div>
+    </div>
+    <div class="podium-item no3">
+      <div class="avatar-wrapper"><div class="rank-badge badge-3">3</div><img src="https://api.dicebear.com/8.x/avataaars/svg?seed=${modeData.top3[2].s}" class="avatar-round"></div>
+      <div class="nickname">${modeData.top3[2].n}</div><div class="val-text" style="color:${themeColor}">${modeData.top3[2].v}</div>
+    </div>
+  `;
   
-  if(modeData.isPodium) {
-    document.getElementById('podiumContent').innerHTML = `
-      <!-- Rank 2 -->
-      <div class="podium-item no2">
-        <div class="avatar-wrapper">
-          <div class="rank-badge badge-2">2</div>
-          <img src="https://api.dicebear.com/8.x/avataaars/svg?seed=${modeData.top3[1].s}" class="avatar-round">
-        </div>
-        <div class="nickname">${modeData.top3[1].n}</div>
-        <div class="val-text" style="color:${themeColor}">${modeData.top3[1].v}</div>
-      </div>
-      <!-- Rank 1 -->
-      <div class="podium-item no1">
-        <div class="avatar-wrapper">
-          ${crownSVG}
-          <img src="https://api.dicebear.com/8.x/avataaars/svg?seed=${modeData.top3[0].s}" class="avatar-round">
-          <div class="rank-badge badge-1">1</div>
-        </div>
-        <div class="nickname" style="font-weight:600">${modeData.top3[0].n}</div>
-        <div class="val-text" style="color:${themeColor}">${modeData.top3[0].v}</div>
-      </div>
-      <!-- Rank 3 -->
-      <div class="podium-item no3">
-        <div class="avatar-wrapper">
-          <div class="rank-badge badge-3">3</div>
-          <img src="https://api.dicebear.com/8.x/avataaars/svg?seed=${modeData.top3[2].s}" class="avatar-round">
-        </div>
-        <div class="nickname">${modeData.top3[2].n}</div>
-        <div class="val-text" style="color:${themeColor}">${modeData.top3[2].v}</div>
-      </div>
-    `;
-  }
-  
-  const listArea = document.getElementById('listView');
-  listArea.innerHTML = modeData.list.map(item => `
+  document.getElementById('listView').innerHTML = modeData.list.map(item => `
     <div class="list-row ${item.me ? 'is-me' : ''}">
       <div class="rank-num">${item.r}</div>
       <img src="https://api.dicebear.com/8.x/initials/svg?seed=${item.n}" class="avatar-square">
-      <div class="user-info">
-        <div class="user-name">${item.n}</div>
-      </div>
+      <div class="user-info"><div class="user-name">${item.n}</div></div>
       <div class="data-value" style="color:${themeColor}">${item.v} ${modeData.unit}</div>
     </div>
   `).join('');
 
   document.getElementById('myRankNum').innerText = modeData.my.r;
+  document.getElementById('myRankNum').style.color = (modeData.my.r === '未入榜') ? 'var(--text-secondary)' : 'var(--primary)';
   document.getElementById('myValueText').innerText = modeData.my.v;
   document.getElementById('gapText').innerHTML = modeData.my.g;
 }
@@ -568,49 +511,24 @@ function renderContent(modeData) {
 function changeMode(type, el) {
   document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
   el.classList.add('active');
+  const modeData = data[type] || data.hour; // fallback
   
-  const modeData = (type === 'all') ? data.all : data.hour;
-  
-  // 處理次選單顯示
-  const subTabs = document.getElementById('subTabs');
-  if(type === 'all') {
-    subTabs.style.display = 'flex';
-    // 動態變更次選單主色
-    document.documentElement.style.setProperty('--primary', data.all.color);
-  } else {
-    subTabs.style.display = 'none';
-  }
-  
-  // 觸發 Skeleton Loading 模擬 API 請求
   showSkeleton();
   setTimeout(() => {
     renderContent(modeData);
     document.getElementById('scrollArea').scrollTop = 0;
-  }, 400); // 模擬 400ms 網路延遲
-}
-
-function changeSub(sub, el) {
-  document.querySelectorAll('.sub-item').forEach(s => s.classList.remove('active'));
-  el.classList.add('active');
-  // 這裡可串接次選單對應的 API
-  showSkeleton();
-  setTimeout(() => renderContent(data.all), 300);
+  }, 400);
 }
 
 let lang = 'Hant';
 function toggleLang() {
-  const btn = document.querySelector('.i18n-btn');
   lang = lang === 'Hant' ? 'EN' : 'Hant';
-  btn.innerText = lang === 'Hant' ? '繁' : 'EN';
-  // 實際應用中此處會觸發 I18n 字典替換
+  document.querySelector('.i18n-btn').innerText = lang === 'Hant' ? '繁' : 'EN';
 }
 
-// 畫面載入啟動
 window.onload = () => {
   showSkeleton();
-  setTimeout(() => {
-    changeMode('hour', document.querySelector('.tab-item.active'));
-  }, 300);
+  setTimeout(() => changeMode('hour', document.querySelector('.tab-item.active')), 300);
 };
 </script>
 </body>
