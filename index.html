@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>用戶榮譽排行榜 - 完整版 (含倒數與規則)</title>
+<title>用戶榮譽排行榜 - 終極完整版</title>
 <style>
   /* =========================================
      1. Design Tokens (系統化設計規範)
@@ -21,13 +21,12 @@
     --surface-container-variant: #474747;
     --text-primary: #FFFFFF;
     --text-secondary: #C8C8C8;
-    --text-tertiary: #646464;
     --outline: #474747;
     --outline-variant: rgba(71, 71, 71, 0.4);
     
     --primary: #F6418D;
-    --primary-hover: rgba(246, 65, 141, 0.8);
     --asset-purple: #8238BA;
+    --info-blue: #60C4E8;
     --gold: #FFA500;
     --silver: #C8C8C8;
     --bronze: #CD7F32;
@@ -75,15 +74,14 @@
   .content-scroll {
     height: 100%;
     overflow-y: auto;
-    padding-bottom: 100px;
+    padding-bottom: 110px;
     scrollbar-width: none;
   }
   .content-scroll::-webkit-scrollbar { display: none; }
 
   /* =========================================
-     3. UI Components
+     3. UI Components (符合 40px 觸控熱區)
      ========================================= */
-  
   .i18n-btn {
     position: fixed;
     top: var(--space-5);
@@ -119,7 +117,6 @@
     font-size: var(--font-title-l);
     font-weight: 600;
   }
-  /* 規則說明圖示：確保觸控熱區大於 40px */
   .info-icon {
     display: inline-flex;
     justify-content: center;
@@ -130,14 +127,7 @@
     color: var(--text-secondary);
     cursor: pointer;
     border-radius: 50%;
-    transition: background 0.3s, color 0.3s;
   }
-  .info-icon:active {
-    background: var(--surface-container);
-    color: var(--text-primary);
-  }
-  
-  /* 倒數計時區塊 */
   .countdown-banner {
     margin-top: var(--space-2);
     font-size: var(--font-body-s);
@@ -147,37 +137,76 @@
     padding: 4px 16px;
     border-radius: var(--radius-full);
     border: 1px solid var(--outline-variant);
+    transition: opacity 0.3s;
   }
   .countdown-time {
     color: var(--primary);
-    font-family: 'Courier New', Courier, monospace; /* 等寬字體防晃動 */
+    font-family: 'Courier New', Courier, monospace;
     font-weight: bold;
     font-size: var(--font-body-m);
     margin-left: 4px;
   }
 
-  /* Main Tabs */
+  /* Main Tabs (支援橫向滑動，若未來標籤變多也不會擠壓) */
   .tabs-main {
     display: flex;
-    justify-content: space-around;
     background-color: var(--surface-container);
     border-bottom: 1px solid var(--outline);
+    overflow-x: auto;
+    scrollbar-width: none;
+    scroll-behavior: smooth;
   }
+  .tabs-main::-webkit-scrollbar { display: none; }
+  
   .tab-item {
     font-size: var(--font-body-m);
     color: var(--text-secondary);
     cursor: pointer;
-    flex: 1;
+    white-space: nowrap;
+    padding: 0 var(--space-5);
+    flex: 1; /* 平分寬度 */
     min-height: 48px;
     display: flex;
     justify-content: center;
     align-items: center;
     position: relative;
+    flex-shrink: 0;
   }
   .tab-item.active { color: var(--primary); font-weight: 600; }
   .tab-item.active::after {
     content: ''; position: absolute; bottom: -1px; left: 20%; width: 60%; 
     height: 3px; border-radius: 3px 3px 0 0; background-color: var(--primary);
+  }
+
+  /* Sub Tabs (累積榜專用) */
+  .tabs-sub {
+    display: none;
+    background-color: var(--surface);
+    padding: var(--space-4) var(--space-5);
+    gap: var(--space-3);
+    overflow-x: auto;
+    border-bottom: 1px solid var(--outline-variant);
+    scrollbar-width: none;
+  }
+  .tabs-sub::-webkit-scrollbar { display: none; }
+  .sub-item {
+    font-size: var(--font-body-s);
+    color: var(--text-secondary);
+    background: var(--surface-container);
+    padding: 0 var(--space-5);
+    min-height: 40px;
+    display: flex;
+    align-items: center;
+    border-radius: var(--radius-full);
+    white-space: nowrap;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: all 0.2s;
+  }
+  .sub-item.active { 
+    border-color: var(--primary); 
+    color: var(--primary); 
+    background: rgba(246, 65, 141, 0.1); 
   }
 
   /* Podium */
@@ -218,16 +247,16 @@
   .is-me .rank-num { color: var(--primary); }
   .avatar-square { width: 44px; height: 44px; border-radius: var(--radius-m); margin-right: var(--space-4); object-fit: cover; border: 1px solid var(--outline); background: var(--surface-container); }
   .is-me .avatar-square { border-color: var(--primary); }
-  .user-info { flex: 1; display: flex; flex-direction: column; justify-content: center; }
-  .user-name { font-size: var(--font-body-m); color: var(--text-primary); }
+  .user-info { flex: 1; display: flex; flex-direction: column; justify-content: center; overflow: hidden; }
+  .user-name { font-size: var(--font-body-m); color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .is-me .user-name { font-weight: 600; color: var(--primary); }
-  .data-value { font-weight: 600; font-size: var(--font-body-m); text-align: right; }
+  .data-value { font-weight: 600; font-size: var(--font-body-m); text-align: right; padding-left: 8px;}
 
   /* Sticky Footer */
   .sticky-footer {
     position: absolute;
     bottom: 24px; left: var(--space-4); right: var(--space-4);
-    background: rgba(35, 35, 35, 0.8);
+    background: rgba(35, 35, 35, 0.85);
     backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
     border: 1px solid rgba(255, 255, 255, 0.15);
     border-radius: var(--radius-l);
@@ -253,49 +282,21 @@
   /* Modal (毛玻璃規則說明) */
   .modal-overlay {
     position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0, 0, 0, 0.6);
-    backdrop-filter: blur(8px);
-    z-index: 100;
-    display: none;
-    justify-content: center;
-    align-items: center;
-    opacity: 0;
-    transition: opacity 0.3s;
+    background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(8px);
+    z-index: 100; display: none; justify-content: center; align-items: center;
+    opacity: 0; transition: opacity 0.3s;
   }
-  .modal-overlay.show {
-    display: flex;
-    opacity: 1;
-  }
+  .modal-overlay.show { display: flex; opacity: 1; }
   .modal-content {
-    background: var(--surface-container);
-    width: 80%;
-    border-radius: var(--radius-xl);
-    padding: var(--space-6);
-    border: 1px solid var(--outline);
+    background: var(--surface-container); width: 80%; border-radius: var(--radius-xl);
+    padding: var(--space-6); border: 1px solid var(--outline);
     box-shadow: 0 20px 40px rgba(0,0,0,0.8);
-    transform: translateY(20px);
-    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    transform: translateY(20px); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   }
-  .modal-overlay.show .modal-content {
-    transform: translateY(0);
-  }
-  .modal-content h2 {
-    margin-top: 0;
-    font-size: var(--font-title-m);
-    text-align: center;
-    color: var(--primary);
-  }
-  .modal-content p {
-    font-size: var(--font-body-m);
-    color: var(--text-secondary);
-    line-height: 1.6;
-    margin-bottom: var(--space-3);
-  }
-  .modal-close-btn {
-    width: 100%;
-    margin-top: var(--space-5);
-    background: var(--outline);
-  }
+  .modal-overlay.show .modal-content { transform: translateY(0); }
+  .modal-content h2 { margin-top: 0; font-size: var(--font-title-m); text-align: center; color: var(--primary); }
+  .modal-content p { font-size: var(--font-body-m); color: var(--text-secondary); line-height: 1.6; margin-bottom: var(--space-3); }
+  .modal-close-btn { width: 100%; margin-top: var(--space-5); background: var(--outline); }
 </style>
 </head>
 <body>
@@ -309,7 +310,7 @@
       <h2>活動規則</h2>
       <p>1. 小時榜：依據每小時累積消耗鑽石總額進行排名。</p>
       <p>2. 日/週/月榜：依照對應週期結算，結算後積分歸零重置。</p>
-      <p>3. 未進榜的用戶將顯示「未入榜」，請努力為喜愛的創作者應援！</p>
+      <p>3. 累積榜：結算歷屆所有獲得冠軍的總次數排行。</p>
       <p>4. 系統每 5 分鐘同步一次最新數據。</p>
       <button class="btn-action modal-close-btn" onclick="closeModal()">我知道了</button>
     </div>
@@ -321,17 +322,25 @@
         <h1 id="mainTitle">即時榮譽榜</h1>
         <div class="info-icon" onclick="openModal()">ⓘ</div>
       </div>
-      <div class="countdown-banner">
+      <div class="countdown-banner" id="countdownBanner">
         距離結算 <span class="countdown-time" id="countdownTimer">--:--:--</span>
       </div>
     </div>
 
     <!-- Main Tabs -->
-    <div class="tabs-main">
+    <div class="tabs-main" id="mainTabsContainer">
       <div class="tab-item active" onclick="changeMode('hour', this)">小時</div>
       <div class="tab-item" onclick="changeMode('day', this)">日</div>
       <div class="tab-item" onclick="changeMode('week', this)">週</div>
       <div class="tab-item" onclick="changeMode('month', this)">月</div>
+      <div class="tab-item" onclick="changeMode('all', this)">累積榜</div>
+    </div>
+
+    <!-- Sub Tabs (僅在累積榜顯示) -->
+    <div class="tabs-sub" id="subTabs">
+      <div class="sub-item active" onclick="changeSub('h_win', this)">小時冠軍累積</div>
+      <div class="sub-item" onclick="changeSub('d_win', this)">日冠軍累積</div>
+      <div class="sub-item" onclick="changeSub('w_win', this)">週冠軍累積</div>
     </div>
 
     <!-- Podium View -->
@@ -341,7 +350,6 @@
     
     <!-- List View -->
     <div class="list-table" id="listView">
-      <div class="list-row"><div class="rank-num skeleton sk-text-short" style="width:20px"></div><div class="sk-avatar skeleton"></div><div class="user-info"><div class="skeleton sk-text"></div></div></div>
       <div class="list-row"><div class="rank-num skeleton sk-text-short" style="width:20px"></div><div class="sk-avatar skeleton"></div><div class="user-info"><div class="skeleton sk-text"></div></div></div>
     </div>
   </div>
@@ -371,7 +379,6 @@
 function openModal() {
   const modal = document.getElementById('ruleModal');
   modal.style.display = 'flex';
-  // Trigger reflow for animation
   void modal.offsetWidth;
   modal.classList.add('show');
 }
@@ -382,21 +389,16 @@ function closeModal(e) {
 }
 
 /* =========================================
-   倒數計時器 (Countdown Timer) 邏輯
+   倒數計時器 (Countdown Timer)
    ========================================= */
 let countdownInterval;
 function startCountdown() {
   clearInterval(countdownInterval);
-  // 模擬距離結算還有 24小時 15分 30秒
   let totalSeconds = 24 * 3600 + 15 * 60 + 30; 
   const timerEl = document.getElementById('countdownTimer');
   
   countdownInterval = setInterval(() => {
-    if (totalSeconds <= 0) {
-      clearInterval(countdownInterval);
-      timerEl.innerText = "00:00:00";
-      return;
-    }
+    if (totalSeconds <= 0) { clearInterval(countdownInterval); timerEl.innerText = "00:00:00"; return; }
     totalSeconds--;
     const h = String(Math.floor(totalSeconds / 3600)).padStart(2, '0');
     const m = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, '0');
@@ -405,12 +407,9 @@ function startCountdown() {
   }, 1000);
 }
 
-/* =========================================
-   PWA 攔截與 Mock Data 邏輯
-   ========================================= */
 document.addEventListener('DOMContentLoaded', () => {
-  startCountdown(); // 啟動倒數
-
+  startCountdown();
+  // 攔截 <a> 標籤，處理 Iframe 環境跳轉
   document.body.addEventListener('click', (e) => {
     const link = e.target.closest('a[target="_blank"]');
     if (!link) return;
@@ -418,7 +417,7 @@ document.addEventListener('DOMContentLoaded', () => {
       try {
         const targetUrl = new URL(link.href);
         if (targetUrl.hostname === 'swag.live' || targetUrl.hostname === 'www.swag.live') {
-          e.preventDefault();
+          e.preventDefault(); 
           window.parent.postMessage({ type: 'PWA_NAVIGATE', url: link.href }, '*');
         }
       } catch (err) {}
@@ -426,41 +425,26 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
+/* =========================================
+   Mock Data & Rendering Logic
+   ========================================= */
 const data = {
   hour: {
-    color: "#F6418D",
-    isPodium: true,
-    title: "小時即時榜",
-    unit: "💎",
-    top3:[
-      {n:"耗鑽狂魔哥", v:"120,500", s:"King"},
-      {n:"隔壁老王", v:"89,200", s:"Wang"},
-      {n:"小美愛跳舞", v:"75,000", s:"Mei"}
-    ],
-    list:[
-      {r:4, n:"貓奴一號", v:"62,300"},
-      {r:5, n:"衝榜小弟", v:"58,500"},
-      {r:6, n:"天天解鎖", v:"51,800"},
-      {r:7, n:"我是七號(Me)", v:"48,520", me:true}
-    ],
-    // 依據提示詞加入「未入榜」的情境範例 (可在日榜/週榜測試切換)
+    color: "#F6418D", isPodium: true, title: "小時即時榜", unit: "💎",
+    top3:[{n:"耗鑽狂魔哥", v:"120,500", s:"King"}, {n:"隔壁老王", v:"89,200", s:"Wang"}, {n:"小美愛跳舞", v:"75,000", s:"Mei"}],
+    list:[{r:4, n:"貓奴一號", v:"62,300"}, {r:5, n:"衝榜小弟", v:"58,500"}, {r:6, n:"天天解鎖", v:"51,800"}, {r:7, n:"我是七號(Me)", v:"48,520", me:true}],
     my: {r:"#7", v:"48,520 💎", g:"距離前一名還差 150 💎"} 
   },
   day: {
-    color: "#FFA500",
-    isPodium: true,
-    title: "日榜即時榜",
-    unit: "💎",
-    top3:[
-      {n:"富豪傳奇", v:"820,000", s:"Rich"},
-      {n:"榜一大哥", v:"600,000", s:"Bro"},
-      {n:"安靜看戲", v:"450,000", s:"Silent"}
-    ],
-    list:[
-      {r:4, n:"路人甲", v:"300,000"}
-    ],
-    // 未進榜狀態
+    color: "#FFA500", isPodium: true, title: "日榜即時榜", unit: "💎",
+    top3:[{n:"富豪傳奇", v:"820,000", s:"Rich"}, {n:"榜一大哥", v:"600,000", s:"Bro"}, {n:"安靜看戲", v:"450,000", s:"Silent"}],
+    list:[{r:4, n:"路人甲", v:"300,000"}, {r:5, n:"路人乙", v:"280,000"}],
     my: {r:"未入榜", v:"0 💎", g:"距離第 1 名還差 820,000 💎"} 
+  },
+  all: {
+    color: "#8238BA", isPodium: false, title: "傳奇奪冠累積榜", unit: "次",
+    list:[{r:1, n:"全站教父", v:"1,250"}, {r:2, n:"大亨傳奇", v:"892"}, {r:3, n:"資深收藏家", v:"750"}, {r:4, n:"神秘大戶", v:"620"}, {r:12, n:"我是七號(Me)", v:"128", me:true}],
+    my: {r:"#12", v:"累計奪冠：128 次", g:"再拿 3 次冠軍可提升排名"}
   }
 };
 
@@ -477,28 +461,36 @@ function renderContent(modeData) {
   document.documentElement.style.setProperty('--primary', themeColor);
   document.querySelector('.modal-content h2').style.color = themeColor;
   
+  // 更新背景漸層
+  const rgb = hexToRgb(themeColor);
+  document.querySelector('.podium').style.background = `linear-gradient(180deg, rgba(${rgb}, 0.08) 0%, transparent 100%)`;
+  
+  document.getElementById('podiumView').style.display = modeData.isPodium ? 'block' : 'none';
   document.getElementById('podiumView').style.opacity = '1';
-  document.getElementById('podiumContent').innerHTML = `
-    <div class="podium-item no2">
-      <div class="avatar-wrapper"><div class="rank-badge badge-2">2</div><img src="https://api.dicebear.com/8.x/avataaars/svg?seed=${modeData.top3[1].s}" class="avatar-round"></div>
-      <div class="nickname">${modeData.top3[1].n}</div><div class="val-text" style="color:${themeColor}">${modeData.top3[1].v}</div>
-    </div>
-    <div class="podium-item no1">
-      <div class="avatar-wrapper">${crownSVG}<img src="https://api.dicebear.com/8.x/avataaars/svg?seed=${modeData.top3[0].s}" class="avatar-round"><div class="rank-badge badge-1">1</div></div>
-      <div class="nickname" style="font-weight:600">${modeData.top3[0].n}</div><div class="val-text" style="color:${themeColor}">${modeData.top3[0].v}</div>
-    </div>
-    <div class="podium-item no3">
-      <div class="avatar-wrapper"><div class="rank-badge badge-3">3</div><img src="https://api.dicebear.com/8.x/avataaars/svg?seed=${modeData.top3[2].s}" class="avatar-round"></div>
-      <div class="nickname">${modeData.top3[2].n}</div><div class="val-text" style="color:${themeColor}">${modeData.top3[2].v}</div>
-    </div>
-  `;
+  
+  if (modeData.isPodium) {
+    document.getElementById('podiumContent').innerHTML = `
+      <div class="podium-item no2">
+        <div class="avatar-wrapper"><div class="rank-badge badge-2">2</div><img src="https://api.dicebear.com/8.x/avataaars/svg?seed=${modeData.top3[1].s}" class="avatar-round"></div>
+        <div class="nickname">${modeData.top3[1].n}</div><div class="val-text" style="color:${themeColor}">${modeData.top3[1].v}</div>
+      </div>
+      <div class="podium-item no1">
+        <div class="avatar-wrapper">${crownSVG}<img src="https://api.dicebear.com/8.x/avataaars/svg?seed=${modeData.top3[0].s}" class="avatar-round"><div class="rank-badge badge-1">1</div></div>
+        <div class="nickname" style="font-weight:600">${modeData.top3[0].n}</div><div class="val-text" style="color:${themeColor}">${modeData.top3[0].v}</div>
+      </div>
+      <div class="podium-item no3">
+        <div class="avatar-wrapper"><div class="rank-badge badge-3">3</div><img src="https://api.dicebear.com/8.x/avataaars/svg?seed=${modeData.top3[2].s}" class="avatar-round"></div>
+        <div class="nickname">${modeData.top3[2].n}</div><div class="val-text" style="color:${themeColor}">${modeData.top3[2].v}</div>
+      </div>
+    `;
+  }
   
   document.getElementById('listView').innerHTML = modeData.list.map(item => `
     <div class="list-row ${item.me ? 'is-me' : ''}">
       <div class="rank-num">${item.r}</div>
       <img src="https://api.dicebear.com/8.x/initials/svg?seed=${item.n}" class="avatar-square">
       <div class="user-info"><div class="user-name">${item.n}</div></div>
-      <div class="data-value" style="color:${themeColor}">${item.v} ${modeData.unit}</div>
+      <div class="data-value" style="color:${themeColor}">${item.v} <span style="font-size:12px">${modeData.unit}</span></div>
     </div>
   `).join('');
 
@@ -508,16 +500,43 @@ function renderContent(modeData) {
   document.getElementById('gapText').innerHTML = modeData.my.g;
 }
 
+function hexToRgb(hex) {
+  var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  return result ? `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}` : '246, 65, 141';
+}
+
 function changeMode(type, el) {
   document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
   el.classList.add('active');
+  
+  // 處理特例：當切換至「累積榜」時隱藏倒數計時，並展開次選單
+  const isAll = (type === 'all');
+  document.getElementById('countdownBanner').style.opacity = isAll ? '0' : '1';
+  document.getElementById('subTabs').style.display = isAll ? 'flex' : 'none';
+  
   const modeData = data[type] || data.hour; // fallback
   
+  // 更新次選單的主色 (動態更改 CSS Variable)
+  if(isAll) {
+    document.documentElement.style.setProperty('--primary', modeData.color);
+  }
+
   showSkeleton();
   setTimeout(() => {
     renderContent(modeData);
     document.getElementById('scrollArea').scrollTop = 0;
   }, 400);
+}
+
+function changeSub(sub, el) {
+  document.querySelectorAll('.sub-item').forEach(s => s.classList.remove('active'));
+  el.classList.add('active');
+  
+  showSkeleton();
+  setTimeout(() => {
+    renderContent(data.all);
+    document.getElementById('scrollArea').scrollTop = 0;
+  }, 300);
 }
 
 let lang = 'Hant';
