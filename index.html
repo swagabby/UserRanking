@@ -16,24 +16,41 @@
     --highlight: #ff4081;
   }
 
+  /* 修正電腦顯示比例 */
   body {
     font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif;
-    background-color: var(--bg-color);
+    background-color: #000; /* 背景全黑 */
     color: var(--text-primary);
     margin: 0;
     padding: 0;
     display: flex;
-    justify-content: center;
-    padding-bottom: 80px; /* Space for sticky bar */
+    justify-content: center; /* 電腦版置中 */
+    align-items: center;
+    min-height: 100vh;
   }
 
+  /* 修正電腦顯示比例 (手機模式外殼) */
   .phone-container {
-    width: 375px; /* Simulate phone width */
+    width: 375px;        /* 固定手機寬度 */
+    height: 812px;       /* 固定手機高度 */
     background-color: var(--card-bg);
-    min-height: 667px;
-    box-shadow: 0 0 20px rgba(0,0,0,0.5);
+    box-shadow: 0 0 50px rgba(0,0,0,0.8);
     position: relative;
-    overflow: hidden;
+    overflow: hidden;    /* 讓內容捲動 (下面設) */
+    border: 8px solid #333; /* 增加手機邊框 */
+    border-radius: 40px;    /* 圓角 */
+  }
+
+  /* 內容可捲動區 */
+  .content-scroll {
+    height: calc(100% - 80px); /* 扣掉吸底列高度 */
+    overflow-y: auto;
+    padding-bottom: 20px;
+  }
+  
+  /* 隱藏捲動條 (美化) */
+  .content-scroll::-webkit-scrollbar {
+    width: 0px;
   }
 
   /* Header */
@@ -246,6 +263,8 @@
     bottom: 0;
     left: 0;
     width: 100%;
+    height: 80px;
+    z-index: 100;
     background-color: #2c2c2c;
     border-top: 2px solid var(--highlight);
     padding: 10px 20px;
@@ -314,93 +333,113 @@
     font-weight: 600;
   }
 
+  /* 手機模式隱藏捲動條控制路徑 */
+  @media (max-width: 400px) {
+    .phone-container {
+        width: 100%;
+        height: 100vh;
+        border: none;
+        border-radius: 0;
+    }
+  }
+
 </style>
 </head>
 <body>
 
 <div class="phone-container">
-  <div class="header">
-    <h1>榮譽巔峰榜</h1>
-    <span class="rule-icon">❓</span>
-  </div>
-
-  <div class="tabs">
-    <div class="tab active">小時榜</div>
-    <div class="tab">日榜</div>
-    <div class="tab">週榜</div>
-    <div class="tab">月榜</div>
-    <div class="tab">新星榜</div>
-  </div>
-
-  <div class="countdown-banner">
-    ⏱️ 距離 14:00 結算剩餘：<strong>12分43秒</strong>
-  </div>
-
-  <div class="podium">
-    <div class="podium-item no2">
-      <div class="avatar-container">
-        <div class="crown">🥈</div>
-        <img src="https://via.placeholder.com/70/555555/FFFFFF?text=User2" alt="User 2" class="avatar">
-        <div class="rank-badge">2</div>
-      </div>
-      <div class="nickname">隔壁老王</div>
-      <div class="diamond-count">89,200 💎</div>
-    </div>
-    
-    <div class="podium-item no1">
-      <div class="avatar-container">
-        <div class="crown">🥇</div>
-        <img src="https://via.placeholder.com/90/FFD700/000000?text=Winner" alt="Winner" class="avatar">
-        <div class="rank-badge">1</div>
-      </div>
-      <div class="nickname">耗鑽狂魔哥</div>
-      <div class="diamond-count">120,500 💎</div>
-    </div>
-    
-    <div class="podium-item no3">
-      <div class="avatar-container">
-        <div class="crown">🥉</div>
-        <img src="https://via.placeholder.com/70/CD7F32/FFFFFF?text=User3" alt="User 3" class="avatar">
-        <div class="rank-badge">3</div>
-      </div>
-      <div class="nickname">小美愛跳舞</div>
-      <div class="diamond-count">75,000 💎</div>
-    </div>
-  </div>
-
-  <div class="list-container">
-    <div class="list-item">
-      <div class="list-rank">4</div>
-      <img src="https://via.placeholder.com/40/444444/FFFFFF?text=U4" alt="U4" class="list-avatar">
-      <div class="list-info">
-        <div class="list-nickname">貓奴一號</div>
-        <div class="list-diamonds">62,000 💎</div>
-      </div>
-      <div class="list-badge">🎖️<span style="font-size:10px;color:var(--accent-silver)">x10</span></div>
-    </div>
-    
-    <div class="list-item">
-      <div class="list-rank">5</div>
-      <img src="https://via.placeholder.com/40/444444/FFFFFF?text=U5" alt="U5" class="list-avatar">
-      <div class="list-info">
-        <div class="list-nickname">衝榜小弟</div>
-        <div class="list-diamonds">58,500 💎</div>
-      </div>
-      <div class="list-badge">🎖️<span style="font-size:10px;color:var(--accent-silver)">x5</span></div>
-    </div>
-    
-    <div class="list-item">
-      <div class="list-rank">6</div>
-      <img src="https://via.placeholder.com/40/444444/FFFFFF?text=U6" alt="U6" class="list-avatar">
-      <div class="list-info">
-        <div class="list-nickname">天天解鎖</div>
-        <div class="list-diamonds">51,200 💎</div>
-      </div>
-      <div class="list-badge">-</div>
-    </div>
+  
+  <div class="content-scroll">
+    <div class="header">
+      <h1>榮譽巔峰榜</h1>
+      <span class="rule-icon">❓</span>
     </div>
 
-  <div class="my-status-bar">
+    <div class="tabs">
+      <div class="tab active">小時榜</div>
+      <div class="tab">日榜</div>
+      <div class="tab">週榜</div>
+      <div class="tab">月榜</div>
+      <div class="tab">新星榜</div>
+    </div>
+
+    <div class="countdown-banner">
+      ⏱️ 距離 14:00 結算剩餘：<strong>12分43秒</strong>
+    </div>
+
+    <div class="podium">
+      <div class="podium-item no2">
+        <div class="avatar-container">
+          <div class="crown">🥈</div>
+          <img src="https://via.placeholder.com/70/555555/FFFFFF?text=User2" alt="User 2" class="avatar">
+          <div class="rank-badge">2</div>
+        </div>
+        <div class="nickname">隔壁老王</div>
+        <div class="diamond-count">89,200 💎</div>
+      </div>
+      
+      <div class="podium-item no1">
+        <div class="avatar-container">
+          <div class="crown">🥇</div>
+          <img src="https://via.placeholder.com/90/FFD700/000000?text=Winner" alt="Winner" class="avatar">
+          <div class="rank-badge">1</div>
+        </div>
+        <div class="nickname">耗鑽狂魔哥</div>
+        <div class="diamond-count">120,500 💎</div>
+      </div>
+      
+      <div class="podium-item no3">
+        <div class="avatar-container">
+          <div class="crown">🥉</div>
+          <img src="https://via.placeholder.com/70/CD7F32/FFFFFF?text=User3" alt="User 3" class="avatar">
+          <div class="rank-badge">3</div>
+        </div>
+        <div class="nickname">小美愛跳舞</div>
+        <div class="diamond-count">75,000 💎</div>
+      </div>
+    </div>
+
+    <div class="list-container">
+      <div class="list-item">
+        <div class="list-rank">4</div>
+        <img src="https://via.placeholder.com/40/444444/FFFFFF?text=U4" alt="U4" class="list-avatar">
+        <div class="list-info">
+          <div class="list-nickname">貓奴一號</div>
+          <div class="list-diamonds">62,000 💎</div>
+        </div>
+        <div class="list-badge">🎖️<span style="font-size:10px;color:var(--accent-silver)">x10</span></div>
+      </div>
+      
+      <div class="list-item">
+        <div class="list-rank">5</div>
+        <img src="https://via.placeholder.com/40/444444/FFFFFF?text=U5" alt="U5" class="list-avatar">
+        <div class="list-info">
+          <div class="list-nickname">衝榜小弟</div>
+          <div class="list-diamonds">58,500 💎</div>
+        </div>
+        <div class="list-badge">🎖️<span style="font-size:10px;color:var(--accent-silver)">x5</span></div>
+      </div>
+      
+      <div class="list-item">
+        <div class="list-rank">6</div>
+        <img src="https://via.placeholder.com/40/444444/FFFFFF?text=U6" alt="U6" class="list-avatar">
+        <div class="list-info">
+          <div class="list-nickname">天天解鎖</div>
+          <div class="list-diamonds">51,200 💎</div>
+        </div>
+        <div class="list-badge">-</div>
+      </div>
+      <div class="list-item">
+        <div class="list-rank">7</div>
+        <img src="https://via.placeholder.com/40/444444/FFFFFF?text=U7" alt="U7" class="list-avatar">
+        <div class="list-info">
+          <div class="list-nickname">我是七號</div>
+          <div class="list-diamonds">48,000 💎</div>
+        </div>
+        <div class="list-badge">-</div>
+      </div>
+    </div>
+  </div> <div class="my-status-bar">
     <div class="my-info-row">
       <div class="my-rank-info">
         <img src="https://via.placeholder.com/30/FF4081/FFFFFF?text=Me" alt="Me" class="my-avatar">
