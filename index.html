@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>用戶榮譽排行榜 - 真實 API 串接版</title>
+<title>用戶榮譽排行榜</title>
 <style>
   /* =========================================
      1. Design Tokens (系統化設計規範)
@@ -25,8 +25,6 @@
     --outline-variant: rgba(71, 71, 71, 0.4);
     
     --primary: #F6418D;
-    --asset-purple: #8238BA;
-    --info-blue: #60C4E8;
     --gold: #FFA500;
     --silver: #C8C8C8;
     --bronze: #CD7F32;
@@ -44,9 +42,6 @@
     --space-6: 24px;
   }
 
-  /* =========================================
-     2. Base & Layout (Flexbox 架構)
-     ========================================= */
   body {
     font-family: var(--font-family);
     background-color: #0A0A0A;
@@ -60,19 +55,27 @@
     -webkit-tap-highlight-color: transparent;
   }
 
+  /* 滿版或容器化自適應 */
   .device-container {
-    width: 360px;
-    height: 740px;
+    width: 100%;
+    max-width: 500px;
+    height: 100vh;
     background-color: var(--surface);
     position: relative;
     overflow: hidden;
-    border-radius: 28px;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8), inset 0 1px 1px rgba(255, 255, 255, 0.1);
-    border: 6px solid #222;
     display: flex;
     flex-direction: column;
   }
+  @media (min-width: 501px) {
+    .device-container {
+      height: 85vh;
+      border-radius: 28px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8), inset 0 1px 1px rgba(255, 255, 255, 0.1);
+      border: 6px solid #222;
+    }
+  }
 
+  /* 上半部固定區域 */
   .top-fixed-section {
     flex-shrink: 0;
     background-color: var(--surface);
@@ -82,6 +85,7 @@
     border-bottom: 1px solid var(--outline-variant);
   }
 
+  /* 下半部滾動區域 */
   .content-scroll {
     flex-grow: 1;
     overflow-y: auto;
@@ -91,103 +95,43 @@
   .content-scroll::-webkit-scrollbar { display: none; }
 
   /* =========================================
-     3. UI Components
+     2. UI Components
      ========================================= */
   .i18n-btn {
-    position: fixed;
-    top: var(--space-5);
-    right: var(--space-5);
-    min-width: 44px;
-    min-height: 44px;
+    position: absolute;
+    top: var(--space-4);
+    right: var(--space-4);
+    min-width: 36px;
+    min-height: 36px;
     border-radius: var(--radius-full);
     background: rgba(35, 35, 35, 0.6);
     backdrop-filter: blur(8px);
     border: 1px solid var(--outline);
     color: var(--text-primary);
-    font-size: var(--font-body-m);
+    font-size: 13px;
     display: flex;
     justify-content: center;
     align-items: center;
     cursor: pointer;
-    z-index: 9999;
+    z-index: 30;
   }
 
-  /* Header (新增昨日按鈕) */
-  .header {
-    padding: var(--space-5) var(--space-5) var(--space-2);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  .header-title-row {
-    display: flex;
-    align-items: center;
-    gap: var(--space-2);
-  }
-  .header h1 {
-    margin: 0;
-    font-size: var(--font-title-l);
-    font-weight: 600;
-  }
-  .info-icon {
-    display: inline-flex;
-    justify-content: center;
-    align-items: center;
-    width: 32px;
-    height: 32px;
-    font-size: 16px;
-    color: var(--text-secondary);
-    cursor: pointer;
-    border-radius: 50%;
-  }
-  
-  /* 昨日榜單按鈕 */
-  .btn-yesterday {
-    background: rgba(255, 255, 255, 0.1);
-    color: var(--text-primary);
-    border: 1px solid var(--outline);
-    padding: 6px 12px;
-    border-radius: var(--radius-full);
-    font-size: 12px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-  .btn-yesterday.active {
-    background: var(--primary);
-    border-color: var(--primary);
-    color: #fff;
-  }
+  /* Header */
+  .header { padding: 40px var(--space-5) var(--space-3); text-align: center; }
+  .header h1 { margin: 0 0 8px 0; font-size: var(--font-title-l); font-weight: 800; }
+  .header-subtitle { font-size: var(--font-body-s); color: var(--text-secondary); }
 
-  .countdown-wrapper { text-align: center; margin-bottom: 4px; }
-  .countdown-banner {
-    font-size: var(--font-body-s);
-    color: var(--text-secondary);
-    background: rgba(255, 255, 255, 0.05);
-    display: inline-block;
-    padding: 4px 16px;
-    border-radius: var(--radius-full);
-    border: 1px solid var(--outline-variant);
-    transition: opacity 0.3s;
-  }
-  .countdown-time { color: var(--primary); font-family: 'Courier New', monospace; font-weight: bold; font-size: var(--font-body-m); margin-left: 4px; }
-
-  /* Main Tabs */
+  /* Tabs */
   .tabs-main {
-    display: flex;
-    background-color: var(--surface-container);
-    border-bottom: 1px solid var(--outline);
+    display: flex; background-color: var(--surface-container);
+    border-bottom: 1px solid var(--outline); overflow-x: auto; scrollbar-width: none;
   }
+  .tabs-main::-webkit-scrollbar { display: none; }
   .tab-item {
-    font-size: var(--font-body-m);
-    color: var(--text-secondary);
-    cursor: pointer;
-    flex: 1; 
-    min-height: 48px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    position: relative;
+    font-size: var(--font-body-m); color: var(--text-secondary); cursor: pointer;
+    white-space: nowrap; padding: 0 var(--space-5); flex: 1; min-height: 48px;
+    display: flex; justify-content: center; align-items: center; position: relative; flex-shrink: 0;
+    transition: color 0.3s;
   }
   .tab-item.active { color: var(--primary); font-weight: 600; }
   .tab-item.active::after {
@@ -195,67 +139,48 @@
     height: 3px; border-radius: 3px 3px 0 0; background-color: var(--primary);
   }
 
-  /* 昨日 Top 10 榮譽徽章 */
-  .prev-badge {
-    font-size: 10px;
-    color: var(--gold);
-    background: rgba(255, 215, 0, 0.15);
-    border: 1px solid rgba(255, 215, 0, 0.4);
-    padding: 2px 6px;
-    border-radius: 4px;
-    margin-left: 6px;
-    vertical-align: middle;
-    white-space: nowrap;
-    font-weight: 600;
-  }
-  .podium-item .prev-badge { display: inline-block; margin-left: 0; margin-top: 4px; }
-
   /* Podium (置頂區) */
   .podium {
-    display: flex;
-    justify-content: center;
-    align-items: flex-end;
-    padding: 45px 10px 16px;
-    background: linear-gradient(180deg, rgba(246, 65, 141, 0.08) 0%, transparent 100%);
-    gap: var(--space-3);
-    transition: opacity 0.3s;
+    display: flex; justify-content: center; align-items: flex-end;
+    padding: 40px 10px 16px; background: linear-gradient(180deg, rgba(246, 65, 141, 0.08) 0%, transparent 100%);
+    gap: var(--space-3); transition: opacity 0.3s; min-height: 140px;
   }
-  .podium-item { text-align: center; width: 100px; display: flex; flex-direction: column; align-items: center; }
+  .podium-item { text-align: center; width: 30%; display: flex; flex-direction: column; align-items: center; }
   .avatar-wrapper { position: relative; margin-bottom: var(--space-3); }
-  .avatar-round { width: 64px; height: 64px; border-radius: 50%; border: 2px solid var(--outline); object-fit: cover; background: var(--surface-container); }
-  .no1 .avatar-round { width: 84px; height: 84px; border: 3px solid var(--gold); box-shadow: 0 0 24px rgba(255, 165, 0, 0.25); }
+  .avatar-round { width: 60px; height: 60px; border-radius: 50%; border: 2px solid var(--outline); object-fit: cover; background: var(--surface-container); }
+  .no1 .avatar-round { width: 80px; height: 80px; border: 3px solid var(--gold); box-shadow: 0 0 24px rgba(255, 165, 0, 0.25); }
   
-  .crown-icon { position: absolute; top: -28px; left: 50%; transform: translateX(-50%); width: 32px; height: 32px; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5)); }
-  .rank-badge { position: absolute; top: -10px; left: 50%; transform: translateX(-50%); color: #fff; font-size: 12px; font-weight: 600; border-radius: var(--radius-full); padding: 2px 8px; border: 2px solid var(--surface); box-shadow: 0 4px 8px rgba(0,0,0,0.4); min-width: 24px; }
+  .crown-icon { position: absolute; top: -28px; left: 50%; transform: translateX(-50%); width: 32px; height: 32px; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5)); z-index: 2; }
+  .rank-badge { position: absolute; top: -10px; left: 50%; transform: translateX(-50%); color: #fff; font-size: 12px; font-weight: 600; border-radius: var(--radius-full); padding: 2px 8px; border: 2px solid var(--surface); box-shadow: 0 4px 8px rgba(0,0,0,0.4); min-width: 24px; z-index: 2;}
   .badge-1 { background: var(--gold); color: #000; top: auto; bottom: -12px; }
   .badge-2 { background: var(--silver); color: #000; }
   .badge-3 { background: var(--bronze); }
 
-  .nickname { font-size: var(--font-body-m); color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 90px; }
-  .val-text { font-size: var(--font-body-s); margin-top: 2px; font-weight: 600; }
+  .nickname { font-size: 13px; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+  .val-text { font-size: 12px; margin-top: 4px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 4px; }
+  .diamond-icon { width: 12px; height: 12px; fill: currentColor; }
 
-  /* List Table (滑動區) */
-  .list-row { display: flex; align-items: center; padding: var(--space-4) var(--space-5); border-bottom: 1px solid var(--outline-variant); }
-  .list-row.is-me { background: linear-gradient(90deg, rgba(246, 65, 141, 0.1) 0%, transparent 100%); border-left: 3px solid var(--primary); }
+  /* List Table */
+  .list-row {
+    display: flex; align-items: center; padding: var(--space-4) var(--space-5);
+    border-bottom: 1px solid var(--outline-variant);
+  }
   .rank-num { width: 36px; font-weight: 600; font-size: var(--font-body-l); color: var(--text-secondary); }
-  .is-me .rank-num { color: var(--primary); }
   .avatar-square { width: 44px; height: 44px; border-radius: var(--radius-m); margin-right: var(--space-4); object-fit: cover; border: 1px solid var(--outline); background: var(--surface-container); }
-  .is-me .avatar-square { border-color: var(--primary); }
   .user-info { flex: 1; display: flex; flex-direction: column; justify-content: center; overflow: hidden; }
-  .user-name { font-size: var(--font-body-m); color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center;}
-  .is-me .user-name { font-weight: 600; color: var(--primary); }
-  .data-value { font-weight: 600; font-size: var(--font-body-m); text-align: right; padding-left: 8px;}
+  .user-name { font-size: var(--font-body-m); color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .data-value { font-weight: 600; font-size: var(--font-body-m); text-align: right; padding-left: 8px; display: flex; align-items: center; gap: 4px;}
 
   /* Sticky Footer */
   .sticky-footer {
-    position: absolute; bottom: 24px; left: var(--space-4); right: var(--space-4);
-    background: rgba(35, 35, 35, 0.85); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.15);
-    border-radius: var(--radius-l); padding: var(--space-4) var(--space-4); box-shadow: 0 12px 32px rgba(0,0,0,0.8); z-index: 30;
+    position: absolute; bottom: 20px; left: var(--space-4); right: var(--space-4);
+    background: rgba(35, 35, 35, 0.85); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.15); border-radius: var(--radius-l);
+    padding: var(--space-4); box-shadow: 0 12px 32px rgba(0,0,0,0.8); z-index: 30;
   }
-  .my-info { display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-4); }
-  .my-avatar { width: 40px; height: 40px; border-radius: var(--radius-s); margin-right: var(--space-3); border: 1px solid var(--primary); object-fit: cover;}
+  .my-info { display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-3); }
+  .my-avatar { width: 44px; height: 44px; border-radius: var(--radius-s); margin-right: var(--space-3); border: 1px solid var(--primary); background: var(--surface-container); }
   
-  /* Toggle Switch (隱身模式開關) */
   .toggle-wrapper { display: flex; flex-direction: column; align-items: flex-end; }
   .toggle-container { display: flex; align-items: center; gap: 6px; margin-top: 4px; }
   .toggle-label { font-size: 11px; color: var(--text-secondary); font-weight: 600; transition: color 0.3s;}
@@ -266,79 +191,51 @@
   input:checked + .slider { background-color: var(--primary); }
   input:checked + .slider:before { transform: translateX(16px); }
 
-  .footer-tip { display: flex; justify-content: space-between; align-items: center; font-size: var(--font-body-s); color: var(--text-secondary); border-top: 1px solid var(--outline-variant); padding-top: var(--space-4); }
-  .btn-action { background: var(--primary); color: #fff; border: none; min-height: 36px; padding: 0 var(--space-4); border-radius: var(--radius-full); font-size: var(--font-body-m); font-weight: 600; cursor: pointer; }
-
-  /* Skeleton & Utils */
+  /* Empty & Skeleton */
+  .empty-state { text-align: center; padding: 40px 20px; color: var(--text-secondary); font-size: var(--font-body-m); }
   @keyframes shimmer { 0% { background-position: -200px 0; } 100% { background-position: 200px 0; } }
-  .skeleton { background: linear-gradient(90deg, var(--surface-container) 25%, var(--surface-container-variant) 50%, var(--surface-container) 75%); background-size: 400px 100%; animation: shimmer 1.5s infinite linear; border-radius: var(--radius-s); }
+  .skeleton { background: linear-gradient(90deg, var(--surface-container) 25%, var(--surface-container-variant) 50%, var(--surface-container) 75%); background-size: 400px 100%; animation: shimmer 1.5s infinite linear; border-radius: var(--radius-s); color: transparent !important; border: none !important;}
   .sk-avatar { width: 44px; height: 44px; }
   .sk-text { height: 16px; width: 120px; }
   .sk-text-short { height: 14px; width: 60px; }
-  
-  .modal-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(8px); z-index: 100; display: none; justify-content: center; align-items: center; opacity: 0; transition: opacity 0.3s; }
-  .modal-overlay.show { display: flex; opacity: 1; }
-  .modal-content { background: var(--surface-container); width: 80%; border-radius: var(--radius-xl); padding: var(--space-6); border: 1px solid var(--outline); box-shadow: 0 20px 40px rgba(0,0,0,0.8); transform: translateY(20px); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-  .modal-overlay.show .modal-content { transform: translateY(0); }
-  .modal-content h2 { margin-top: 0; font-size: var(--font-title-m); text-align: center; color: var(--primary); }
-  .modal-content p { font-size: var(--font-body-m); color: var(--text-secondary); line-height: 1.6; margin-bottom: var(--space-3); }
-  .modal-close-btn { width: 100%; margin-top: var(--space-5); background: var(--outline); }
-  
-  #dev-banner { display: none; position: fixed; top: 0; left: 0; width: 100%; background: #ef4444; color: #fff; text-align: center; padding: 8px; font-size: 13px; font-weight: bold; z-index: 9999; }
-  .api-error-msg { text-align: center; color: var(--text-secondary); padding: 40px 20px; font-size: var(--font-body-m); }
 </style>
 </head>
 <body>
 
-<!-- 開發防呆 -->
-<div id="dev-banner">⚠️ [DEV MODE] 目前處於本地預覽模式，資料皆為假資料</div>
-
-<div class="i18n-btn" onclick="App.toggleLang()">繁</div>
-
 <div class="device-container">
-  <!-- Modal -->
-  <div class="modal-overlay" id="ruleModal" onclick="App.closeModal(event)">
-    <div class="modal-content" onclick="event.stopPropagation()">
-      <h2>活動規則</h2>
-      <p>1. 結算時間：依照日榜、週榜對應週期結算，結算後積分歸零重置。</p>
-      <p>2. 昨日榮耀：若用戶在前一天日榜位列前十，今日將展示專屬榮耀徽章。</p>
-      <p>3. 系統每 5 分鐘同步一次最新數據。</p>
-      <button class="btn-action modal-close-btn" onclick="App.closeModal()">我知道了</button>
-    </div>
-  </div>
+  <div class="i18n-btn" id="langBtn" onclick="toggleLang()">繁</div>
 
-  <!-- 頂部固定區域 -->
   <div class="top-fixed-section">
     <div class="header">
-      <div class="header-title-row">
-        <h1 id="mainTitle">日榜即時榮譽</h1>
-        <div class="info-icon" onclick="App.openModal()">ⓘ</div>
-      </div>
-      <button class="btn-yesterday" id="btnYesterday" onclick="App.toggleYesterday()">昨日榜單</button>
-    </div>
-    
-    <div class="countdown-wrapper">
-      <div class="countdown-banner" id="countdownBanner">
-        距離結算 <span class="countdown-time" id="countdownTimer">--:--:--</span>
-      </div>
+      <h1 data-i18n="title">2026 璀璨之星爭奪戰</h1>
+      <div class="header-subtitle" data-i18n="time">活動時間：2026/04/07 ~ 2026/04/30</div>
     </div>
 
-    <!-- Tabs (僅日/週) -->
+    <!-- Main Tabs -->
     <div class="tabs-main" id="mainTabsContainer">
-      <div class="tab-item active" onclick="App.changeMode('day', this)">日榜</div>
-      <div class="tab-item" onclick="App.changeMode('week', this)">週榜</div>
+      <div class="tab-item active" onclick="changeMode('hour', this, '#F6418D')" data-i18n="tabHour">小時</div>
+      <div class="tab-item" onclick="changeMode('day', this, '#FFA500')" data-i18n="tabDay">日</div>
+      <div class="tab-item" onclick="changeMode('week', this, '#60C4E8')" data-i18n="tabWeek">週</div>
+      <div class="tab-item" onclick="changeMode('month', this, '#15EA48')" data-i18n="tabMonth">月</div>
     </div>
 
-    <!-- Podium (前三名) -->
+    <!-- Podium View -->
     <div id="podiumView">
-      <div class="podium" id="podiumContent"></div>
+      <div class="podium" id="podiumContent">
+        <!-- 骨架屏頒獎台 -->
+        <div class="podium-item no2"><div class="avatar-wrapper"><div class="avatar-round skeleton"></div></div><div class="skeleton sk-text-short"></div></div>
+        <div class="podium-item no1"><div class="avatar-wrapper"><div class="avatar-round skeleton" style="width:80px;height:80px"></div></div><div class="skeleton sk-text-short"></div></div>
+        <div class="podium-item no3"><div class="avatar-wrapper"><div class="avatar-round skeleton"></div></div><div class="skeleton sk-text-short"></div></div>
+      </div>
     </div>
   </div>
 
-  <!-- 內容滾動區 -->
   <div class="content-scroll" id="scrollArea">
     <div class="list-table" id="listView">
-      <!-- 骨架屏 -->
+      <!-- 骨架屏列表 -->
+      <div class="list-row"><div class="rank-num skeleton sk-text-short" style="width:20px"></div><div class="sk-avatar skeleton"></div><div class="user-info"><div class="skeleton sk-text"></div></div></div>
+      <div class="list-row"><div class="rank-num skeleton sk-text-short" style="width:20px"></div><div class="sk-avatar skeleton"></div><div class="user-info"><div class="skeleton sk-text"></div></div></div>
+      <div class="list-row"><div class="rank-num skeleton sk-text-short" style="width:20px"></div><div class="sk-avatar skeleton"></div><div class="user-info"><div class="skeleton sk-text"></div></div></div>
       <div class="list-row"><div class="rank-num skeleton sk-text-short" style="width:20px"></div><div class="sk-avatar skeleton"></div><div class="user-info"><div class="skeleton sk-text"></div></div></div>
     </div>
   </div>
@@ -347,318 +244,243 @@
   <div class="sticky-footer" id="footerBar">
     <div class="my-info">
       <div style="display:flex; align-items:center;">
-        <img src="https://api.dicebear.com/8.x/avataaars/svg?seed=Me" class="my-avatar" id="footerAvatar">
+        <img src="" class="my-avatar skeleton" id="myAvatar">
         <div style="display:flex; flex-direction:column; justify-content:center;">
-            <span style="font-size:var(--font-body-s); color:var(--text-secondary); margin-bottom:2px" id="footerName">我的帳號</span>
-            <span style="font-size:var(--font-body-m);">我的排名：<strong id="myRankNum" style="color:var(--primary)">-</strong></span>
+            <span style="font-size:var(--font-body-s); color:var(--text-secondary); margin-bottom:2px" data-i18n="myRank">我的排名</span>
+            <span style="font-size:var(--font-body-l); font-weight:bold; color:var(--primary)" id="myRankNum" class="skeleton sk-text-short">--</span>
         </div>
       </div>
       
-      <!-- 隱身開關 -->
       <div class="toggle-wrapper">
-        <span id="myValueText" style="font-size:var(--font-body-m); font-weight:600;">-</span>
+        <span id="myValueText" class="skeleton sk-text-short" style="font-size:var(--font-body-l); font-weight:600; color:var(--primary); margin-bottom:4px;">--</span>
         <div class="toggle-container">
-          <span class="toggle-label" id="anonLabel">公開</span>
+          <span class="toggle-label" id="anonLabel" data-i18n="public">公開</span>
           <label class="switch">
-            <input type="checkbox" id="anonToggle" onchange="App.toggleAnonymous()">
+            <input type="checkbox" id="anonToggle" onchange="toggleAnonymous()">
             <span class="slider"></span>
           </label>
         </div>
       </div>
     </div>
-    
-    <div class="footer-tip">
-      <span id="gapText">資料載入中...</span>
-      <a href="https://swag.live/go" target="_blank" style="text-decoration:none;">
-        <button class="btn-action">立即衝榜</button>
-      </a>
-    </div>
   </div>
 </div>
 
 <script>
-/**
- * ==========================================
- * 核心應用模組 (封裝 API, Iframe, UI 邏輯)
- * ==========================================
- */
-const App = {
-  CONFIG: {
-    API_ENDPOINT: 'https://swag-campaign-api-905468082258.asia-east1.run.app/api/leaderboard',
-    HANDSHAKE_INTERVAL: 3000,
-    DEV_MODE_TIMEOUT: 2000
-  },
-  state: {
-    swagToken: null,
-    currentMode: 'day', // 'day' 或 'week'
-    isYesterday: false,
-    isAnonymous: false,
-    currentDataList: null,
-    myRawAvatar: "https://api.dicebear.com/8.x/avataaars/svg?seed=Me",
-    myRawName: "我的帳號",
-    handshakeTimer: null,
-    countdownInterval: null
-  },
+/* =========================================
+   1. 環境與狀態變數
+   ========================================= */
+const API_ENDPOINT = 'https://swag-campaign-api-905468082258.asia-east1.run.app/api/leaderboard';
+let swagToken = null;
+let handshakeRetryInterval = null;
+let currentMode = 'hour';
+let currentThemeColor = '#F6418D';
+let isAnonymous = false;
+let myOriginalId = "Me"; // 暫存自己的真實 ID 用於頭像生成
 
-  // 共用 SVG 資源
-  CROWN_SVG: `<svg viewBox="0 0 24 24" fill="none" class="crown-icon"><path d="M2 19H22V21H2V19ZM3 5L7 12L12 3L17 12L21 5L19 17H5L3 5Z" fill="var(--gold)"/><path d="M12 9C12.5523 9 13 8.55228 13 8C13 7.44772 12.5523 7 12 7C11.4477 7 11 7.44772 11 8C11 8.55228 11.4477 9 12 9Z" fill="#FFF"/></svg>`,
+const diamondSVG = `<svg class="diamond-icon" viewBox="0 0 24 24"><path d="M12 2L2 9l10 13L22 9l-10-7zm0 2.8l6.3 4.4H5.7L12 4.8zM4.1 10h15.8L12 20.3 4.1 10z"/></svg>`;
+const crownSVG = `<svg viewBox="0 0 24 24" fill="none" class="crown-icon"><path d="M2 19H22V21H2V19ZM3 5L7 12L12 3L17 12L21 5L19 17H5L3 5Z" fill="var(--gold)"/><path d="M12 9C12.5523 9 13 8.55228 13 8C13 7.44772 12.5523 7 12 7C11.4477 7 11 7.44772 11 8C11 8.55228 11.4477 9 12 9Z" fill="#FFF"/></svg>`;
 
-  init() {
-    this.startCountdown();
-    this.setupIframeHandshake();
-    this.setupPwaInterceptor();
-  },
-
-  /* =========================================
-     資料轉換器 (請對應你真實的 API 欄位)
-     ========================================= */
-  transformApiData(apiResponse) {
-    const list = Array.isArray(apiResponse) ? apiResponse : (apiResponse.leaderboard || apiResponse.data ||[]);
-    // 假設 API 在物件外層也提供 me 資訊，若無，則從 list 中尋找 is_me=true
-    return list.map((raw, index) => ({
-      rank: raw.rank || index + 1,
-      userId: raw.user_id || raw.id,
-      name: raw.name || raw.nickname || '未命名用戶',
-      avatar: raw.avatar || raw.avatar_url || `https://api.dicebear.com/8.x/initials/svg?seed=${raw.user_id || index}`,
-      score: raw.total_diamonds || raw.score || raw.diamonds || 0,
-      prevRank: raw.yesterday_rank || raw.prev_rank || null, // 判斷是否有昨日排名
-      isMe: !!raw.is_me
-    }));
-  },
-
-  /* =========================================
-     API 呼叫與 Dev Mode
-     ========================================= */
-  async fetchLeaderboardData() {
-    this.showSkeleton();
-    try {
-      const typeParam = this.state.currentMode === 'day' ? 'daily' : 'weekly';
-      const dateParam = this.state.isYesterday ? '&date=yesterday' : ''; // 若 API 支援 last_week 可自行修改
-      const fetchUrl = `${this.CONFIG.API_ENDPOINT}?type=${typeParam}${dateParam}`;
-      
-      const res = await fetch(fetchUrl, {
-        headers: this.state.swagToken ? { 'Authorization': `Bearer ${this.state.swagToken}` } : {}
-      });
-      if (!res.ok) throw new Error('API 回應錯誤');
-      
-      const rawData = await res.json();
-      this.state.currentDataList = this.transformApiData(rawData);
-      this.renderContent(this.state.currentDataList);
-    } catch (error) {
-      console.error('[Fetch Error]', error);
-      document.getElementById('podiumView').style.display = 'none';
-      document.getElementById('listView').innerHTML = `<div class="api-error-msg">⚠️ 無法取得資料，請稍後再試</div>`;
-    }
-  },
-
-  enableDevMode() {
-    document.getElementById('dev-banner').style.display = 'block';
-    // 產生假資料，包含 prevRank 測試
-    const mockData =[
-      { rank: 1, name: "富豪傳奇", total_diamonds: 820000, prev_rank: 2, avatar: "https://api.dicebear.com/8.x/avataaars/svg?seed=Rich", is_me: false },
-      { rank: 2, name: "測試小明", total_diamonds: 600000, prev_rank: 1, avatar: "https://api.dicebear.com/8.x/avataaars/svg?seed=Ming", is_me: true },
-      { rank: 3, name: "安靜看戲", total_diamonds: 450000, prev_rank: 12, avatar: "https://api.dicebear.com/8.x/avataaars/svg?seed=Silent", is_me: false },
-      { rank: 4, name: "路人甲", total_diamonds: 300000, prev_rank: 8, avatar: "https://api.dicebear.com/8.x/avataaars/svg?seed=A", is_me: false },
-      { rank: 5, name: "路人乙", total_diamonds: 280000, prev_rank: null, avatar: "https://api.dicebear.com/8.x/avataaars/svg?seed=B", is_me: false }
-    ];
-    this.state.currentDataList = this.transformApiData(mockData);
-    this.renderContent(this.state.currentDataList);
-  },
-
-  /* =========================================
-     畫面渲染與遮蔽邏輯
-     ========================================= */
-  showSkeleton() {
-    const skeletonHTML = Array(5).fill(`<div class="list-row"><div class="rank-num skeleton sk-text-short" style="width:20px"></div><div class="sk-avatar skeleton"></div><div class="user-info"><div class="skeleton sk-text"></div></div></div>`).join('');
-    document.getElementById('listView').innerHTML = skeletonHTML;
-    document.getElementById('podiumView').style.opacity = '0.5';
-  },
-
-  getRenderName(item) { return (item.isMe && this.state.isAnonymous) ? "神秘人" : item.name; },
-  getRenderAvatar(item) { return (item.isMe && this.state.isAnonymous) ? "https://api.dicebear.com/8.x/bottts/svg?seed=Ghost&backgroundColor=474747" : item.avatar; },
-  getPrevRankBadge(prevRank) {
-    if (prevRank && prevRank <= 10) return `<span class="prev-badge">昨日 #${prevRank}</span>`;
-    return '';
-  },
-  hexToRgb(hex) {
-    let result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-    return result ? `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}` : '246, 65, 141';
-  },
-
-  renderContent(dataList) {
-    if(!dataList || dataList.length === 0) {
-      document.getElementById('listView').innerHTML = `<div class="api-error-msg">目前暫無排行資料</div>`;
-      document.getElementById('podiumView').style.display = 'none';
-      return;
-    }
-
-    const themeColor = this.state.currentMode === 'day' ? 'var(--primary)' : 'var(--info-blue)';
-    const displayColor = this.state.isYesterday ? 'var(--outline)' : themeColor;
-    document.documentElement.style.setProperty('--primary', displayColor);
-
-    const rgb = this.hexToRgb(displayColor);
-    document.querySelector('.podium').style.background = `linear-gradient(180deg, rgba(${rgb}, 0.08) 0%, transparent 100%)`;
-    
-    document.getElementById('podiumView').style.display = 'block';
-    document.getElementById('podiumView').style.opacity = '1';
-
-    const top3 = dataList.slice(0, 3);
-    const others = dataList.slice(3);
-
-    // 渲染頒獎台
-    let podiumHtml = '';
-    if(top3[1]) podiumHtml += `<div class="podium-item no2"><div class="avatar-wrapper"><div class="rank-badge badge-2">2</div><img src="${this.getRenderAvatar(top3[1])}" class="avatar-round"></div><div class="nickname">${this.getRenderName(top3[1])}</div>${this.getPrevRankBadge(top3[1].prevRank)}<div class="val-text" style="color:${displayColor}">${Number(top3[1].score).toLocaleString()}</div></div>`;
-    if(top3[0]) podiumHtml += `<div class="podium-item no1"><div class="avatar-wrapper">${this.CROWN_SVG}<img src="${this.getRenderAvatar(top3[0])}" class="avatar-round"><div class="rank-badge badge-1">1</div></div><div class="nickname" style="font-weight:600">${this.getRenderName(top3[0])}</div>${this.getPrevRankBadge(top3[0].prevRank)}<div class="val-text" style="color:${displayColor}">${Number(top3[0].score).toLocaleString()}</div></div>`;
-    if(top3[2]) podiumHtml += `<div class="podium-item no3"><div class="avatar-wrapper"><div class="rank-badge badge-3">3</div><img src="${this.getRenderAvatar(top3[2])}" class="avatar-round"></div><div class="nickname">${this.getRenderName(top3[2])}</div>${this.getPrevRankBadge(top3[2].prevRank)}<div class="val-text" style="color:${displayColor}">${Number(top3[2].score).toLocaleString()}</div></div>`;
-    document.getElementById('podiumContent').innerHTML = podiumHtml;
-
-    // 渲染列表
-    document.getElementById('listView').innerHTML = others.map(item => `
-      <div class="list-row ${item.isMe ? 'is-me' : ''}">
-        <div class="rank-num">${item.rank}</div>
-        <img src="${this.getRenderAvatar(item)}" class="avatar-square">
-        <div class="user-info">
-          <div class="user-name">${this.getRenderName(item)} ${this.getPrevRankBadge(item.prevRank)}</div>
-        </div>
-        <div class="data-value" style="color:${displayColor}">${Number(item.score).toLocaleString()} <span style="font-size:12px">💎</span></div>
-      </div>
-    `).join('');
-
-    // 渲染 Footer 本人資訊
-    const myData = dataList.find(item => item.isMe);
-    if(myData) {
-      this.state.myRawName = myData.name;
-      this.state.myRawAvatar = myData.avatar;
-      document.getElementById('myRankNum').innerText = `#${myData.rank}`;
-      document.getElementById('myRankNum').style.color = displayColor;
-      document.getElementById('myValueText').innerText = `${Number(myData.score).toLocaleString()} 💎`;
-      document.getElementById('gapText').innerHTML = `距離前一名還差...`;
-    } else {
-      document.getElementById('myRankNum').innerText = `未入榜`;
-      document.getElementById('myRankNum').style.color = 'var(--text-secondary)';
-      document.getElementById('myValueText').innerText = `0 💎`;
-      document.getElementById('gapText').innerHTML = `快來送禮上榜吧！`;
-    }
-    
-    // 依據隱身狀態更新 Footer 顯示
-    if(!this.state.isAnonymous && myData) {
-      document.getElementById('footerName').innerText = this.state.myRawName;
-      document.getElementById('footerAvatar').src = this.state.myRawAvatar;
-    }
-  },
-
-  /* =========================================
-     互動操作
-     ========================================= */
-  changeMode(mode, el) {
-    document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
-    el.classList.add('active');
-    this.state.currentMode = mode;
-    this.state.isYesterday = false;
-    
-    document.getElementById('btnYesterday').classList.remove('active');
-    document.getElementById('mainTitle').innerText = mode === 'day' ? '日榜即時榮譽' : '週榜即時榮譽';
-    document.getElementById('btnYesterday').innerText = mode === 'day' ? '昨日榜單' : '上週榜單';
-    document.getElementById('countdownBanner').style.opacity = '1';
-    
-    this.fetchLeaderboardData();
-    document.getElementById('scrollArea').scrollTop = 0;
-  },
-
-  toggleYesterday() {
-    this.state.isYesterday = !this.state.isYesterday;
-    const btn = document.getElementById('btnYesterday');
-    
-    if(this.state.isYesterday) {
-      btn.classList.add('active');
-      document.getElementById('mainTitle').innerText = (this.state.currentMode === 'day' ? '昨日' : '上週') + '榮譽榜單';
-      document.getElementById('countdownBanner').style.opacity = '0';
-    } else {
-      btn.classList.remove('active');
-      document.getElementById('mainTitle').innerText = this.state.currentMode === 'day' ? '日榜即時榮譽' : '週榜即時榮譽';
-      document.getElementById('countdownBanner').style.opacity = '1';
-    }
-    this.fetchLeaderboardData();
-    document.getElementById('scrollArea').scrollTop = 0;
-  },
-
-  toggleAnonymous() {
-    this.state.isAnonymous = document.getElementById('anonToggle').checked;
-    const anonLabel = document.getElementById('anonLabel');
-    
-    if (this.state.isAnonymous) {
-      anonLabel.innerText = "隱身";
-      anonLabel.style.color = "var(--primary)";
-      document.getElementById('footerAvatar').src = "https://api.dicebear.com/8.x/bottts/svg?seed=Ghost&backgroundColor=474747";
-      document.getElementById('footerName').innerText = "神秘人";
-    } else {
-      anonLabel.innerText = "公開";
-      anonLabel.style.color = "var(--text-secondary)";
-      document.getElementById('footerAvatar').src = this.state.myRawAvatar;
-      document.getElementById('footerName').innerText = this.state.myRawName;
-    }
-    if(this.state.currentDataList) this.renderContent(this.state.currentDataList);
-  },
-
-  /* =========================================
-     SWAG Iframe 通訊協議 & PWA 攔截
-     ========================================= */
-  postIframeReady() { window.parent.postMessage({ type: 'IFRAME_READY' }, '*'); },
-
-  setupIframeHandshake() {
-    setTimeout(() => this.postIframeReady(), 100);
-    this.state.handshakeTimer = setInterval(() => { if (!this.state.swagToken) this.postIframeReady(); }, this.CONFIG.HANDSHAKE_INTERVAL);
-
-    window.addEventListener('message', (event) => {
-      const data = event.data;
-      if (!data) return;
-      if (data.type === 'SET_TOKEN') {
-        if (this.state.swagToken === data.token) return;
-        this.state.swagToken = data.token;
-        if (this.state.handshakeTimer) clearInterval(this.state.handshakeTimer);
-        this.fetchLeaderboardData();
-      }
-    });
-
-    if (window.self === window.top) {
-      setTimeout(() => { if (!this.state.swagToken) { clearInterval(this.state.handshakeTimer); this.enableDevMode(); } }, this.CONFIG.DEV_MODE_TIMEOUT);
-    }
-  },
-
-  setupPwaInterceptor() {
-    document.addEventListener('click', (e) => {
-      if (window.self === window.top) return;
-      const link = e.target.closest('a[target="_blank"]');
-      if (link) {
-        try {
-          const url = new URL(link.href);
-          if (url.hostname === 'swag.live' || url.hostname === 'www.swag.live') {
-            e.preventDefault(); 
-            window.parent.postMessage({ type: 'PWA_NAVIGATE', url: link.href }, '*');
-          }
-        } catch(err) {}
-      }
-    });
-  },
-
-  /* =========================================
-     雜項 Utils
-     ========================================= */
-  openModal() { const m = document.getElementById('ruleModal'); m.style.display = 'flex'; void m.offsetWidth; m.classList.add('show'); },
-  closeModal() { const m = document.getElementById('ruleModal'); m.classList.remove('show'); setTimeout(() => m.style.display = 'none', 300); },
-  toggleLang() { /* 留空備用 */ },
-  startCountdown() {
-    let totalSecs = 24 * 3600 + 15 * 60 + 30; 
-    const timerEl = document.getElementById('countdownTimer');
-    this.state.countdownInterval = setInterval(() => {
-      if (totalSecs <= 0) { timerEl.innerText = "00:00:00"; return; }
-      totalSecs--;
-      timerEl.innerText = `${String(Math.floor(totalSecs/3600)).padStart(2,'0')}:${String(Math.floor((totalSecs%3600)/60)).padStart(2,'0')}:${String(totalSecs%60).padStart(2,'0')}`;
-    }, 1000);
-  }
+/* =========================================
+   2. 多語系 (I18n) 模組
+   ========================================= */
+const i18n = {
+  'Hant': { title: '2026 璀璨之星爭奪戰', time: '活動時間：2026/04/07 ~ 2026/04/30', tabHour: '小時', tabDay: '日', tabWeek: '週', tabMonth: '月', myRank: '我的排名', unranked: '未上榜', public: '公開', hidden: '隱身', empty: '暫無排名資料' },
+  'EN': { title: '2026 Star Battle', time: 'Period: Apr 7 - Apr 30, 2026', tabHour: 'Hour', tabDay: 'Day', tabWeek: 'Week', tabMonth: 'Month', myRank: 'My Rank', unranked: 'Unranked', public: 'Public', hidden: 'Hidden', empty: 'No data available' }
 };
+let lang = 'Hant';
 
-window.addEventListener('DOMContentLoaded', () => App.init());
+function toggleLang() {
+  lang = lang === 'Hant' ? 'EN' : 'Hant';
+  document.getElementById('langBtn').innerText = lang === 'Hant' ? '繁' : 'EN';
+  
+  const dict = i18n[lang];
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    el.innerText = dict[el.getAttribute('data-i18n')];
+  });
+  
+  toggleAnonymous(); // 刷新隱身文字狀態
+}
+
+/* =========================================
+   3. SWAG Iframe 通訊與 API 獲取
+   ========================================= */
+function postIframeReady() { window.parent.postMessage({ type: 'IFRAME_READY' }, '*'); }
+
+window.addEventListener('DOMContentLoaded', () => {
+  toggleLang(); // 初始化語系
+  setTimeout(postIframeReady, 100);
+  handshakeRetryInterval = setInterval(() => { if (!swagToken) postIframeReady(); }, 3000);
+});
+
+window.addEventListener('message', (event) => {
+  const data = event.data;
+  if (!data) return;
+  if (data.type === 'SET_TOKEN') {
+    if (swagToken === data.token) return;
+    swagToken = data.token;
+    if (handshakeRetryInterval) { clearInterval(handshakeRetryInterval); handshakeRetryInterval = null; }
+    fetchApiData();
+  }
+});
+
+async function fetchApiData() {
+  showSkeleton();
+  try {
+    // 帶入 mode 參數讓後端根據 Tab 切換撈取對應資料
+    const res = await fetch(`${API_ENDPOINT}?mode=${currentMode}`, {
+      headers: { 'Authorization': `Bearer ${swagToken}` }
+    });
+    if (!res.ok) throw new Error(`API Error: ${res.status}`);
+    const data = await res.json();
+    renderContent(data.leaderboard ||[], data.me || { rank: -1, total_diamonds: 0, user_id: 'Me' });
+  } catch (err) {
+    console.error('Fetch Data Error:', err);
+    document.getElementById('podiumContent').innerHTML = '';
+    document.getElementById('listView').innerHTML = `<div class="empty-state">連線失敗，請稍後再試</div>`;
+  }
+}
+
+/* =========================================
+   4. UI 渲染邏輯
+   ========================================= */
+function hexToRgb(hex) {
+  var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  return result ? `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}` : '246, 65, 141';
+}
+
+function changeMode(type, el, color) {
+  if (currentMode === type) return;
+  document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  
+  currentMode = type;
+  currentThemeColor = color;
+  document.documentElement.style.setProperty('--primary', color);
+  document.querySelector('.podium').style.background = `linear-gradient(180deg, rgba(${hexToRgb(color)}, 0.08) 0%, transparent 100%)`;
+  
+  if (swagToken) {
+    fetchApiData(); // 重新 Call API
+  } else {
+    showSkeleton(); // 若無 token 繼續顯示骨架屏
+  }
+}
+
+function showSkeleton() {
+  document.getElementById('podiumContent').innerHTML = `
+    <div class="podium-item no2"><div class="avatar-wrapper"><div class="avatar-round skeleton"></div></div><div class="skeleton sk-text-short"></div></div>
+    <div class="podium-item no1"><div class="avatar-wrapper"><div class="avatar-round skeleton" style="width:80px;height:80px"></div></div><div class="skeleton sk-text-short"></div></div>
+    <div class="podium-item no3"><div class="avatar-wrapper"><div class="avatar-round skeleton"></div></div><div class="skeleton sk-text-short"></div></div>
+  `;
+  document.getElementById('listView').innerHTML = Array(6).fill(`<div class="list-row"><div class="rank-num skeleton sk-text-short" style="width:20px"></div><div class="sk-avatar skeleton"></div><div class="user-info"><div class="skeleton sk-text"></div></div></div>`).join('');
+}
+
+function renderContent(leaderboard, meData) {
+  // 處理個人狀態區塊
+  myOriginalId = meData.user_id || meData.masked_user_id || "Me";
+  const myRankEl = document.getElementById('myRankNum');
+  const myValueEl = document.getElementById('myValueText');
+  const myAvatarEl = document.getElementById('myAvatar');
+  
+  myRankEl.classList.remove('skeleton', 'sk-text-short');
+  myValueEl.classList.remove('skeleton', 'sk-text-short');
+  myAvatarEl.classList.remove('skeleton');
+
+  myRankEl.innerText = meData.rank === -1 ? i18n[lang].unranked : `No.${meData.rank}`;
+  myValueEl.innerHTML = `${meData.total_diamonds.toLocaleString()} ${diamondSVG}`;
+  
+  // 觸發一次頭像更新邏輯
+  toggleAnonymous();
+
+  // 處理排行榜 (前3名與剩餘)
+  const top3 = leaderboard.slice(0, 3);
+  const rest = leaderboard.slice(3);
+  const podiumEl = document.getElementById('podiumContent');
+  const listEl = document.getElementById('listView');
+
+  if (leaderboard.length === 0) {
+    podiumEl.innerHTML = '';
+    listEl.innerHTML = `<div class="empty-state">${i18n[lang].empty}</div>`;
+    return;
+  }
+
+  // 渲染頒獎台 (防呆：若少於 3 人也正常顯示)
+  let podiumHtml = '';
+  const generatePodiumItem = (user, rankClass, badgeClass, badgeNum, isCrown) => {
+    if (!user) return `<div class="podium-item ${rankClass}"></div>`;
+    const id = user.user_id || user.masked_user_id;
+    return `
+      <div class="podium-item ${rankClass}">
+        <div class="avatar-wrapper">
+          ${isCrown ? crownSVG : ''}
+          <div class="rank-badge ${badgeClass}">${badgeNum}</div>
+          <img src="https://api.dicebear.com/8.x/avataaars/svg?seed=${id}" class="avatar-round">
+        </div>
+        <div class="nickname" style="${isCrown ? 'font-weight:600;' : ''}">${id}</div>
+        <div class="val-text" style="color:${currentThemeColor}">${user.total_diamonds.toLocaleString()} ${diamondSVG}</div>
+      </div>
+    `;
+  };
+
+  podiumHtml += generatePodiumItem(top3[1], 'no2', 'badge-2', '2', false);
+  podiumHtml += generatePodiumItem(top3[0], 'no1', 'badge-1', '1', true);
+  podiumHtml += generatePodiumItem(top3[2], 'no3', 'badge-3', '3', false);
+  podiumEl.innerHTML = podiumHtml;
+
+  // 渲染列表
+  listEl.innerHTML = rest.map(user => {
+    const id = user.user_id || user.masked_user_id;
+    return `
+      <div class="list-row">
+        <div class="rank-num">${user.rank}</div>
+        <img src="https://api.dicebear.com/8.x/initials/svg?seed=${id}" class="avatar-square">
+        <div class="user-info"><div class="user-name">${id}</div></div>
+        <div class="data-value" style="color:${currentThemeColor}">${user.total_diamonds.toLocaleString()} ${diamondSVG}</div>
+      </div>
+    `;
+  }).join('');
+  
+  document.getElementById('scrollArea').scrollTop = 0;
+}
+
+/* =========================================
+   5. 隱身開關控制
+   ========================================= */
+function toggleAnonymous() {
+  isAnonymous = document.getElementById('anonToggle').checked;
+  const anonLabel = document.getElementById('anonLabel');
+  const footerAvatar = document.getElementById('myAvatar');
+
+  if (isAnonymous) {
+    anonLabel.innerText = i18n[lang].hidden;
+    anonLabel.style.color = "var(--primary)";
+    footerAvatar.src = "https://api.dicebear.com/8.x/bottts/svg?seed=Ghost&backgroundColor=474747";
+  } else {
+    anonLabel.innerText = i18n[lang].public;
+    anonLabel.style.color = "var(--text-secondary)";
+    // 依賴真實 ID 生成固定頭像
+    footerAvatar.src = `https://api.dicebear.com/8.x/avataaars/svg?seed=${myOriginalId}`;
+  }
+}
+
+/* =========================================
+   6. PWA 跨視窗導航攔截 (Navigation Interceptor)
+   ========================================= */
+document.addEventListener('click', (e) => {
+  if (window.self === window.top) return; // 若非 iframe 環境則不攔截
+
+  const link = e.target.closest('a[target="_blank"]');
+  if (link) {
+    try {
+      const url = new URL(link.href);
+      if (url.hostname === 'swag.live' || url.hostname === 'www.swag.live') {
+        e.preventDefault();
+        window.parent.postMessage({ type: 'PWA_NAVIGATE', url: link.href }, '*');
+      }
+    } catch(err) {
+      console.error("URL Parsing Error", err);
+    }
+  }
+});
 </script>
 </body>
 </html>
