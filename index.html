@@ -2,8 +2,8 @@
 <html lang="zh-Hant">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>用戶榮譽排行榜 - 置頂頒獎台與隱身模式</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>用戶榮譽排行榜 - 真實 API 串接版</title>
 <style>
   /* =========================================
      1. Design Tokens (系統化設計規範)
@@ -45,7 +45,7 @@
   }
 
   /* =========================================
-     2. Base & Layout (Flexbox 架構重構)
+     2. Base & Layout (Flexbox 架構)
      ========================================= */
   body {
     font-family: var(--font-family);
@@ -69,27 +69,22 @@
     border-radius: 28px;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8), inset 0 1px 1px rgba(255, 255, 255, 0.1);
     border: 6px solid #222;
-    /* 改用 Flexbox 讓上半部固定，下半部滑動 */
     display: flex;
     flex-direction: column;
   }
 
-  /* 上半部固定區域 (Header + Tabs + Top 3) */
   .top-fixed-section {
     flex-shrink: 0;
     background-color: var(--surface);
     z-index: 20;
     position: relative;
-    /* 懸浮陰影，創造前後景深 */
     box-shadow: 0 8px 24px rgba(0,0,0,0.5);
     border-bottom: 1px solid var(--outline-variant);
   }
 
-  /* 下半部滾動區域 (List 4~25) */
   .content-scroll {
     flex-grow: 1;
     overflow-y: auto;
-    /* 預留底部 Footer 的空間，避免最後一名被擋住 */
     padding-bottom: 120px; 
     scrollbar-width: none;
   }
@@ -117,14 +112,15 @@
     z-index: 9999;
   }
 
-  /* Header */
+  /* Header (新增昨日按鈕) */
   .header {
     padding: var(--space-5) var(--space-5) var(--space-2);
-    text-align: center;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
   }
   .header-title-row {
     display: flex;
-    justify-content: center;
     align-items: center;
     gap: var(--space-2);
   }
@@ -137,15 +133,34 @@
     display: inline-flex;
     justify-content: center;
     align-items: center;
-    width: 40px;
-    height: 40px;
-    font-size: 18px;
+    width: 32px;
+    height: 32px;
+    font-size: 16px;
     color: var(--text-secondary);
     cursor: pointer;
     border-radius: 50%;
   }
+  
+  /* 昨日榜單按鈕 */
+  .btn-yesterday {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
+    border: 1px solid var(--outline);
+    padding: 6px 12px;
+    border-radius: var(--radius-full);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-yesterday.active {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: #fff;
+  }
+
+  .countdown-wrapper { text-align: center; margin-bottom: 4px; }
   .countdown-banner {
-    margin-top: 4px;
     font-size: var(--font-body-s);
     color: var(--text-secondary);
     background: rgba(255, 255, 255, 0.05);
@@ -155,38 +170,24 @@
     border: 1px solid var(--outline-variant);
     transition: opacity 0.3s;
   }
-  .countdown-time {
-    color: var(--primary);
-    font-family: 'Courier New', Courier, monospace;
-    font-weight: bold;
-    font-size: var(--font-body-m);
-    margin-left: 4px;
-  }
+  .countdown-time { color: var(--primary); font-family: 'Courier New', monospace; font-weight: bold; font-size: var(--font-body-m); margin-left: 4px; }
 
   /* Main Tabs */
   .tabs-main {
     display: flex;
     background-color: var(--surface-container);
     border-bottom: 1px solid var(--outline);
-    overflow-x: auto;
-    scrollbar-width: none;
-    scroll-behavior: smooth;
   }
-  .tabs-main::-webkit-scrollbar { display: none; }
-  
   .tab-item {
     font-size: var(--font-body-m);
     color: var(--text-secondary);
     cursor: pointer;
-    white-space: nowrap;
-    padding: 0 var(--space-5);
     flex: 1; 
     min-height: 48px;
     display: flex;
     justify-content: center;
     align-items: center;
     position: relative;
-    flex-shrink: 0;
   }
   .tab-item.active { color: var(--primary); font-weight: 600; }
   .tab-item.active::after {
@@ -194,38 +195,22 @@
     height: 3px; border-radius: 3px 3px 0 0; background-color: var(--primary);
   }
 
-  /* Sub Tabs */
-  .tabs-sub {
-    display: none;
-    background-color: var(--surface);
-    padding: var(--space-4) var(--space-5);
-    gap: var(--space-3);
-    overflow-x: auto;
-    border-bottom: 1px solid var(--outline-variant);
-    scrollbar-width: none;
-  }
-  .tabs-sub::-webkit-scrollbar { display: none; }
-  .sub-item {
-    font-size: var(--font-body-s);
-    color: var(--text-secondary);
-    background: var(--surface-container);
-    padding: 0 var(--space-5);
-    min-height: 40px;
-    display: flex;
-    align-items: center;
-    border-radius: var(--radius-full);
+  /* 昨日 Top 10 榮譽徽章 */
+  .prev-badge {
+    font-size: 10px;
+    color: var(--gold);
+    background: rgba(255, 215, 0, 0.15);
+    border: 1px solid rgba(255, 215, 0, 0.4);
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin-left: 6px;
+    vertical-align: middle;
     white-space: nowrap;
-    cursor: pointer;
-    border: 1px solid transparent;
-    transition: all 0.2s;
+    font-weight: 600;
   }
-  .sub-item.active { 
-    border-color: var(--primary); 
-    color: var(--primary); 
-    background: rgba(246, 65, 141, 0.1); 
-  }
+  .podium-item .prev-badge { display: inline-block; margin-left: 0; margin-top: 4px; }
 
-  /* Podium (置頂區) - 微調 padding 以節省空間 */
+  /* Podium (置頂區) */
   .podium {
     display: flex;
     justify-content: center;
@@ -250,39 +235,25 @@
   .val-text { font-size: var(--font-body-s); margin-top: 2px; font-weight: 600; }
 
   /* List Table (滑動區) */
-  .list-row {
-    display: flex;
-    align-items: center;
-    padding: var(--space-4) var(--space-5);
-    border-bottom: 1px solid var(--outline-variant);
-  }
-  .list-row.is-me {
-    background: linear-gradient(90deg, rgba(246, 65, 141, 0.1) 0%, transparent 100%);
-    border-left: 3px solid var(--primary);
-  }
+  .list-row { display: flex; align-items: center; padding: var(--space-4) var(--space-5); border-bottom: 1px solid var(--outline-variant); }
+  .list-row.is-me { background: linear-gradient(90deg, rgba(246, 65, 141, 0.1) 0%, transparent 100%); border-left: 3px solid var(--primary); }
   .rank-num { width: 36px; font-weight: 600; font-size: var(--font-body-l); color: var(--text-secondary); }
   .is-me .rank-num { color: var(--primary); }
   .avatar-square { width: 44px; height: 44px; border-radius: var(--radius-m); margin-right: var(--space-4); object-fit: cover; border: 1px solid var(--outline); background: var(--surface-container); }
   .is-me .avatar-square { border-color: var(--primary); }
   .user-info { flex: 1; display: flex; flex-direction: column; justify-content: center; overflow: hidden; }
-  .user-name { font-size: var(--font-body-m); color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .user-name { font-size: var(--font-body-m); color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center;}
   .is-me .user-name { font-weight: 600; color: var(--primary); }
   .data-value { font-weight: 600; font-size: var(--font-body-m); text-align: right; padding-left: 8px;}
 
   /* Sticky Footer */
   .sticky-footer {
-    position: absolute;
-    bottom: 24px; left: var(--space-4); right: var(--space-4);
-    background: rgba(35, 35, 35, 0.85);
-    backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    border-radius: var(--radius-l);
-    padding: var(--space-4) var(--space-4);
-    box-shadow: 0 12px 32px rgba(0,0,0,0.8);
-    z-index: 30; /* 確保在整個畫面最上層 */
+    position: absolute; bottom: 24px; left: var(--space-4); right: var(--space-4);
+    background: rgba(35, 35, 35, 0.85); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: var(--radius-l); padding: var(--space-4) var(--space-4); box-shadow: 0 12px 32px rgba(0,0,0,0.8); z-index: 30;
   }
   .my-info { display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-4); }
-  .my-avatar { width: 40px; height: 40px; border-radius: var(--radius-s); margin-right: var(--space-3); border: 1px solid var(--primary); }
+  .my-avatar { width: 40px; height: 40px; border-radius: var(--radius-s); margin-right: var(--space-3); border: 1px solid var(--primary); object-fit: cover;}
   
   /* Toggle Switch (隱身模式開關) */
   .toggle-wrapper { display: flex; flex-direction: column; align-items: flex-end; }
@@ -296,94 +267,78 @@
   input:checked + .slider:before { transform: translateX(16px); }
 
   .footer-tip { display: flex; justify-content: space-between; align-items: center; font-size: var(--font-body-s); color: var(--text-secondary); border-top: 1px solid var(--outline-variant); padding-top: var(--space-4); }
-  .btn-action { 
-    background: var(--primary); color: #fff; border: none; min-height: 36px; 
-    padding: 0 var(--space-4); border-radius: var(--radius-full); font-size: var(--font-body-m); font-weight: 600; cursor: pointer; 
-  }
+  .btn-action { background: var(--primary); color: #fff; border: none; min-height: 36px; padding: 0 var(--space-4); border-radius: var(--radius-full); font-size: var(--font-body-m); font-weight: 600; cursor: pointer; }
 
-  /* Skeleton Loading */
+  /* Skeleton & Utils */
   @keyframes shimmer { 0% { background-position: -200px 0; } 100% { background-position: 200px 0; } }
   .skeleton { background: linear-gradient(90deg, var(--surface-container) 25%, var(--surface-container-variant) 50%, var(--surface-container) 75%); background-size: 400px 100%; animation: shimmer 1.5s infinite linear; border-radius: var(--radius-s); }
   .sk-avatar { width: 44px; height: 44px; }
   .sk-text { height: 16px; width: 120px; }
   .sk-text-short { height: 14px; width: 60px; }
-
-  /* Modal (毛玻璃規則說明) */
-  .modal-overlay {
-    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(8px);
-    z-index: 100; display: none; justify-content: center; align-items: center;
-    opacity: 0; transition: opacity 0.3s;
-  }
+  
+  .modal-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(8px); z-index: 100; display: none; justify-content: center; align-items: center; opacity: 0; transition: opacity 0.3s; }
   .modal-overlay.show { display: flex; opacity: 1; }
-  .modal-content {
-    background: var(--surface-container); width: 80%; border-radius: var(--radius-xl);
-    padding: var(--space-6); border: 1px solid var(--outline);
-    box-shadow: 0 20px 40px rgba(0,0,0,0.8);
-    transform: translateY(20px); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  }
+  .modal-content { background: var(--surface-container); width: 80%; border-radius: var(--radius-xl); padding: var(--space-6); border: 1px solid var(--outline); box-shadow: 0 20px 40px rgba(0,0,0,0.8); transform: translateY(20px); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
   .modal-overlay.show .modal-content { transform: translateY(0); }
   .modal-content h2 { margin-top: 0; font-size: var(--font-title-m); text-align: center; color: var(--primary); }
   .modal-content p { font-size: var(--font-body-m); color: var(--text-secondary); line-height: 1.6; margin-bottom: var(--space-3); }
   .modal-close-btn { width: 100%; margin-top: var(--space-5); background: var(--outline); }
+  
+  #dev-banner { display: none; position: fixed; top: 0; left: 0; width: 100%; background: #ef4444; color: #fff; text-align: center; padding: 8px; font-size: 13px; font-weight: bold; z-index: 9999; }
+  .api-error-msg { text-align: center; color: var(--text-secondary); padding: 40px 20px; font-size: var(--font-body-m); }
 </style>
 </head>
 <body>
 
-<div class="i18n-btn" onclick="toggleLang()">繁</div>
+<!-- 開發防呆 -->
+<div id="dev-banner">⚠️ [DEV MODE] 目前處於本地預覽模式，資料皆為假資料</div>
+
+<div class="i18n-btn" onclick="App.toggleLang()">繁</div>
 
 <div class="device-container">
-  <!-- Modal Overlay -->
-  <div class="modal-overlay" id="ruleModal" onclick="closeModal(event)">
+  <!-- Modal -->
+  <div class="modal-overlay" id="ruleModal" onclick="App.closeModal(event)">
     <div class="modal-content" onclick="event.stopPropagation()">
       <h2>活動規則</h2>
-      <p>1. 小時榜：依據每小時累積消耗鑽石總額進行排名。</p>
-      <p>2. 日/週/月榜：依照對應週期結算，結算後積分歸零重置。</p>
-      <p>3. 累積榜：結算歷屆所有獲得冠軍的總次數排行。</p>
-      <p>4. 系統每 5 分鐘同步一次最新數據。</p>
-      <button class="btn-action modal-close-btn" onclick="closeModal()">我知道了</button>
+      <p>1. 結算時間：依照日榜、週榜對應週期結算，結算後積分歸零重置。</p>
+      <p>2. 昨日榮耀：若用戶在前一天日榜位列前十，今日將展示專屬榮耀徽章。</p>
+      <p>3. 系統每 5 分鐘同步一次最新數據。</p>
+      <button class="btn-action modal-close-btn" onclick="App.closeModal()">我知道了</button>
     </div>
   </div>
 
-  <!-- [更新] 頂部固定區域 (不會隨頁面滾動) -->
+  <!-- 頂部固定區域 -->
   <div class="top-fixed-section">
     <div class="header">
       <div class="header-title-row">
-        <h1 id="mainTitle">即時榮譽榜</h1>
-        <div class="info-icon" onclick="openModal()">ⓘ</div>
+        <h1 id="mainTitle">日榜即時榮譽</h1>
+        <div class="info-icon" onclick="App.openModal()">ⓘ</div>
       </div>
+      <button class="btn-yesterday" id="btnYesterday" onclick="App.toggleYesterday()">昨日榜單</button>
+    </div>
+    
+    <div class="countdown-wrapper">
       <div class="countdown-banner" id="countdownBanner">
         距離結算 <span class="countdown-time" id="countdownTimer">--:--:--</span>
       </div>
     </div>
 
-    <!-- Main Tabs -->
+    <!-- Tabs (僅日/週) -->
     <div class="tabs-main" id="mainTabsContainer">
-      <div class="tab-item active" onclick="changeMode('hour', this)">小時</div>
-      <div class="tab-item" onclick="changeMode('day', this)">日</div>
-      <div class="tab-item" onclick="changeMode('week', this)">週</div>
-      <div class="tab-item" onclick="changeMode('month', this)">月</div>
-      <div class="tab-item" onclick="changeMode('all', this)">累積榜</div>
+      <div class="tab-item active" onclick="App.changeMode('day', this)">日榜</div>
+      <div class="tab-item" onclick="App.changeMode('week', this)">週榜</div>
     </div>
 
-    <!-- Sub Tabs (僅在累積榜顯示) -->
-    <div class="tabs-sub" id="subTabs">
-      <div class="sub-item active" onclick="changeSub('h_win', this)">小時冠軍累積</div>
-      <div class="sub-item" onclick="changeSub('d_win', this)">日冠軍累積</div>
-      <div class="sub-item" onclick="changeSub('w_win', this)">週冠軍累積</div>
-    </div>
-
-    <!-- Podium View (前三名頒獎台) -->
+    <!-- Podium (前三名) -->
     <div id="podiumView">
       <div class="podium" id="podiumContent"></div>
     </div>
   </div>
-  <!-- 頂部固定區域結束 -->
 
-  <!-- [更新] 內容滾動區域 (僅此區域會滾動) -->
+  <!-- 內容滾動區 -->
   <div class="content-scroll" id="scrollArea">
     <div class="list-table" id="listView">
-      <!-- 預設骨架屏 -->
+      <!-- 骨架屏 -->
       <div class="list-row"><div class="rank-num skeleton sk-text-short" style="width:20px"></div><div class="sk-avatar skeleton"></div><div class="user-info"><div class="skeleton sk-text"></div></div></div>
     </div>
   </div>
@@ -394,18 +349,18 @@
       <div style="display:flex; align-items:center;">
         <img src="https://api.dicebear.com/8.x/avataaars/svg?seed=Me" class="my-avatar" id="footerAvatar">
         <div style="display:flex; flex-direction:column; justify-content:center;">
-            <span style="font-size:var(--font-body-s); color:var(--text-secondary); margin-bottom:2px" id="footerName">我是七號(Me)</span>
+            <span style="font-size:var(--font-body-s); color:var(--text-secondary); margin-bottom:2px" id="footerName">我的帳號</span>
             <span style="font-size:var(--font-body-m);">我的排名：<strong id="myRankNum" style="color:var(--primary)">-</strong></span>
         </div>
       </div>
       
-      <!-- 右側區塊：數值與隱身開關 -->
+      <!-- 隱身開關 -->
       <div class="toggle-wrapper">
         <span id="myValueText" style="font-size:var(--font-body-m); font-weight:600;">-</span>
         <div class="toggle-container">
           <span class="toggle-label" id="anonLabel">公開</span>
           <label class="switch">
-            <input type="checkbox" id="anonToggle" onchange="toggleAnonymous()">
+            <input type="checkbox" id="anonToggle" onchange="App.toggleAnonymous()">
             <span class="slider"></span>
           </label>
         </div>
@@ -422,247 +377,288 @@
 </div>
 
 <script>
-/* =========================================
-   隱身模式 (Anonymous Mode) 狀態與邏輯
-   ========================================= */
-let isAnonymous = false;
-let currentMode = 'hour'; 
-
-function toggleAnonymous() {
-  isAnonymous = document.getElementById('anonToggle').checked;
-  const anonLabel = document.getElementById('anonLabel');
-  const footerAvatar = document.getElementById('footerAvatar');
-  const footerName = document.getElementById('footerName');
-
-  if (isAnonymous) {
-    anonLabel.innerText = "隱身";
-    anonLabel.style.color = "var(--primary)";
-    footerAvatar.src = "https://api.dicebear.com/8.x/bottts/svg?seed=Ghost&backgroundColor=474747";
-    footerName.innerText = "神秘人";
-  } else {
-    anonLabel.innerText = "公開";
-    anonLabel.style.color = "var(--text-secondary)";
-    footerAvatar.src = "https://api.dicebear.com/8.x/avataaars/svg?seed=Me";
-    footerName.innerText = "我是七號(Me)";
-  }
-
-  // 瞬間重繪當前榜單，體驗零延遲
-  renderContent(data[currentMode]);
-}
-
-function getRenderName(item) {
-  return (item.me && isAnonymous) ? "神秘人" : item.n;
-}
-function getRenderAvatar(item, type = 'avataaars') {
-  if (item.me && isAnonymous) {
-    return "https://api.dicebear.com/8.x/bottts/svg?seed=Ghost&backgroundColor=474747";
-  }
-  return `https://api.dicebear.com/8.x/${type}/svg?seed=${item.s}`;
-}
-
-/* =========================================
-   自動生成 20+ 名次的假資料產生器 (擬真滑動感)
-   ========================================= */
-function generateList(startRank, endRank, hasMeAt) {
-  const names =["夜之王者", "孤獨的狼", "財富密碼", "只想躺平", "戰神", "吃瓜群眾", "打醬油的", "努力衝刺", "週末狂歡", "星空小孩", "不屈靈魂", "狂暴之路", "微笑天使", "幸運星", "夢想家", "時間旅人", "風中承諾", "破壞王", "閃耀鑽石", "默默守護", "守夜人", "探險家"];
-  let list =[];
-  let currentScore = 80000 - (startRank * 1500); 
-  
-  for(let r = startRank; r <= endRank; r++) {
-    let isMe = (r === hasMeAt);
-    currentScore = currentScore - Math.floor(Math.random() * 800 + 100);
-    list.push({
-      r: r,
-      n: isMe ? "我是七號(Me)" : names[r % names.length] + Math.floor(Math.random()*99),
-      v: currentScore.toLocaleString(),
-      s: isMe ? "Me" : "Seed"+r,
-      me: isMe
-    });
-  }
-  return list;
-}
-
-const data = {
-  hour: {
-    color: "#F6418D", isPodium: true, title: "小時即時榜", unit: "💎",
-    top3:[
-      {n:"耗鑽狂魔哥", v:"120,500", s:"King"}, 
-      {n:"隔壁老王", v:"89,200", s:"Wang"}, 
-      {n:"小美愛跳舞", v:"75,000", s:"Mei"}
-    ],
-    list: generateList(4, 25, 7), // 第7名
-    my: {r:"#7", v:"68,230 💎", g:"距離前一名還差 1,200 💎"} 
+/**
+ * ==========================================
+ * 核心應用模組 (封裝 API, Iframe, UI 邏輯)
+ * ==========================================
+ */
+const App = {
+  CONFIG: {
+    API_ENDPOINT: 'https://swag-campaign-api-905468082258.asia-east1.run.app/api/leaderboard',
+    HANDSHAKE_INTERVAL: 3000,
+    DEV_MODE_TIMEOUT: 2000
   },
-  day: {
-    color: "#FFA500", isPodium: true, title: "日榜即時榜", unit: "💎",
-    top3:[
-      {n:"富豪傳奇", v:"820,000", s:"Rich"}, 
-      {n:"我是七號(Me)", v:"600,000", s:"Me", me: true}, // 測試頒獎台隱身
-      {n:"安靜看戲", v:"450,000", s:"Silent"}
-    ],
-    list: generateList(4, 25, -1),
-    my: {r:"#2", v:"600,000 💎", g:"距離第 1 名還差 220,000 💎"} 
+  state: {
+    swagToken: null,
+    currentMode: 'day', // 'day' 或 'week'
+    isYesterday: false,
+    isAnonymous: false,
+    currentDataList: null,
+    myRawAvatar: "https://api.dicebear.com/8.x/avataaars/svg?seed=Me",
+    myRawName: "我的帳號",
+    handshakeTimer: null,
+    countdownInterval: null
   },
-  week: {
-    color: "#60C4E8", isPodium: true, title: "週榜即時榜", unit: "💎",
-    top3:[
-      {n:"無情刷刷", v:"5,200,000", s:"W1"}, 
-      {n:"大亨", v:"4,800,000", s:"W2"}, 
-      {n:"路人", v:"3,900,000", s:"W3"}
-    ],
-    list: generateList(4, 25, -1), // 沒進榜
-    my: {r:"未入榜", v:"0 💎", g:"距離進榜還差 45,000 💎"} 
+
+  // 共用 SVG 資源
+  CROWN_SVG: `<svg viewBox="0 0 24 24" fill="none" class="crown-icon"><path d="M2 19H22V21H2V19ZM3 5L7 12L12 3L17 12L21 5L19 17H5L3 5Z" fill="var(--gold)"/><path d="M12 9C12.5523 9 13 8.55228 13 8C13 7.44772 12.5523 7 12 7C11.4477 7 11 7.44772 11 8C11 8.55228 11.4477 9 12 9Z" fill="#FFF"/></svg>`,
+
+  init() {
+    this.startCountdown();
+    this.setupIframeHandshake();
+    this.setupPwaInterceptor();
   },
-  month: {
-    color: "#15EA48", isPodium: true, title: "月榜即時榜", unit: "💎",
-    top3:[
-      {n:"全站第一", v:"25,200,000", s:"M1"}, 
-      {n:"全站第二", v:"14,800,000", s:"M2"}, 
-      {n:"全站第三", v:"13,900,000", s:"M3"}
-    ],
-    list: generateList(4, 25, 23), // 測試深層滑動
-    my: {r:"#23", v:"38,500 💎", g:"距離前一名還差 500 💎"} 
+
+  /* =========================================
+     資料轉換器 (請對應你真實的 API 欄位)
+     ========================================= */
+  transformApiData(apiResponse) {
+    const list = Array.isArray(apiResponse) ? apiResponse : (apiResponse.leaderboard || apiResponse.data ||[]);
+    // 假設 API 在物件外層也提供 me 資訊，若無，則從 list 中尋找 is_me=true
+    return list.map((raw, index) => ({
+      rank: raw.rank || index + 1,
+      userId: raw.user_id || raw.id,
+      name: raw.name || raw.nickname || '未命名用戶',
+      avatar: raw.avatar || raw.avatar_url || `https://api.dicebear.com/8.x/initials/svg?seed=${raw.user_id || index}`,
+      score: raw.total_diamonds || raw.score || raw.diamonds || 0,
+      prevRank: raw.yesterday_rank || raw.prev_rank || null, // 判斷是否有昨日排名
+      isMe: !!raw.is_me
+    }));
   },
-  all: {
-    color: "#8238BA", isPodium: false, title: "傳奇奪冠累積榜", unit: "次",
-    list:[
-      {r:1, n:"全站教父", v:"1,250", s:"A1"}, 
-      {r:2, n:"大亨傳奇", v:"892", s:"A2"}, 
-      {r:3, n:"資深收藏家", v:"750", s:"A3"},
-      ...generateList(4, 25, 12) 
-    ],
-    my: {r:"#12", v:"128 次", g:"再拿 3 次冠軍可提升排名"}
-  }
-};
 
-/* =========================================
-   渲染邏輯與通用控制
-   ========================================= */
-const crownSVG = `<svg viewBox="0 0 24 24" fill="none" class="crown-icon"><path d="M2 19H22V21H2V19ZM3 5L7 12L12 3L17 12L21 5L19 17H5L3 5Z" fill="var(--gold)"/><path d="M12 9C12.5523 9 13 8.55228 13 8C13 7.44772 12.5523 7 12 7C11.4477 7 11 7.44772 11 8C11 8.55228 11.4477 9 12 9Z" fill="#FFF"/></svg>`;
-
-function showSkeleton() {
-  const listArea = document.getElementById('listView');
-  listArea.innerHTML = Array(6).fill(`<div class="list-row"><div class="rank-num skeleton sk-text-short" style="width:20px"></div><div class="sk-avatar skeleton"></div><div class="user-info"><div class="skeleton sk-text"></div></div></div>`).join('');
-  document.getElementById('podiumView').style.opacity = '0.5';
-}
-
-function renderContent(modeData) {
-  const themeColor = modeData.color;
-  document.documentElement.style.setProperty('--primary', themeColor);
-  document.querySelector('.modal-content h2').style.color = themeColor;
-  
-  // 更新背景漸層
-  const rgb = hexToRgb(themeColor);
-  document.querySelector('.podium').style.background = `linear-gradient(180deg, rgba(${rgb}, 0.08) 0%, transparent 100%)`;
-  
-  document.getElementById('podiumView').style.display = modeData.isPodium ? 'block' : 'none';
-  document.getElementById('podiumView').style.opacity = '1';
-  
-  if (modeData.isPodium) {
-    document.getElementById('podiumContent').innerHTML = `
-      <div class="podium-item no2">
-        <div class="avatar-wrapper"><div class="rank-badge badge-2">2</div><img src="${getRenderAvatar(modeData.top3[1], 'avataaars')}" class="avatar-round"></div>
-        <div class="nickname">${getRenderName(modeData.top3[1])}</div><div class="val-text" style="color:${themeColor}">${modeData.top3[1].v}</div>
-      </div>
-      <div class="podium-item no1">
-        <div class="avatar-wrapper">${crownSVG}<img src="${getRenderAvatar(modeData.top3[0], 'avataaars')}" class="avatar-round"><div class="rank-badge badge-1">1</div></div>
-        <div class="nickname" style="font-weight:600">${getRenderName(modeData.top3[0])}</div><div class="val-text" style="color:${themeColor}">${modeData.top3[0].v}</div>
-      </div>
-      <div class="podium-item no3">
-        <div class="avatar-wrapper"><div class="rank-badge badge-3">3</div><img src="${getRenderAvatar(modeData.top3[2], 'avataaars')}" class="avatar-round"></div>
-        <div class="nickname">${getRenderName(modeData.top3[2])}</div><div class="val-text" style="color:${themeColor}">${modeData.top3[2].v}</div>
-      </div>
-    `;
-  }
-  
-  document.getElementById('listView').innerHTML = modeData.list.map(item => `
-    <div class="list-row ${item.me ? 'is-me' : ''}">
-      <div class="rank-num">${item.r}</div>
-      <img src="${getRenderAvatar(item, 'initials')}" class="avatar-square">
-      <div class="user-info"><div class="user-name">${getRenderName(item)}</div></div>
-      <div class="data-value" style="color:${themeColor}">${item.v} <span style="font-size:12px">${modeData.unit}</span></div>
-    </div>
-  `).join('');
-
-  document.getElementById('myRankNum').innerText = modeData.my.r;
-  document.getElementById('myRankNum').style.color = (modeData.my.r === '未入榜') ? 'var(--text-secondary)' : 'var(--primary)';
-  document.getElementById('myValueText').innerText = modeData.my.v;
-  document.getElementById('gapText').innerHTML = modeData.my.g;
-}
-
-function hexToRgb(hex) {
-  var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-  return result ? `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}` : '246, 65, 141';
-}
-
-function changeMode(type, el) {
-  document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
-  el.classList.add('active');
-  
-  currentMode = type;
-  const isAll = (type === 'all');
-  document.getElementById('countdownBanner').style.opacity = isAll ? '0' : '1';
-  document.getElementById('subTabs').style.display = isAll ? 'flex' : 'none';
-  
-  const modeData = data[type] || data.hour;
-  if(isAll) document.documentElement.style.setProperty('--primary', modeData.color);
-
-  showSkeleton();
-  setTimeout(() => {
-    renderContent(modeData);
-    document.getElementById('scrollArea').scrollTop = 0; // 重置下方列表的滾動條
-  }, 400);
-}
-
-function changeSub(sub, el) {
-  document.querySelectorAll('.sub-item').forEach(s => s.classList.remove('active'));
-  el.classList.add('active');
-  showSkeleton();
-  setTimeout(() => { renderContent(data.all); document.getElementById('scrollArea').scrollTop = 0; }, 300);
-}
-
-/* =========================================
-   Modal & 倒數 & PWA 初始化
-   ========================================= */
-function openModal() { const m = document.getElementById('ruleModal'); m.style.display = 'flex'; void m.offsetWidth; m.classList.add('show'); }
-function closeModal() { const m = document.getElementById('ruleModal'); m.classList.remove('show'); setTimeout(() => m.style.display = 'none', 300); }
-
-let lang = 'Hant';
-function toggleLang() {
-  lang = lang === 'Hant' ? 'EN' : 'Hant';
-  document.querySelector('.i18n-btn').innerText = lang === 'Hant' ? '繁' : 'EN';
-}
-
-function startCountdown() {
-  let totalSeconds = 24 * 3600 + 15 * 60 + 30; 
-  const timerEl = document.getElementById('countdownTimer');
-  setInterval(() => {
-    if (totalSeconds <= 0) { timerEl.innerText = "00:00:00"; return; }
-    totalSeconds--;
-    const h = String(Math.floor(totalSeconds / 3600)).padStart(2, '0');
-    const m = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, '0');
-    const s = String(totalSeconds % 60).padStart(2, '0');
-    timerEl.innerText = `${h}:${m}:${s}`;
-  }, 1000);
-}
-
-window.onload = () => {
-  startCountdown();
-  showSkeleton();
-  setTimeout(() => changeMode('hour', document.querySelector('.tab-item.active')), 300);
-
-  document.body.addEventListener('click', (e) => {
-    const link = e.target.closest('a[target="_blank"]');
-    if (link && window.self !== window.top) {
-      try {
-        const targetUrl = new URL(link.href);
-        if (targetUrl.hostname.includes('swag.live')) {
-          e.preventDefault(); window.parent.postMessage({ type: 'PWA_NAVIGATE', url: link.href }, '*');
-        }
-      } catch (err) {}
+  /* =========================================
+     API 呼叫與 Dev Mode
+     ========================================= */
+  async fetchLeaderboardData() {
+    this.showSkeleton();
+    try {
+      const typeParam = this.state.currentMode === 'day' ? 'daily' : 'weekly';
+      const dateParam = this.state.isYesterday ? '&date=yesterday' : ''; // 若 API 支援 last_week 可自行修改
+      const fetchUrl = `${this.CONFIG.API_ENDPOINT}?type=${typeParam}${dateParam}`;
+      
+      const res = await fetch(fetchUrl, {
+        headers: this.state.swagToken ? { 'Authorization': `Bearer ${this.state.swagToken}` } : {}
+      });
+      if (!res.ok) throw new Error('API 回應錯誤');
+      
+      const rawData = await res.json();
+      this.state.currentDataList = this.transformApiData(rawData);
+      this.renderContent(this.state.currentDataList);
+    } catch (error) {
+      console.error('[Fetch Error]', error);
+      document.getElementById('podiumView').style.display = 'none';
+      document.getElementById('listView').innerHTML = `<div class="api-error-msg">⚠️ 無法取得資料，請稍後再試</div>`;
     }
-  });
+  },
+
+  enableDevMode() {
+    document.getElementById('dev-banner').style.display = 'block';
+    // 產生假資料，包含 prevRank 測試
+    const mockData =[
+      { rank: 1, name: "富豪傳奇", total_diamonds: 820000, prev_rank: 2, avatar: "https://api.dicebear.com/8.x/avataaars/svg?seed=Rich", is_me: false },
+      { rank: 2, name: "測試小明", total_diamonds: 600000, prev_rank: 1, avatar: "https://api.dicebear.com/8.x/avataaars/svg?seed=Ming", is_me: true },
+      { rank: 3, name: "安靜看戲", total_diamonds: 450000, prev_rank: 12, avatar: "https://api.dicebear.com/8.x/avataaars/svg?seed=Silent", is_me: false },
+      { rank: 4, name: "路人甲", total_diamonds: 300000, prev_rank: 8, avatar: "https://api.dicebear.com/8.x/avataaars/svg?seed=A", is_me: false },
+      { rank: 5, name: "路人乙", total_diamonds: 280000, prev_rank: null, avatar: "https://api.dicebear.com/8.x/avataaars/svg?seed=B", is_me: false }
+    ];
+    this.state.currentDataList = this.transformApiData(mockData);
+    this.renderContent(this.state.currentDataList);
+  },
+
+  /* =========================================
+     畫面渲染與遮蔽邏輯
+     ========================================= */
+  showSkeleton() {
+    const skeletonHTML = Array(5).fill(`<div class="list-row"><div class="rank-num skeleton sk-text-short" style="width:20px"></div><div class="sk-avatar skeleton"></div><div class="user-info"><div class="skeleton sk-text"></div></div></div>`).join('');
+    document.getElementById('listView').innerHTML = skeletonHTML;
+    document.getElementById('podiumView').style.opacity = '0.5';
+  },
+
+  getRenderName(item) { return (item.isMe && this.state.isAnonymous) ? "神秘人" : item.name; },
+  getRenderAvatar(item) { return (item.isMe && this.state.isAnonymous) ? "https://api.dicebear.com/8.x/bottts/svg?seed=Ghost&backgroundColor=474747" : item.avatar; },
+  getPrevRankBadge(prevRank) {
+    if (prevRank && prevRank <= 10) return `<span class="prev-badge">昨日 #${prevRank}</span>`;
+    return '';
+  },
+  hexToRgb(hex) {
+    let result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result ? `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}` : '246, 65, 141';
+  },
+
+  renderContent(dataList) {
+    if(!dataList || dataList.length === 0) {
+      document.getElementById('listView').innerHTML = `<div class="api-error-msg">目前暫無排行資料</div>`;
+      document.getElementById('podiumView').style.display = 'none';
+      return;
+    }
+
+    const themeColor = this.state.currentMode === 'day' ? 'var(--primary)' : 'var(--info-blue)';
+    const displayColor = this.state.isYesterday ? 'var(--outline)' : themeColor;
+    document.documentElement.style.setProperty('--primary', displayColor);
+
+    const rgb = this.hexToRgb(displayColor);
+    document.querySelector('.podium').style.background = `linear-gradient(180deg, rgba(${rgb}, 0.08) 0%, transparent 100%)`;
+    
+    document.getElementById('podiumView').style.display = 'block';
+    document.getElementById('podiumView').style.opacity = '1';
+
+    const top3 = dataList.slice(0, 3);
+    const others = dataList.slice(3);
+
+    // 渲染頒獎台
+    let podiumHtml = '';
+    if(top3[1]) podiumHtml += `<div class="podium-item no2"><div class="avatar-wrapper"><div class="rank-badge badge-2">2</div><img src="${this.getRenderAvatar(top3[1])}" class="avatar-round"></div><div class="nickname">${this.getRenderName(top3[1])}</div>${this.getPrevRankBadge(top3[1].prevRank)}<div class="val-text" style="color:${displayColor}">${Number(top3[1].score).toLocaleString()}</div></div>`;
+    if(top3[0]) podiumHtml += `<div class="podium-item no1"><div class="avatar-wrapper">${this.CROWN_SVG}<img src="${this.getRenderAvatar(top3[0])}" class="avatar-round"><div class="rank-badge badge-1">1</div></div><div class="nickname" style="font-weight:600">${this.getRenderName(top3[0])}</div>${this.getPrevRankBadge(top3[0].prevRank)}<div class="val-text" style="color:${displayColor}">${Number(top3[0].score).toLocaleString()}</div></div>`;
+    if(top3[2]) podiumHtml += `<div class="podium-item no3"><div class="avatar-wrapper"><div class="rank-badge badge-3">3</div><img src="${this.getRenderAvatar(top3[2])}" class="avatar-round"></div><div class="nickname">${this.getRenderName(top3[2])}</div>${this.getPrevRankBadge(top3[2].prevRank)}<div class="val-text" style="color:${displayColor}">${Number(top3[2].score).toLocaleString()}</div></div>`;
+    document.getElementById('podiumContent').innerHTML = podiumHtml;
+
+    // 渲染列表
+    document.getElementById('listView').innerHTML = others.map(item => `
+      <div class="list-row ${item.isMe ? 'is-me' : ''}">
+        <div class="rank-num">${item.rank}</div>
+        <img src="${this.getRenderAvatar(item)}" class="avatar-square">
+        <div class="user-info">
+          <div class="user-name">${this.getRenderName(item)} ${this.getPrevRankBadge(item.prevRank)}</div>
+        </div>
+        <div class="data-value" style="color:${displayColor}">${Number(item.score).toLocaleString()} <span style="font-size:12px">💎</span></div>
+      </div>
+    `).join('');
+
+    // 渲染 Footer 本人資訊
+    const myData = dataList.find(item => item.isMe);
+    if(myData) {
+      this.state.myRawName = myData.name;
+      this.state.myRawAvatar = myData.avatar;
+      document.getElementById('myRankNum').innerText = `#${myData.rank}`;
+      document.getElementById('myRankNum').style.color = displayColor;
+      document.getElementById('myValueText').innerText = `${Number(myData.score).toLocaleString()} 💎`;
+      document.getElementById('gapText').innerHTML = `距離前一名還差...`;
+    } else {
+      document.getElementById('myRankNum').innerText = `未入榜`;
+      document.getElementById('myRankNum').style.color = 'var(--text-secondary)';
+      document.getElementById('myValueText').innerText = `0 💎`;
+      document.getElementById('gapText').innerHTML = `快來送禮上榜吧！`;
+    }
+    
+    // 依據隱身狀態更新 Footer 顯示
+    if(!this.state.isAnonymous && myData) {
+      document.getElementById('footerName').innerText = this.state.myRawName;
+      document.getElementById('footerAvatar').src = this.state.myRawAvatar;
+    }
+  },
+
+  /* =========================================
+     互動操作
+     ========================================= */
+  changeMode(mode, el) {
+    document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    this.state.currentMode = mode;
+    this.state.isYesterday = false;
+    
+    document.getElementById('btnYesterday').classList.remove('active');
+    document.getElementById('mainTitle').innerText = mode === 'day' ? '日榜即時榮譽' : '週榜即時榮譽';
+    document.getElementById('btnYesterday').innerText = mode === 'day' ? '昨日榜單' : '上週榜單';
+    document.getElementById('countdownBanner').style.opacity = '1';
+    
+    this.fetchLeaderboardData();
+    document.getElementById('scrollArea').scrollTop = 0;
+  },
+
+  toggleYesterday() {
+    this.state.isYesterday = !this.state.isYesterday;
+    const btn = document.getElementById('btnYesterday');
+    
+    if(this.state.isYesterday) {
+      btn.classList.add('active');
+      document.getElementById('mainTitle').innerText = (this.state.currentMode === 'day' ? '昨日' : '上週') + '榮譽榜單';
+      document.getElementById('countdownBanner').style.opacity = '0';
+    } else {
+      btn.classList.remove('active');
+      document.getElementById('mainTitle').innerText = this.state.currentMode === 'day' ? '日榜即時榮譽' : '週榜即時榮譽';
+      document.getElementById('countdownBanner').style.opacity = '1';
+    }
+    this.fetchLeaderboardData();
+    document.getElementById('scrollArea').scrollTop = 0;
+  },
+
+  toggleAnonymous() {
+    this.state.isAnonymous = document.getElementById('anonToggle').checked;
+    const anonLabel = document.getElementById('anonLabel');
+    
+    if (this.state.isAnonymous) {
+      anonLabel.innerText = "隱身";
+      anonLabel.style.color = "var(--primary)";
+      document.getElementById('footerAvatar').src = "https://api.dicebear.com/8.x/bottts/svg?seed=Ghost&backgroundColor=474747";
+      document.getElementById('footerName').innerText = "神秘人";
+    } else {
+      anonLabel.innerText = "公開";
+      anonLabel.style.color = "var(--text-secondary)";
+      document.getElementById('footerAvatar').src = this.state.myRawAvatar;
+      document.getElementById('footerName').innerText = this.state.myRawName;
+    }
+    if(this.state.currentDataList) this.renderContent(this.state.currentDataList);
+  },
+
+  /* =========================================
+     SWAG Iframe 通訊協議 & PWA 攔截
+     ========================================= */
+  postIframeReady() { window.parent.postMessage({ type: 'IFRAME_READY' }, '*'); },
+
+  setupIframeHandshake() {
+    setTimeout(() => this.postIframeReady(), 100);
+    this.state.handshakeTimer = setInterval(() => { if (!this.state.swagToken) this.postIframeReady(); }, this.CONFIG.HANDSHAKE_INTERVAL);
+
+    window.addEventListener('message', (event) => {
+      const data = event.data;
+      if (!data) return;
+      if (data.type === 'SET_TOKEN') {
+        if (this.state.swagToken === data.token) return;
+        this.state.swagToken = data.token;
+        if (this.state.handshakeTimer) clearInterval(this.state.handshakeTimer);
+        this.fetchLeaderboardData();
+      }
+    });
+
+    if (window.self === window.top) {
+      setTimeout(() => { if (!this.state.swagToken) { clearInterval(this.state.handshakeTimer); this.enableDevMode(); } }, this.CONFIG.DEV_MODE_TIMEOUT);
+    }
+  },
+
+  setupPwaInterceptor() {
+    document.addEventListener('click', (e) => {
+      if (window.self === window.top) return;
+      const link = e.target.closest('a[target="_blank"]');
+      if (link) {
+        try {
+          const url = new URL(link.href);
+          if (url.hostname === 'swag.live' || url.hostname === 'www.swag.live') {
+            e.preventDefault(); 
+            window.parent.postMessage({ type: 'PWA_NAVIGATE', url: link.href }, '*');
+          }
+        } catch(err) {}
+      }
+    });
+  },
+
+  /* =========================================
+     雜項 Utils
+     ========================================= */
+  openModal() { const m = document.getElementById('ruleModal'); m.style.display = 'flex'; void m.offsetWidth; m.classList.add('show'); },
+  closeModal() { const m = document.getElementById('ruleModal'); m.classList.remove('show'); setTimeout(() => m.style.display = 'none', 300); },
+  toggleLang() { /* 留空備用 */ },
+  startCountdown() {
+    let totalSecs = 24 * 3600 + 15 * 60 + 30; 
+    const timerEl = document.getElementById('countdownTimer');
+    this.state.countdownInterval = setInterval(() => {
+      if (totalSecs <= 0) { timerEl.innerText = "00:00:00"; return; }
+      totalSecs--;
+      timerEl.innerText = `${String(Math.floor(totalSecs/3600)).padStart(2,'0')}:${String(Math.floor((totalSecs%3600)/60)).padStart(2,'0')}:${String(totalSecs%60).padStart(2,'0')}`;
+    }, 1000);
+  }
 };
+
+window.addEventListener('DOMContentLoaded', () => App.init());
 </script>
 </body>
 </html>
