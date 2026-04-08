@@ -1,486 +1,813 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>用戶榮譽排行榜</title>
-<style>
-  /* =========================================
-     1. Design Tokens (系統化設計規範)
-     ========================================= */
-  :root {
-    --font-family: "PingFang TC", "Microsoft JhengHei", sans-serif;
-    --font-title-l: 22px;
-    --font-title-m: 20px;
-    --font-body-l: 16px;
-    --font-body-m: 14px;
-    --font-body-s: 12px;
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>即時榮譽榜</title>
+  <style>
+    :root {
+      --font-family: "PingFang TC", "Microsoft JhengHei", sans-serif;
+      --font-title-l: 22px;
+      --font-title-m: 20px;
+      --font-body-l: 16px;
+      --font-body-m: 14px;
+      --font-body-s: 12px;
 
-    --surface: #191919;
-    --surface-container: #232323;
-    --surface-container-variant: #474747;
-    --text-primary: #FFFFFF;
-    --text-secondary: #C8C8C8;
-    --outline: #474747;
-    --outline-variant: rgba(71, 71, 71, 0.4);
-    
-    --primary: #F6418D;
-    --gold: #FFA500;
-    --silver: #C8C8C8;
-    --bronze: #CD7F32;
+      --surface: #191919;
+      --surface-container: #232323;
+      --surface-container-variant: #474747;
+      --text-primary: #ffffff;
+      --text-secondary: #c8c8c8;
+      --outline: #474747;
+      --outline-variant: rgba(71, 71, 71, 0.4);
 
-    --radius-s: 8px;
-    --radius-m: 12px;
-    --radius-l: 16px;
-    --radius-xl: 24px;
-    --radius-full: 1000px;
-    
-    --space-2: 4px;
-    --space-3: 8px;
-    --space-4: 12px;
-    --space-5: 16px;
-    --space-6: 24px;
-  }
+      --primary: #f6418d;
+      --day: #ffa500;
+      --week: #60c4e8;
+      --all: #8238ba;
+      --gold: #ffa500;
+      --silver: #c8c8c8;
+      --bronze: #cd7f32;
+      --success: #22c55e;
 
-  body {
-    font-family: var(--font-family);
-    background-color: #0A0A0A;
-    color: var(--text-primary);
-    margin: 0;
-    padding: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    -webkit-tap-highlight-color: transparent;
-  }
+      --radius-s: 8px;
+      --radius-m: 12px;
+      --radius-l: 16px;
+      --radius-xl: 24px;
+      --radius-full: 999px;
 
-  /* 滿版或容器化自適應 */
-  .device-container {
-    width: 100%;
-    max-width: 500px;
-    height: 100vh;
-    background-color: var(--surface);
-    position: relative;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-  }
-  @media (min-width: 501px) {
-    .device-container {
-      height: 85vh;
-      border-radius: 28px;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8), inset 0 1px 1px rgba(255, 255, 255, 0.1);
-      border: 6px solid #222;
+      --space-2: 4px;
+      --space-3: 8px;
+      --space-4: 12px;
+      --space-5: 16px;
+      --space-6: 24px;
     }
-  }
 
-  /* 上半部固定區域 */
-  .top-fixed-section {
-    flex-shrink: 0;
-    background-color: var(--surface);
-    z-index: 20;
-    position: relative;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.5);
-    border-bottom: 1px solid var(--outline-variant);
-  }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: #0a0a0a;
+      color: var(--text-primary);
+      font-family: var(--font-family);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      -webkit-tap-highlight-color: transparent;
+    }
 
-  /* 下半部滾動區域 */
-  .content-scroll {
-    flex-grow: 1;
-    overflow-y: auto;
-    padding-bottom: 120px; 
-    scrollbar-width: none;
-  }
-  .content-scroll::-webkit-scrollbar { display: none; }
+    .device-container {
+      width: 360px;
+      height: 740px;
+      background: var(--surface);
+      position: relative;
+      overflow: hidden;
+      border-radius: 28px;
+      border: 6px solid #222;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8), inset 0 1px 1px rgba(255,255,255,0.08);
+      display: flex;
+      flex-direction: column;
+    }
 
-  /* =========================================
-     2. UI Components
-     ========================================= */
-  .i18n-btn {
-    position: absolute;
-    top: var(--space-4);
-    right: var(--space-4);
-    min-width: 36px;
-    min-height: 36px;
-    border-radius: var(--radius-full);
-    background: rgba(35, 35, 35, 0.6);
-    backdrop-filter: blur(8px);
-    border: 1px solid var(--outline);
-    color: var(--text-primary);
-    font-size: 13px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    cursor: pointer;
-    z-index: 30;
-  }
+    .top-fixed-section {
+      flex-shrink: 0;
+      background: var(--surface);
+      z-index: 10;
+      border-bottom: 1px solid var(--outline-variant);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+    }
 
-  /* Header */
-  .header { padding: 40px var(--space-5) var(--space-3); text-align: center; }
-  .header h1 { margin: 0 0 8px 0; font-size: var(--font-title-l); font-weight: 800; }
-  .header-subtitle { font-size: var(--font-body-s); color: var(--text-secondary); }
+    .content-scroll {
+      flex: 1;
+      overflow-y: auto;
+      scrollbar-width: none;
+      padding-bottom: 118px;
+    }
+    .content-scroll::-webkit-scrollbar { display: none; }
 
-  /* Tabs */
-  .tabs-main {
-    display: flex; background-color: var(--surface-container);
-    border-bottom: 1px solid var(--outline); overflow-x: auto; scrollbar-width: none;
-  }
-  .tabs-main::-webkit-scrollbar { display: none; }
-  .tab-item {
-    font-size: var(--font-body-m); color: var(--text-secondary); cursor: pointer;
-    white-space: nowrap; padding: 0 var(--space-5); flex: 1; min-height: 48px;
-    display: flex; justify-content: center; align-items: center; position: relative; flex-shrink: 0;
-    transition: color 0.3s;
-  }
-  .tab-item.active { color: var(--primary); font-weight: 600; }
-  .tab-item.active::after {
-    content: ''; position: absolute; bottom: -1px; left: 20%; width: 60%; 
-    height: 3px; border-radius: 3px 3px 0 0; background-color: var(--primary);
-  }
+    .header {
+      padding: var(--space-5);
+      text-align: center;
+    }
+    .header-title-row {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: var(--space-2);
+    }
+    .header h1 {
+      margin: 0;
+      font-size: var(--font-title-l);
+      font-weight: 700;
+    }
+    .info-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      color: var(--text-secondary);
+      cursor: pointer;
+      user-select: none;
+    }
+    .countdown-banner {
+      margin-top: 6px;
+      display: inline-block;
+      padding: 4px 16px;
+      border-radius: var(--radius-full);
+      border: 1px solid var(--outline-variant);
+      background: rgba(255,255,255,0.04);
+      color: var(--text-secondary);
+      font-size: var(--font-body-s);
+    }
+    .countdown-time {
+      color: var(--primary);
+      font-weight: 700;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      margin-left: 4px;
+    }
 
-  /* Podium (置頂區) */
-  .podium {
-    display: flex; justify-content: center; align-items: flex-end;
-    padding: 40px 10px 16px; background: linear-gradient(180deg, rgba(246, 65, 141, 0.08) 0%, transparent 100%);
-    gap: var(--space-3); transition: opacity 0.3s; min-height: 140px;
-  }
-  .podium-item { text-align: center; width: 30%; display: flex; flex-direction: column; align-items: center; }
-  .avatar-wrapper { position: relative; margin-bottom: var(--space-3); }
-  .avatar-round { width: 60px; height: 60px; border-radius: 50%; border: 2px solid var(--outline); object-fit: cover; background: var(--surface-container); }
-  .no1 .avatar-round { width: 80px; height: 80px; border: 3px solid var(--gold); box-shadow: 0 0 24px rgba(255, 165, 0, 0.25); }
-  
-  .crown-icon { position: absolute; top: -28px; left: 50%; transform: translateX(-50%); width: 32px; height: 32px; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5)); z-index: 2; }
-  .rank-badge { position: absolute; top: -10px; left: 50%; transform: translateX(-50%); color: #fff; font-size: 12px; font-weight: 600; border-radius: var(--radius-full); padding: 2px 8px; border: 2px solid var(--surface); box-shadow: 0 4px 8px rgba(0,0,0,0.4); min-width: 24px; z-index: 2;}
-  .badge-1 { background: var(--gold); color: #000; top: auto; bottom: -12px; }
-  .badge-2 { background: var(--silver); color: #000; }
-  .badge-3 { background: var(--bronze); }
+    .tabs-main {
+      display: flex;
+      background: var(--surface-container);
+      border-bottom: 1px solid var(--outline);
+    }
+    .tab-item {
+      flex: 1;
+      min-height: 50px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      color: var(--text-secondary);
+      font-size: var(--font-body-m);
+      cursor: pointer;
+      gap: 6px;
+    }
+    .tab-item.active {
+      color: var(--primary);
+      font-weight: 700;
+    }
+    .tab-item.active::after {
+      content: "";
+      position: absolute;
+      left: 20%;
+      width: 60%;
+      bottom: -1px;
+      height: 3px;
+      background: var(--primary);
+      border-radius: 3px 3px 0 0;
+    }
+    .tab-text { line-height: 1; }
+    .history-icon {
+      width: 16px;
+      height: 16px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      opacity: .9;
+      cursor: pointer;
+      color: currentColor;
+    }
+    .history-icon svg { width: 14px; height: 14px; fill: currentColor; }
 
-  .nickname { font-size: 13px; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
-  .val-text { font-size: 12px; margin-top: 4px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 4px; }
-  .diamond-icon { width: 12px; height: 12px; fill: currentColor; }
+    .podium {
+      display: flex;
+      justify-content: center;
+      align-items: flex-end;
+      gap: var(--space-3);
+      padding: 45px 10px 16px;
+      background: linear-gradient(180deg, rgba(246, 65, 141, 0.08) 0%, transparent 100%);
+    }
+    .podium-item {
+      width: 100px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .avatar-wrapper {
+      position: relative;
+      margin-bottom: var(--space-3);
+    }
+    .avatar-round {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      object-fit: cover;
+      background: var(--surface-container);
+      border: 2px solid var(--outline);
+    }
+    .no1 .avatar-round {
+      width: 84px;
+      height: 84px;
+      border-color: var(--gold);
+      box-shadow: 0 0 24px rgba(255,165,0,.25);
+    }
+    .crown-icon {
+      position: absolute;
+      top: -28px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 32px;
+      height: 32px;
+      filter: drop-shadow(0 4px 6px rgba(0,0,0,.45));
+    }
+    .rank-badge {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      min-width: 24px;
+      border-radius: var(--radius-full);
+      padding: 2px 8px;
+      font-size: 12px;
+      font-weight: 700;
+      border: 2px solid var(--surface);
+      box-shadow: 0 4px 8px rgba(0,0,0,.35);
+      color: #fff;
+    }
+    .badge-1 { bottom: -12px; background: var(--gold); color: #000; }
+    .badge-2 { top: -10px; background: var(--silver); color: #000; }
+    .badge-3 { top: -10px; background: var(--bronze); }
+    .nickname {
+      max-width: 90px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-size: var(--font-body-m);
+    }
+    .val-text {
+      margin-top: 2px;
+      font-size: var(--font-body-s);
+      font-weight: 700;
+    }
 
-  /* List Table */
-  .list-row {
-    display: flex; align-items: center; padding: var(--space-4) var(--space-5);
-    border-bottom: 1px solid var(--outline-variant);
-  }
-  .rank-num { width: 36px; font-weight: 600; font-size: var(--font-body-l); color: var(--text-secondary); }
-  .avatar-square { width: 44px; height: 44px; border-radius: var(--radius-m); margin-right: var(--space-4); object-fit: cover; border: 1px solid var(--outline); background: var(--surface-container); }
-  .user-info { flex: 1; display: flex; flex-direction: column; justify-content: center; overflow: hidden; }
-  .user-name { font-size: var(--font-body-m); color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .data-value { font-weight: 600; font-size: var(--font-body-m); text-align: right; padding-left: 8px; display: flex; align-items: center; gap: 4px;}
+    .list-row {
+      display: flex;
+      align-items: center;
+      padding: var(--space-4) var(--space-5);
+      border-bottom: 1px solid var(--outline-variant);
+    }
+    .list-row.is-me {
+      background: linear-gradient(90deg, rgba(246,65,141,0.08) 0%, transparent 100%);
+      border-left: 3px solid var(--primary);
+    }
+    .rank-num {
+      width: 36px;
+      font-size: var(--font-body-l);
+      font-weight: 700;
+      color: var(--text-secondary);
+    }
+    .avatar-square {
+      width: 44px;
+      height: 44px;
+      object-fit: cover;
+      border-radius: var(--radius-m);
+      margin-right: var(--space-4);
+      border: 1px solid var(--outline);
+      background: var(--surface-container);
+      flex-shrink: 0;
+    }
+    .user-info {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .user-name-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      min-width: 0;
+    }
+    .user-name {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-size: var(--font-body-m);
+    }
+    .prev-badge {
+      flex-shrink: 0;
+      font-size: 10px;
+      line-height: 1;
+      padding: 4px 6px;
+      border-radius: var(--radius-full);
+      background: rgba(34,197,94,.18);
+      color: #86efac;
+      border: 1px solid rgba(34,197,94,.35);
+      font-weight: 700;
+    }
+    .data-value {
+      padding-left: 8px;
+      text-align: right;
+      font-size: var(--font-body-m);
+      font-weight: 700;
+    }
 
-  /* Sticky Footer */
-  .sticky-footer {
-    position: absolute; bottom: 20px; left: var(--space-4); right: var(--space-4);
-    background: rgba(35, 35, 35, 0.85); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(255, 255, 255, 0.15); border-radius: var(--radius-l);
-    padding: var(--space-4); box-shadow: 0 12px 32px rgba(0,0,0,0.8); z-index: 30;
-  }
-  .my-info { display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-3); }
-  .my-avatar { width: 44px; height: 44px; border-radius: var(--radius-s); margin-right: var(--space-3); border: 1px solid var(--primary); background: var(--surface-container); }
-  
-  .toggle-wrapper { display: flex; flex-direction: column; align-items: flex-end; }
-  .toggle-container { display: flex; align-items: center; gap: 6px; margin-top: 4px; }
-  .toggle-label { font-size: 11px; color: var(--text-secondary); font-weight: 600; transition: color 0.3s;}
-  .switch { position: relative; display: inline-block; width: 36px; height: 20px; }
-  .switch input { opacity: 0; width: 0; height: 0; }
-  .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--outline); transition: .4s; border-radius: 20px; }
-  .slider:before { position: absolute; content: ""; height: 14px; width: 14px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
-  input:checked + .slider { background-color: var(--primary); }
-  input:checked + .slider:before { transform: translateX(16px); }
+    .sticky-footer {
+      position: absolute;
+      left: var(--space-4);
+      right: var(--space-4);
+      bottom: 24px;
+      z-index: 20;
+      border-radius: var(--radius-l);
+      padding: var(--space-4);
+      background: rgba(35,35,35,.88);
+      border: 1px solid rgba(255,255,255,.12);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      box-shadow: 0 12px 32px rgba(0,0,0,.8);
+    }
+    .my-info {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: var(--space-4);
+      gap: 12px;
+    }
+    .my-left {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      min-width: 0;
+    }
+    .my-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: var(--radius-s);
+      border: 1px solid var(--primary);
+      object-fit: cover;
+      background: var(--surface-container);
+      flex-shrink: 0;
+    }
+    .my-name {
+      font-size: var(--font-body-s);
+      color: var(--text-secondary);
+      margin-bottom: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 132px;
+    }
+    .my-rank-text { font-size: var(--font-body-m); }
+    .my-rank-num { color: var(--primary); font-weight: 700; }
+    .my-right {
+      text-align: right;
+      flex-shrink: 0;
+    }
+    .my-value-text {
+      font-size: var(--font-body-m);
+      font-weight: 700;
+    }
+    .footer-tip {
+      border-top: 1px solid var(--outline-variant);
+      padding-top: var(--space-4);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      font-size: var(--font-body-s);
+      color: var(--text-secondary);
+    }
+    .btn-action {
+      height: 36px;
+      padding: 0 14px;
+      border: 0;
+      border-radius: var(--radius-full);
+      background: var(--primary);
+      color: #fff;
+      font-size: var(--font-body-m);
+      font-weight: 700;
+      cursor: pointer;
+    }
 
-  /* Empty & Skeleton */
-  .empty-state { text-align: center; padding: 40px 20px; color: var(--text-secondary); font-size: var(--font-body-m); }
-  @keyframes shimmer { 0% { background-position: -200px 0; } 100% { background-position: 200px 0; } }
-  .skeleton { background: linear-gradient(90deg, var(--surface-container) 25%, var(--surface-container-variant) 50%, var(--surface-container) 75%); background-size: 400px 100%; animation: shimmer 1.5s infinite linear; border-radius: var(--radius-s); color: transparent !important; border: none !important;}
-  .sk-avatar { width: 44px; height: 44px; }
-  .sk-text { height: 16px; width: 120px; }
-  .sk-text-short { height: 14px; width: 60px; }
-</style>
+    .skeleton {
+      background: linear-gradient(90deg, var(--surface-container) 25%, var(--surface-container-variant) 50%, var(--surface-container) 75%);
+      background-size: 400px 100%;
+      animation: shimmer 1.5s infinite linear;
+      border-radius: var(--radius-s);
+    }
+    .sk-avatar { width: 44px; height: 44px; }
+    .sk-text { width: 120px; height: 16px; }
+    .sk-text-short { width: 60px; height: 14px; }
+    @keyframes shimmer {
+      0% { background-position: -200px 0; }
+      100% { background-position: 200px 0; }
+    }
+
+    .modal-overlay {
+      position: absolute;
+      inset: 0;
+      display: none;
+      justify-content: center;
+      align-items: center;
+      background: rgba(0,0,0,.6);
+      backdrop-filter: blur(8px);
+      z-index: 50;
+      opacity: 0;
+      transition: opacity .25s;
+    }
+    .modal-overlay.show { display: flex; opacity: 1; }
+    .modal-content {
+      width: 80%;
+      padding: var(--space-6);
+      background: var(--surface-container);
+      border-radius: var(--radius-xl);
+      border: 1px solid var(--outline);
+      box-shadow: 0 20px 40px rgba(0,0,0,.8);
+      transform: translateY(20px);
+      transition: transform .25s;
+    }
+    .modal-overlay.show .modal-content { transform: translateY(0); }
+    .modal-content h2 {
+      margin: 0 0 12px;
+      text-align: center;
+      color: var(--primary);
+      font-size: var(--font-title-m);
+    }
+    .modal-content p {
+      margin: 0 0 8px;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      font-size: var(--font-body-m);
+    }
+    .modal-close-btn { width: 100%; margin-top: 16px; background: var(--outline); }
+  </style>
 </head>
 <body>
-
-<div class="device-container">
-  <div class="i18n-btn" id="langBtn" onclick="toggleLang()">繁</div>
-
-  <div class="top-fixed-section">
-    <div class="header">
-      <h1 data-i18n="title">2026 璀璨之星爭奪戰</h1>
-      <div class="header-subtitle" data-i18n="time">活動時間：2026/04/07 ~ 2026/04/30</div>
+  <div class="device-container">
+    <div class="modal-overlay" id="ruleModal" onclick="closeModal(event)">
+      <div class="modal-content" onclick="event.stopPropagation()">
+        <h2>活動規則</h2>
+        <p>1. 顯示日榜、週榜與累積榜。</p>
+        <p>2. 排行資料以 API 即時回傳結果為主。</p>
+        <p>3. 日榜與週榜右上角可開啟前一期榜單。</p>
+        <p>4. 今日榜若使用者前一日曾進入前十，ID 旁會顯示 badge。</p>
+        <button class="btn-action modal-close-btn" onclick="closeModal()">我知道了</button>
+      </div>
     </div>
 
-    <!-- Main Tabs -->
-    <div class="tabs-main" id="mainTabsContainer">
-      <div class="tab-item active" onclick="changeMode('hour', this, '#F6418D')" data-i18n="tabHour">小時</div>
-      <div class="tab-item" onclick="changeMode('day', this, '#FFA500')" data-i18n="tabDay">日</div>
-      <div class="tab-item" onclick="changeMode('week', this, '#60C4E8')" data-i18n="tabWeek">週</div>
-      <div class="tab-item" onclick="changeMode('month', this, '#15EA48')" data-i18n="tabMonth">月</div>
+    <div class="top-fixed-section">
+      <div class="header">
+        <div class="header-title-row">
+          <h1 id="mainTitle">即時榮譽榜</h1>
+          <div class="info-icon" onclick="openModal()">ⓘ</div>
+        </div>
+        <div class="countdown-banner" id="countdownBanner">
+          距離結算 <span class="countdown-time" id="countdownTimer">--:--:--</span>
+        </div>
+      </div>
+
+      <div class="tabs-main">
+        <div class="tab-item active" data-mode="day" onclick="changeMode('day', this)">
+          <span class="tab-text">日榜</span>
+          <span class="history-icon" title="昨日榜單" onclick="openPreviousBoard(event, 'day')">
+            <svg viewBox="0 0 24 24"><path d="M13 3a9 9 0 1 0 8.95 10h-2.02A7 7 0 1 1 13 5v4l5-5-5-5v4Zm-1 5h2v6h-5v-2h3V8Z"/></svg>
+          </span>
+        </div>
+        <div class="tab-item" data-mode="week" onclick="changeMode('week', this)">
+          <span class="tab-text">週榜</span>
+          <span class="history-icon" title="昨日榜單" onclick="openPreviousBoard(event, 'week')">
+            <svg viewBox="0 0 24 24"><path d="M13 3a9 9 0 1 0 8.95 10h-2.02A7 7 0 1 1 13 5v4l5-5-5-5v4Zm-1 5h2v6h-5v-2h3V8Z"/></svg>
+          </span>
+        </div>
+        <div class="tab-item" data-mode="all" onclick="changeMode('all', this)">
+          <span class="tab-text">累積榜</span>
+        </div>
+      </div>
+
+      <div id="podiumView">
+        <div class="podium" id="podiumContent"></div>
+      </div>
     </div>
 
-    <!-- Podium View -->
-    <div id="podiumView">
-      <div class="podium" id="podiumContent">
-        <!-- 骨架屏頒獎台 -->
-        <div class="podium-item no2"><div class="avatar-wrapper"><div class="avatar-round skeleton"></div></div><div class="skeleton sk-text-short"></div></div>
-        <div class="podium-item no1"><div class="avatar-wrapper"><div class="avatar-round skeleton" style="width:80px;height:80px"></div></div><div class="skeleton sk-text-short"></div></div>
-        <div class="podium-item no3"><div class="avatar-wrapper"><div class="avatar-round skeleton"></div></div><div class="skeleton sk-text-short"></div></div>
+    <div class="content-scroll" id="scrollArea">
+      <div id="listView">
+        <div class="list-row"><div class="rank-num skeleton sk-text-short"></div><div class="sk-avatar skeleton"></div><div class="user-info"><div class="skeleton sk-text"></div></div></div>
+        <div class="list-row"><div class="rank-num skeleton sk-text-short"></div><div class="sk-avatar skeleton"></div><div class="user-info"><div class="skeleton sk-text"></div></div></div>
+        <div class="list-row"><div class="rank-num skeleton sk-text-short"></div><div class="sk-avatar skeleton"></div><div class="user-info"><div class="skeleton sk-text"></div></div></div>
+      </div>
+    </div>
+
+    <div class="sticky-footer">
+      <div class="my-info">
+        <div class="my-left">
+          <img id="footerAvatar" class="my-avatar" alt="me avatar" />
+          <div style="min-width:0;">
+            <div class="my-name" id="footerName">我</div>
+            <div class="my-rank-text">我的排名：<span class="my-rank-num" id="myRankNum">-</span></div>
+          </div>
+        </div>
+        <div class="my-right">
+          <div class="my-value-text" id="myValueText">-</div>
+        </div>
+      </div>
+      <div class="footer-tip">
+        <span id="gapText">資料載入中…</span>
+        <a href="https://swag.live/go" target="_blank" style="text-decoration:none;">
+          <button class="btn-action">立即衝榜</button>
+        </a>
       </div>
     </div>
   </div>
 
-  <div class="content-scroll" id="scrollArea">
-    <div class="list-table" id="listView">
-      <!-- 骨架屏列表 -->
-      <div class="list-row"><div class="rank-num skeleton sk-text-short" style="width:20px"></div><div class="sk-avatar skeleton"></div><div class="user-info"><div class="skeleton sk-text"></div></div></div>
-      <div class="list-row"><div class="rank-num skeleton sk-text-short" style="width:20px"></div><div class="sk-avatar skeleton"></div><div class="user-info"><div class="skeleton sk-text"></div></div></div>
-      <div class="list-row"><div class="rank-num skeleton sk-text-short" style="width:20px"></div><div class="sk-avatar skeleton"></div><div class="user-info"><div class="skeleton sk-text"></div></div></div>
-      <div class="list-row"><div class="rank-num skeleton sk-text-short" style="width:20px"></div><div class="sk-avatar skeleton"></div><div class="user-info"><div class="skeleton sk-text"></div></div></div>
-    </div>
-  </div>
+  <script>
+    const API_ENDPOINT = 'https://swag-campaign-api-905468082258.asia-east1.run.app/api/leaderboard';
+    let swagToken = null;
+    let handshakeRetryInterval = null;
 
-  <!-- Sticky Footer -->
-  <div class="sticky-footer" id="footerBar">
-    <div class="my-info">
-      <div style="display:flex; align-items:center;">
-        <img src="" class="my-avatar skeleton" id="myAvatar">
-        <div style="display:flex; flex-direction:column; justify-content:center;">
-            <span style="font-size:var(--font-body-s); color:var(--text-secondary); margin-bottom:2px" data-i18n="myRank">我的排名</span>
-            <span style="font-size:var(--font-body-l); font-weight:bold; color:var(--primary)" id="myRankNum" class="skeleton sk-text-short">--</span>
-        </div>
-      </div>
-      
-      <div class="toggle-wrapper">
-        <span id="myValueText" class="skeleton sk-text-short" style="font-size:var(--font-body-l); font-weight:600; color:var(--primary); margin-bottom:4px;">--</span>
-        <div class="toggle-container">
-          <span class="toggle-label" id="anonLabel" data-i18n="public">公開</span>
-          <label class="switch">
-            <input type="checkbox" id="anonToggle" onchange="toggleAnonymous()">
-            <span class="slider"></span>
-          </label>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
+    const crownSVG = `<svg viewBox="0 0 24 24" fill="none" class="crown-icon"><path d="M2 19H22V21H2V19ZM3 5L7 12L12 3L17 12L21 5L19 17H5L3 5Z" fill="var(--gold)"/><path d="M12 9C12.5523 9 13 8.55228 13 8C13 7.44772 12.5523 7 12 7C11.4477 7 11 7.44772 11 8C11 8.55228 11.4477 9 12 9Z" fill="#FFF"/></svg>`;
 
-<script>
-/* =========================================
-   1. 環境與狀態變數
-   ========================================= */
-const API_ENDPOINT = 'https://swag-campaign-api-905468082258.asia-east1.run.app/api/leaderboard';
-let swagToken = null;
-let handshakeRetryInterval = null;
-let currentMode = 'hour';
-let currentThemeColor = '#F6418D';
-let isAnonymous = false;
-let myOriginalId = "Me"; // 暫存自己的真實 ID 用於頭像生成
+    const modeConfig = {
+      day: { label: '日榜', color: '#FFA500', unit: '💎' },
+      week: { label: '週榜', color: '#60C4E8', unit: '💎' },
+      all: { label: '累積榜', color: '#8238BA', unit: '💎' }
+    };
 
-const diamondSVG = `<svg class="diamond-icon" viewBox="0 0 24 24"><path d="M12 2L2 9l10 13L22 9l-10-7zm0 2.8l6.3 4.4H5.7L12 4.8zM4.1 10h15.8L12 20.3 4.1 10z"/></svg>`;
-const crownSVG = `<svg viewBox="0 0 24 24" fill="none" class="crown-icon"><path d="M2 19H22V21H2V19ZM3 5L7 12L12 3L17 12L21 5L19 17H5L3 5Z" fill="var(--gold)"/><path d="M12 9C12.5523 9 13 8.55228 13 8C13 7.44772 12.5523 7 12 7C11.4477 7 11 7.44772 11 8C11 8.55228 11.4477 9 12 9Z" fill="#FFF"/></svg>`;
-
-/* =========================================
-   2. 多語系 (I18n) 模組
-   ========================================= */
-const i18n = {
-  'Hant': { title: '2026 璀璨之星爭奪戰', time: '活動時間：2026/04/07 ~ 2026/04/30', tabHour: '小時', tabDay: '日', tabWeek: '週', tabMonth: '月', myRank: '我的排名', unranked: '未上榜', public: '公開', hidden: '隱身', empty: '暫無排名資料' },
-  'EN': { title: '2026 Star Battle', time: 'Period: Apr 7 - Apr 30, 2026', tabHour: 'Hour', tabDay: 'Day', tabWeek: 'Week', tabMonth: 'Month', myRank: 'My Rank', unranked: 'Unranked', public: 'Public', hidden: 'Hidden', empty: 'No data available' }
-};
-let lang = 'Hant';
-
-function toggleLang() {
-  lang = lang === 'Hant' ? 'EN' : 'Hant';
-  document.getElementById('langBtn').innerText = lang === 'Hant' ? '繁' : 'EN';
-  
-  const dict = i18n[lang];
-  document.querySelectorAll('[data-i18n]').forEach(el => {
-    el.innerText = dict[el.getAttribute('data-i18n')];
-  });
-  
-  toggleAnonymous(); // 刷新隱身文字狀態
-}
-
-/* =========================================
-   3. SWAG Iframe 通訊與 API 獲取
-   ========================================= */
-function postIframeReady() { window.parent.postMessage({ type: 'IFRAME_READY' }, '*'); }
-
-window.addEventListener('DOMContentLoaded', () => {
-  toggleLang(); // 初始化語系
-  setTimeout(postIframeReady, 100);
-  handshakeRetryInterval = setInterval(() => { if (!swagToken) postIframeReady(); }, 3000);
-});
-
-window.addEventListener('message', (event) => {
-  const data = event.data;
-  if (!data) return;
-  if (data.type === 'SET_TOKEN') {
-    if (swagToken === data.token) return;
-    swagToken = data.token;
-    if (handshakeRetryInterval) { clearInterval(handshakeRetryInterval); handshakeRetryInterval = null; }
-    fetchApiData();
-  }
-});
-
-async function fetchApiData() {
-  showSkeleton();
-  try {
-    // 帶入 mode 參數讓後端根據 Tab 切換撈取對應資料
-    const res = await fetch(`${API_ENDPOINT}?mode=${currentMode}`, {
-      headers: { 'Authorization': `Bearer ${swagToken}` }
-    });
-    if (!res.ok) throw new Error(`API Error: ${res.status}`);
-    const data = await res.json();
-    renderContent(data.leaderboard ||[], data.me || { rank: -1, total_diamonds: 0, user_id: 'Me' });
-  } catch (err) {
-    console.error('Fetch Data Error:', err);
-    document.getElementById('podiumContent').innerHTML = '';
-    document.getElementById('listView').innerHTML = `<div class="empty-state">連線失敗，請稍後再試</div>`;
-  }
-}
-
-/* =========================================
-   4. UI 渲染邏輯
-   ========================================= */
-function hexToRgb(hex) {
-  var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-  return result ? `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}` : '246, 65, 141';
-}
-
-function changeMode(type, el, color) {
-  if (currentMode === type) return;
-  document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
-  el.classList.add('active');
-  
-  currentMode = type;
-  currentThemeColor = color;
-  document.documentElement.style.setProperty('--primary', color);
-  document.querySelector('.podium').style.background = `linear-gradient(180deg, rgba(${hexToRgb(color)}, 0.08) 0%, transparent 100%)`;
-  
-  if (swagToken) {
-    fetchApiData(); // 重新 Call API
-  } else {
-    showSkeleton(); // 若無 token 繼續顯示骨架屏
-  }
-}
-
-function showSkeleton() {
-  document.getElementById('podiumContent').innerHTML = `
-    <div class="podium-item no2"><div class="avatar-wrapper"><div class="avatar-round skeleton"></div></div><div class="skeleton sk-text-short"></div></div>
-    <div class="podium-item no1"><div class="avatar-wrapper"><div class="avatar-round skeleton" style="width:80px;height:80px"></div></div><div class="skeleton sk-text-short"></div></div>
-    <div class="podium-item no3"><div class="avatar-wrapper"><div class="avatar-round skeleton"></div></div><div class="skeleton sk-text-short"></div></div>
-  `;
-  document.getElementById('listView').innerHTML = Array(6).fill(`<div class="list-row"><div class="rank-num skeleton sk-text-short" style="width:20px"></div><div class="sk-avatar skeleton"></div><div class="user-info"><div class="skeleton sk-text"></div></div></div>`).join('');
-}
-
-function renderContent(leaderboard, meData) {
-  // 處理個人狀態區塊
-  myOriginalId = meData.user_id || meData.masked_user_id || "Me";
-  const myRankEl = document.getElementById('myRankNum');
-  const myValueEl = document.getElementById('myValueText');
-  const myAvatarEl = document.getElementById('myAvatar');
-  
-  myRankEl.classList.remove('skeleton', 'sk-text-short');
-  myValueEl.classList.remove('skeleton', 'sk-text-short');
-  myAvatarEl.classList.remove('skeleton');
-
-  myRankEl.innerText = meData.rank === -1 ? i18n[lang].unranked : `No.${meData.rank}`;
-  myValueEl.innerHTML = `${meData.total_diamonds.toLocaleString()} ${diamondSVG}`;
-  
-  // 觸發一次頭像更新邏輯
-  toggleAnonymous();
-
-  // 處理排行榜 (前3名與剩餘)
-  const top3 = leaderboard.slice(0, 3);
-  const rest = leaderboard.slice(3);
-  const podiumEl = document.getElementById('podiumContent');
-  const listEl = document.getElementById('listView');
-
-  if (leaderboard.length === 0) {
-    podiumEl.innerHTML = '';
-    listEl.innerHTML = `<div class="empty-state">${i18n[lang].empty}</div>`;
-    return;
-  }
-
-  // 渲染頒獎台 (防呆：若少於 3 人也正常顯示)
-  let podiumHtml = '';
-  const generatePodiumItem = (user, rankClass, badgeClass, badgeNum, isCrown) => {
-    if (!user) return `<div class="podium-item ${rankClass}"></div>`;
-    const id = user.user_id || user.masked_user_id;
-    return `
-      <div class="podium-item ${rankClass}">
-        <div class="avatar-wrapper">
-          ${isCrown ? crownSVG : ''}
-          <div class="rank-badge ${badgeClass}">${badgeNum}</div>
-          <img src="https://api.dicebear.com/8.x/avataaars/svg?seed=${id}" class="avatar-round">
-        </div>
-        <div class="nickname" style="${isCrown ? 'font-weight:600;' : ''}">${id}</div>
-        <div class="val-text" style="color:${currentThemeColor}">${user.total_diamonds.toLocaleString()} ${diamondSVG}</div>
-      </div>
-    `;
-  };
-
-  podiumHtml += generatePodiumItem(top3[1], 'no2', 'badge-2', '2', false);
-  podiumHtml += generatePodiumItem(top3[0], 'no1', 'badge-1', '1', true);
-  podiumHtml += generatePodiumItem(top3[2], 'no3', 'badge-3', '3', false);
-  podiumEl.innerHTML = podiumHtml;
-
-  // 渲染列表
-  listEl.innerHTML = rest.map(user => {
-    const id = user.user_id || user.masked_user_id;
-    return `
-      <div class="list-row">
-        <div class="rank-num">${user.rank}</div>
-        <img src="https://api.dicebear.com/8.x/initials/svg?seed=${id}" class="avatar-square">
-        <div class="user-info"><div class="user-name">${id}</div></div>
-        <div class="data-value" style="color:${currentThemeColor}">${user.total_diamonds.toLocaleString()} ${diamondSVG}</div>
-      </div>
-    `;
-  }).join('');
-  
-  document.getElementById('scrollArea').scrollTop = 0;
-}
-
-/* =========================================
-   5. 隱身開關控制
-   ========================================= */
-function toggleAnonymous() {
-  isAnonymous = document.getElementById('anonToggle').checked;
-  const anonLabel = document.getElementById('anonLabel');
-  const footerAvatar = document.getElementById('myAvatar');
-
-  if (isAnonymous) {
-    anonLabel.innerText = i18n[lang].hidden;
-    anonLabel.style.color = "var(--primary)";
-    footerAvatar.src = "https://api.dicebear.com/8.x/bottts/svg?seed=Ghost&backgroundColor=474747";
-  } else {
-    anonLabel.innerText = i18n[lang].public;
-    anonLabel.style.color = "var(--text-secondary)";
-    // 依賴真實 ID 生成固定頭像
-    footerAvatar.src = `https://api.dicebear.com/8.x/avataaars/svg?seed=${myOriginalId}`;
-  }
-}
-
-/* =========================================
-   6. PWA 跨視窗導航攔截 (Navigation Interceptor)
-   ========================================= */
-document.addEventListener('click', (e) => {
-  if (window.self === window.top) return; // 若非 iframe 環境則不攔截
-
-  const link = e.target.closest('a[target="_blank"]');
-  if (link) {
-    try {
-      const url = new URL(link.href);
-      if (url.hostname === 'swag.live' || url.hostname === 'www.swag.live') {
-        e.preventDefault();
-        window.parent.postMessage({ type: 'PWA_NAVIGATE', url: link.href }, '*');
+    const state = {
+      currentMode: 'day',
+      currentBoardType: 'current',
+      cache: {
+        day: { current: null, previous: null },
+        week: { current: null, previous: null },
+        all: { current: null, previous: null }
       }
-    } catch(err) {
-      console.error("URL Parsing Error", err);
+    };
+
+    function openModal() {
+      const m = document.getElementById('ruleModal');
+      m.style.display = 'flex';
+      void m.offsetWidth;
+      m.classList.add('show');
     }
-  }
-});
-</script>
+
+    function closeModal() {
+      const m = document.getElementById('ruleModal');
+      m.classList.remove('show');
+      setTimeout(() => { m.style.display = 'none'; }, 250);
+    }
+
+    function setThemeColor(mode) {
+      document.documentElement.style.setProperty('--primary', modeConfig[mode]?.color || '#F6418D');
+    }
+
+    function showSkeleton() {
+      document.getElementById('podiumContent').innerHTML = `
+        <div class="podium-item"><div class="avatar-wrapper"><div class="avatar-round skeleton"></div></div><div class="nickname skeleton" style="width:70px;height:14px"></div></div>
+        <div class="podium-item"><div class="avatar-wrapper"><div class="avatar-round skeleton" style="width:84px;height:84px;border-radius:50%"></div></div><div class="nickname skeleton" style="width:70px;height:14px"></div></div>
+        <div class="podium-item"><div class="avatar-wrapper"><div class="avatar-round skeleton"></div></div><div class="nickname skeleton" style="width:70px;height:14px"></div></div>
+      `;
+      document.getElementById('listView').innerHTML = Array.from({ length: 8 }).map(() => `
+        <div class="list-row"><div class="rank-num skeleton sk-text-short"></div><div class="sk-avatar skeleton"></div><div class="user-info"><div class="skeleton sk-text"></div></div></div>
+      `).join('');
+    }
+
+    function escapeHtml(text) {
+      return String(text ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function formatRank(rank) {
+      if (rank === -1 || rank == null) return '未入榜';
+      return `#${rank}`;
+    }
+
+    function formatValue(value) {
+      const num = Number(value || 0);
+      return num.toLocaleString();
+    }
+
+    function getAvatar(item) {
+      // 這裡盡量兼容常見 API 欄位；若你們正式欄位名稱不同，改第一個命中的 key 即可。
+      return item.avatar_url || item.avatar || item.profile_image_url || item.profile_picture || `https://api.dicebear.com/8.x/initials/svg?seed=${encodeURIComponent(item.user_id || item.masked_user_id || 'User')}`;
+    }
+
+    function getUserName(item) {
+      return item.user_id || item.masked_user_id || item.nickname || item.name || 'Unknown';
+    }
+
+    function normalizeApiPayload(payload, mode, boardType) {
+      const leaderboard = Array.isArray(payload?.leaderboard) ? payload.leaderboard : [];
+      const me = payload?.me || {};
+      const previousTop10Ids = new Set(
+        Array.isArray(payload?.previous_top10_ids)
+          ? payload.previous_top10_ids
+          : Array.isArray(payload?.yesterday_top10_ids)
+            ? payload.yesterday_top10_ids
+            : []
+      );
+
+      return {
+        mode,
+        boardType,
+        title: boardType === 'previous' ? `${modeConfig[mode].label}（前一期）` : `${modeConfig[mode].label}即時榜`,
+        unit: modeConfig[mode].unit,
+        leaderboard: leaderboard.map((item, index) => ({
+          rank: Number(item.rank ?? (index + 1)),
+          name: getUserName(item),
+          avatar: getAvatar(item),
+          value: Number(item.total_diamonds ?? item.value ?? item.total ?? 0),
+          isMe: Boolean(item.is_me),
+          wasPrevTop10: mode === 'day' && boardType === 'current' && previousTop10Ids.has(item.user_id || item.masked_user_id || item.nickname)
+        })),
+        me: {
+          rank: Number(me.rank ?? -1),
+          name: getUserName(me),
+          avatar: getAvatar(me),
+          value: Number(me.total_diamonds ?? me.value ?? me.total ?? 0)
+        }
+      };
+    }
+
+    async function fetchBoard(mode, boardType = 'current') {
+      const cacheHit = state.cache[mode]?.[boardType];
+      if (cacheHit) return cacheHit;
+
+      const url = new URL(API_ENDPOINT);
+      url.searchParams.set('mode', mode);
+      if (boardType === 'previous') {
+        // 這邊先用 previous=1；若你們 API 參數實際不同，改成 date / period / scope 即可。
+        url.searchParams.set('previous', '1');
+      }
+
+      const res = await fetch(url.toString(), {
+        headers: {
+          Authorization: `Bearer ${swagToken}`
+        }
+      });
+
+      if (!res.ok) throw new Error(`API Response: ${res.status}`);
+      const payload = await res.json();
+      const normalized = normalizeApiPayload(payload, mode, boardType);
+      state.cache[mode][boardType] = normalized;
+      return normalized;
+    }
+
+    function renderPodium(data) {
+      const top3 = data.leaderboard.slice(0, 3);
+      const podium = document.getElementById('podiumContent');
+      if (top3.length === 0) {
+        podium.innerHTML = `<div style="padding: 24px; color: var(--text-secondary); text-align:center; width:100%;">暫無資料</div>`;
+        return;
+      }
+
+      const order = [1, 0, 2].filter(i => top3[i]);
+      const themeColor = modeConfig[data.mode].color;
+      podium.innerHTML = order.map((sourceIndex, visualIndex) => {
+        const item = top3[sourceIndex];
+        const rank = item.rank;
+        const rankClass = rank === 1 ? 'no1' : rank === 2 ? 'no2' : 'no3';
+        const badgeClass = rank === 1 ? 'badge-1' : rank === 2 ? 'badge-2' : 'badge-3';
+        return `
+          <div class="podium-item ${rankClass}">
+            <div class="avatar-wrapper">
+              ${rank === 1 ? crownSVG : ''}
+              <div class="rank-badge ${badgeClass}">${rank}</div>
+              <img src="${escapeHtml(item.avatar)}" class="avatar-round" alt="${escapeHtml(item.name)}">
+            </div>
+            <div class="nickname">${escapeHtml(item.name)}</div>
+            <div class="val-text" style="color:${themeColor}">${formatValue(item.value)} ${data.unit}</div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderList(data) {
+      const themeColor = modeConfig[data.mode].color;
+      const list = document.getElementById('listView');
+      list.innerHTML = data.leaderboard.map(item => `
+        <div class="list-row ${item.isMe ? 'is-me' : ''}">
+          <div class="rank-num">${item.rank}</div>
+          <img src="${escapeHtml(item.avatar)}" class="avatar-square" alt="${escapeHtml(item.name)}">
+          <div class="user-info">
+            <div class="user-name-row">
+              <div class="user-name">${escapeHtml(item.name)}</div>
+              ${item.wasPrevTop10 ? '<span class="prev-badge">昨日TOP10</span>' : ''}
+            </div>
+          </div>
+          <div class="data-value" style="color:${themeColor}">${formatValue(item.value)} <span style="font-size:12px">${data.unit}</span></div>
+        </div>
+      `).join('') || `<div style="padding:24px;text-align:center;color:var(--text-secondary);">暫無資料</div>`;
+    }
+
+    function renderFooter(data) {
+      const me = data.me || {};
+      document.getElementById('footerAvatar').src = me.avatar || getAvatar({ user_id: 'Me' });
+      document.getElementById('footerName').innerText = me.name || '我';
+      document.getElementById('myRankNum').innerText = formatRank(me.rank);
+      document.getElementById('myValueText').innerText = `${formatValue(me.value)} ${data.unit}`;
+
+      const myRankNum = document.getElementById('myRankNum');
+      myRankNum.style.color = me.rank === -1 ? 'var(--text-secondary)' : 'var(--primary)';
+
+      const gapText = document.getElementById('gapText');
+      if (me.rank > 1) {
+        const prev = data.leaderboard.find(x => x.rank === me.rank - 1);
+        gapText.innerText = prev ? `距離前一名還差 ${(prev.value - me.value).toLocaleString()} ${data.unit}` : '繼續加油衝榜';
+      } else if (me.rank === 1) {
+        gapText.innerText = '目前為榜首，請持續守榜';
+      } else {
+        const top10 = data.leaderboard.find(x => x.rank === 10);
+        gapText.innerText = top10 ? `距離前十還差 ${(top10.value - me.value).toLocaleString()} ${data.unit}` : '目前尚未入榜';
+      }
+    }
+
+    function renderBoard(data) {
+      setThemeColor(data.mode);
+      document.getElementById('mainTitle').innerText = data.title;
+      document.getElementById('countdownBanner').style.opacity = data.mode === 'all' ? '0' : '1';
+      renderPodium(data);
+      renderList(data);
+      renderFooter(data);
+      document.getElementById('scrollArea').scrollTop = 0;
+    }
+
+    async function changeMode(mode, el) {
+      document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+      if (el) el.classList.add('active');
+      state.currentMode = mode;
+      state.currentBoardType = 'current';
+      showSkeleton();
+      try {
+        const data = await fetchBoard(mode, 'current');
+        renderBoard(data);
+      } catch (err) {
+        console.error(err);
+        document.getElementById('listView').innerHTML = `<div style="padding:24px;text-align:center;color:#fca5a5;">資料讀取失敗</div>`;
+      }
+    }
+
+    async function openPreviousBoard(event, mode) {
+      event.stopPropagation();
+      document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+      const tab = document.querySelector(`.tab-item[data-mode="${mode}"]`);
+      if (tab) tab.classList.add('active');
+      state.currentMode = mode;
+      state.currentBoardType = 'previous';
+      showSkeleton();
+      try {
+        const data = await fetchBoard(mode, 'previous');
+        renderBoard(data);
+      } catch (err) {
+        console.error(err);
+        document.getElementById('listView').innerHTML = `<div style="padding:24px;text-align:center;color:#fca5a5;">前一期榜單讀取失敗</div>`;
+      }
+    }
+
+    function updateCountdown() {
+      const now = new Date();
+      const next = new Date(now);
+      if (state.currentMode === 'week') {
+        const day = next.getDay();
+        const diff = day === 0 ? 7 : 7 - day;
+        next.setDate(next.getDate() + diff);
+        next.setHours(0, 0, 0, 0);
+      } else if (state.currentMode === 'day') {
+        next.setDate(next.getDate() + 1);
+        next.setHours(0, 0, 0, 0);
+      } else {
+        next.setHours(0, 0, 0, 0);
+      }
+      const ms = Math.max(0, next - now);
+      const hh = String(Math.floor(ms / 3600000)).padStart(2, '0');
+      const mm = String(Math.floor((ms % 3600000) / 60000)).padStart(2, '0');
+      const ss = String(Math.floor((ms % 60000) / 1000)).padStart(2, '0');
+      document.getElementById('countdownTimer').innerText = `${hh}:${mm}:${ss}`;
+    }
+
+    function postIframeReady() {
+      window.parent.postMessage({ type: 'IFRAME_READY' }, '*');
+    }
+
+    function startApp() {
+      setInterval(updateCountdown, 1000);
+      updateCountdown();
+      changeMode('day', document.querySelector('.tab-item[data-mode="day"]'));
+    }
+
+    window.addEventListener('message', async (event) => {
+      const data = event.data || {};
+      if (data.type === 'AUTH_SUCCESS' || data.type === 'INIT_AUTH') {
+        swagToken = data.token || data.accessToken || data.swagToken || null;
+        if (swagToken) {
+          clearInterval(handshakeRetryInterval);
+          startApp();
+        }
+      }
+    });
+
+    window.addEventListener('DOMContentLoaded', () => {
+      setTimeout(postIframeReady, 100);
+      handshakeRetryInterval = setInterval(() => {
+        if (!swagToken) postIframeReady();
+      }, 3000);
+    });
+  </script>
 </body>
 </html>
