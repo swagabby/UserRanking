@@ -516,7 +516,6 @@
   <script>
     const API_ENDPOINT = 'https://swag-campaign-api-905468082258.asia-east1.run.app/api/leaderboard';
     let swagToken = null;
-    let apiUrlPrefix = '';
     let handshakeRetryInterval = null;
 
     const crownSVG = `<svg viewBox="0 0 24 24" fill="none" class="crown-icon"><path d="M2 19H22V21H2V19ZM3 5L7 12L12 3L17 12L21 5L19 17H5L3 5Z" fill="var(--gold)"/><path d="M12 9C12.5523 9 13 8.55228 13 8C13 7.44772 12.5523 7 12 7C11.4477 7 11 7.44772 11 8C11 8.55228 11.4477 9 12 9Z" fill="#FFF"/></svg>`;
@@ -596,31 +595,45 @@
     function normalizeApiPayload(payload, mode, boardType) {
       const leaderboard = Array.isArray(payload?.leaderboard) ? payload.leaderboard : [];
       const me = payload?.me || {};
-
-      let previousTop10Ids = new Set();
-      if (mode === 'day' && boardType === 'current' && state.cache.day.previous?.leaderboard) {
-        previousTop10Ids = new Set(
-          state.cache.day.previous.leaderboard.slice(0, 10).map(item => item.rawUserId)
-        );
-      }
+      const previousTop10Ids = new Set(
+        Array.isArray(payload?.previous_top10_ids)
+          ? payload.previous_top10_ids
+          : Array.isArray(payload?.yesterday_top10_ids)
+            ? payload.yesterday_top10_ids
+            : []
+      );
 
       return {
         mode,
         boardType,
-        title: boardType === 'previous' ? `${modeConfig[mo
+        title: boardType === 'previous' ? `${modeConfig[mode].label}（前一期）` : `${modeConfig[mode].label}即時榜`,
+        unit: modeConfig[mode].unit,
+        leaderboard: leaderboard.map((item, index) => ({
+          rank: Number(item.rank ?? (index + 1)),
+          name: getUserName(item),
+          avatar: getAvatar(item),
+          value: Number(item.total_diamonds ?? item.value ?? item.total ?? 0),
+          isMe: Boolean(item.is_me),
+          wasPrevTop10: mode === 'day' && boardType === 'current' && previousTop10Ids.has(item.user_id || item.masked_user_id || item.nickname)
+        })),
+        me: {
+          rank: Number(me.rank ?? -1),
+          name: getUserName(me),
+          avatar: getAvatar(me),
+          value: Number(me.total_diamonds ?? me.value ?? me.total ?? 0)
+        }
+      };
+    }
 
     async function fetchBoard(mode, boardType = 'current') {
       const cacheHit = state.cache[mode]?.[boardType];
       if (cacheHit) return cacheHit;
 
       const url = new URL(API_ENDPOINT);
-      const apiMode = mode === 'all' ? 'all' : mode;
-      url.searchParams.set('mode', apiMode);
-
+      url.searchParams.set('mode', mode);
       if (boardType === 'previous') {
         const now = new Date();
         const target = new Date(now);
-
         if (mode === 'day') {
           target.setDate(target.getDate() - 1);
           url.searchParams.set('date', target.toISOString().slice(0, 10));
@@ -633,7 +646,9 @@
       }
 
       const res = await fetch(url.toString(), {
-        headers: { Authorization: `Bearer ${swagToken}` }
+        headers: {
+          Authorization: `Bearer ${swagToken}`
+        }
       });
 
       if (!res.ok) throw new Error(`API Response: ${res.status}`);
