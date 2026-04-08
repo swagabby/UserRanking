@@ -443,7 +443,7 @@
         <h2>活動規則</h2>
         <p>1. 顯示日榜、週榜與累積榜。</p>
         <p>2. 排行資料以 API 即時回傳結果為主。</p>
-        <p>3. 日榜與週榜右上角可開啟前一期榜單。</p>
+        <p>3. 日榜與週榜右上角可開啟前一期榜單，前一期以時間參數區分。</p>
         <p>4. 今日榜若使用者前一日曾進入前十，ID 旁會顯示 badge。</p>
         <button class="btn-action modal-close-btn" onclick="closeModal()">我知道了</button>
       </div>
@@ -516,6 +516,7 @@
   <script>
     const API_ENDPOINT = 'https://swag-campaign-api-905468082258.asia-east1.run.app/api/leaderboard';
     let swagToken = null;
+    let apiUrlPrefix = '';
     let handshakeRetryInterval = null;
 
     const crownSVG = `<svg viewBox="0 0 24 24" fill="none" class="crown-icon"><path d="M2 19H22V21H2V19ZM3 5L7 12L12 3L17 12L21 5L19 17H5L3 5Z" fill="var(--gold)"/><path d="M12 9C12.5523 9 13 8.55228 13 8C13 7.44772 12.5523 7 12 7C11.4477 7 11 7.44772 11 8C11 8.55228 11.4477 9 12 9Z" fill="#FFF"/></svg>`;
@@ -584,8 +585,8 @@
     }
 
     function getAvatar(item) {
-      // 這裡盡量兼容常見 API 欄位；若你們正式欄位名稱不同，改第一個命中的 key 即可。
-      return item.avatar_url || item.avatar || item.profile_image_url || item.profile_picture || `https://api.dicebear.com/8.x/initials/svg?seed=${encodeURIComponent(item.user_id || item.masked_user_id || 'User')}`;
+      return `https://api.dicebear.com/8.x/initials/svg?seed=${encodeURIComponent(item.user_id || item.masked_user_id || 'User')}`;
+    }`;
     }
 
     function getUserName(item) {
@@ -595,51 +596,44 @@
     function normalizeApiPayload(payload, mode, boardType) {
       const leaderboard = Array.isArray(payload?.leaderboard) ? payload.leaderboard : [];
       const me = payload?.me || {};
-      const previousTop10Ids = new Set(
-        Array.isArray(payload?.previous_top10_ids)
-          ? payload.previous_top10_ids
-          : Array.isArray(payload?.yesterday_top10_ids)
-            ? payload.yesterday_top10_ids
-            : []
-      );
+
+      let previousTop10Ids = new Set();
+      if (mode === 'day' && boardType === 'current' && state.cache.day.previous?.leaderboard) {
+        previousTop10Ids = new Set(
+          state.cache.day.previous.leaderboard.slice(0, 10).map(item => item.rawUserId)
+        );
+      }
 
       return {
         mode,
         boardType,
-        title: boardType === 'previous' ? `${modeConfig[mode].label}（前一期）` : `${modeConfig[mode].label}即時榜`,
-        unit: modeConfig[mode].unit,
-        leaderboard: leaderboard.map((item, index) => ({
-          rank: Number(item.rank ?? (index + 1)),
-          name: getUserName(item),
-          avatar: getAvatar(item),
-          value: Number(item.total_diamonds ?? item.value ?? item.total ?? 0),
-          isMe: Boolean(item.is_me),
-          wasPrevTop10: mode === 'day' && boardType === 'current' && previousTop10Ids.has(item.user_id || item.masked_user_id || item.nickname)
-        })),
-        me: {
-          rank: Number(me.rank ?? -1),
-          name: getUserName(me),
-          avatar: getAvatar(me),
-          value: Number(me.total_diamonds ?? me.value ?? me.total ?? 0)
-        }
-      };
-    }
+        title: boardType === 'previous' ? `${modeConfig[mo
 
     async function fetchBoard(mode, boardType = 'current') {
       const cacheHit = state.cache[mode]?.[boardType];
       if (cacheHit) return cacheHit;
 
       const url = new URL(API_ENDPOINT);
-      url.searchParams.set('mode', mode);
+      const apiMode = mode === 'all' ? 'all' : mode;
+      url.searchParams.set('mode', apiMode);
+
       if (boardType === 'previous') {
-        // 這邊先用 previous=1；若你們 API 參數實際不同，改成 date / period / scope 即可。
-        url.searchParams.set('previous', '1');
+        const now = new Date();
+        const target = new Date(now);
+
+        if (mode === 'day') {
+          target.setDate(target.getDate() - 1);
+          url.searchParams.set('date', target.toISOString().slice(0, 10));
+        } else if (mode === 'week') {
+          const day = target.getDay();
+          const diffToWeekStart = day === 0 ? 6 : day - 1;
+          target.setDate(target.getDate() - diffToWeekStart - 7);
+          url.searchParams.set('week_start', target.toISOString().slice(0, 10));
+        }
       }
 
       const res = await fetch(url.toString(), {
-        headers: {
-          Authorization: `Bearer ${swagToken}`
-        }
+        headers: { Authorization: `Bearer ${swagToken}` }
       });
 
       if (!res.ok) throw new Error(`API Response: ${res.status}`);
