@@ -311,21 +311,37 @@
     // ==========================================
     // 6. API 呼叫 (只負責拿原始日榜資料)
     // ==========================================
-    async function fetchApiData(token) {
+     async function fetchApiData(token) {
       try {
-        // 永遠呼叫原始的 API 網址，不帶任何週榜參數
         const res = await fetch(API_ENDPOINT, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
-        if (!res.ok) throw new Error(`API Response: ${res.status}`);
         
-        // 將最乾淨的日榜存起來
+        if (!res.ok) {
+          // 如果後端回傳 401 或 500 等錯誤，主動拋出
+          throw new Error(`伺服器回應錯誤: ${res.status}`);
+        }
+        
         cachedDailyData = await res.json();
-        
-        // 交給加工廠判斷目前在哪個 Tab 並渲染
         processAndRender();
+
       } catch (err) {
         console.error('Fetch Data Error:', err);
+        
+        // 移除 Skeleton，並在畫面上顯示明顯的錯誤提示
+        document.getElementById('my-rank').classList.remove('skeleton');
+        document.getElementById('my-score-wrap').classList.remove('skeleton');
+        document.getElementById('my-rank').innerText = '載入失敗';
+        document.getElementById('my-score').innerText = '--';
+        
+        document.getElementById('podium-container').innerHTML = '';
+        document.getElementById('leaderboard-list').innerHTML = `
+          <div style="text-align:center; padding: 30px 20px; color: #ef4444; background: rgba(239,68,68,0.1); border-radius: 8px;">
+            <div style="font-size: 16px; font-weight: bold; margin-bottom: 8px;">⚠️ 資料獲取失敗</div>
+            <div style="font-size: 13px;">${err.message}</div>
+            <div style="font-size: 12px; margin-top: 8px; color: #94a3b8;">請確認 API 狀態或 Token 是否有效。</div>
+          </div>
+        `;
       }
     }
 
