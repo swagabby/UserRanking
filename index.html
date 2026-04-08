@@ -110,8 +110,8 @@
     .list-item:last-child { border-bottom: none; }
     .rank-num { width: 32px; font-size: 16px; font-weight: 700; color: var(--text-muted); text-align: center; }
     .list-avatar { width: 40px; height: 40px; border-radius: 50%; margin-right: 12px; background: var(--skeleton-base); }
-    .user-info { flex: 1; }
-    .user-id { font-size: 15px; font-weight: 500; }
+    .user-info { flex: 1; overflow: hidden;}
+    .user-id { font-size: 15px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .score-wrap { display: flex; align-items: center; gap: 4px; }
     .score-val { font-size: 15px; font-weight: 600; color: var(--accent-gold); }
     .diamond-icon { width: 16px; height: 16px; fill: var(--accent-gold); }
@@ -144,21 +144,10 @@
     .skeleton * { visibility: hidden; }
     @keyframes skeleton-loading { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
 
-    /* === Dev Mode Banner === */
-    #dev-banner {
-      display: none; position: fixed; top: 0; left: 0; width: 100%;
-      background: #ef4444; color: #fff; text-align: center; padding: 8px;
-      font-size: 13px; font-weight: bold; z-index: 9999;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.3); animation: slideDown 0.3s ease-out;
-    }
-    @keyframes slideDown { from { transform: translateY(-100%); } to { transform: translateY(0); } }
-
+    .empty-state { text-align:center; padding: 40px; color: var(--text-muted); font-size: 14px; }
   </style>
 </head>
 <body>
-
-  <!-- 本地預覽防呆提示 -->
-  <div id="dev-banner">⚠️ [DEV MODE] 目前處於本地預覽模式，資料皆為假資料，請勿作為正式營運參考！</div>
 
   <button class="lang-switcher" id="langBtn" onclick="toggleLang()">繁體中文</button>
 
@@ -236,10 +225,10 @@
     // 2. 多語系 (I18n) 實作
     // ==========================================
     const i18n = {
-      'zh-TW': { title: '2026 璀璨之星爭奪戰', time: '活動時間：2026/04/07 ~ 2026/04/30', rules: '查看詳細活動規則', myRank: '我的排名', myScore: '累積鑽石', myScoreTimes: '累積獲得', unranked: '未上榜', langName: '繁體中文', tabDay: '日榜', tabWeek: '週榜', tabCumulative: '累積次數', subTabDay: '日榜累積', subTabWeek: '週榜累積', unitTimes: '次' },
-      'zh-CN': { title: '2026 璀璨之星争夺战', time: '活动时间：2026/04/07 ~ 2026/04/30', rules: '查看详细活动规则', myRank: '我的排名', myScore: '累计钻石', myScoreTimes: '累计获得', unranked: '未上榜', langName: '简体中文', tabDay: '日榜', tabWeek: '周榜', tabCumulative: '累计次数', subTabDay: '日榜累计', subTabWeek: '周榜累计', unitTimes: '次' },
-      'en': { title: '2026 Star Diamond Battle', time: 'Period: Apr 7 - Apr 30, 2026', rules: 'View Rules', myRank: 'My Rank', myScore: 'Diamonds', myScoreTimes: 'Total Wins', unranked: 'Unranked', langName: 'English', tabDay: 'Daily', tabWeek: 'Weekly', tabCumulative: 'Cumulative', subTabDay: 'Daily Wins', subTabWeek: 'Weekly Wins', unitTimes: 'Wins' },
-      'ja': { title: '2026 スターダイヤ争奪戦', time: '開催期間：2026/04/07 ~ 2026/04/30', rules: '詳細ルール', myRank: '私の順位', myScore: '獲得ダイヤ', myScoreTimes: '獲得回数', unranked: 'ランク外', langName: '日本語', tabDay: 'デイリー', tabWeek: 'ウィークリー', tabCumulative: '累積回数', subTabDay: 'デイリー累積', subTabWeek: 'ウィークリー累積', unitTimes: '回' }
+      'zh-TW': { title: '2026 璀璨之星爭奪戰', time: '活動時間：2026/04/07 ~ 2026/04/30', rules: '查看詳細活動規則', myRank: '我的排名', myScore: '累積鑽石', myScoreTimes: '累積獲得', unranked: '未上榜', langName: '繁體中文', tabDay: '日榜', tabWeek: '週榜', tabCumulative: '累積次數', subTabDay: '日榜累積', subTabWeek: '週榜累積', unitTimes: '次', empty: '目前暫無資料' },
+      'zh-CN': { title: '2026 璀璨之星争夺战', time: '活动时间：2026/04/07 ~ 2026/04/30', rules: '查看详细活动规则', myRank: '我的排名', myScore: '累计钻石', myScoreTimes: '累计获得', unranked: '未上榜', langName: '简体中文', tabDay: '日榜', tabWeek: '周榜', tabCumulative: '累计次数', subTabDay: '日榜累计', subTabWeek: '周榜累计', unitTimes: '次', empty: '目前暂无资料' },
+      'en': { title: '2026 Star Diamond Battle', time: 'Period: Apr 7 - Apr 30, 2026', rules: 'View Rules', myRank: 'My Rank', myScore: 'Diamonds', myScoreTimes: 'Total Wins', unranked: 'Unranked', langName: 'English', tabDay: 'Daily', tabWeek: 'Weekly', tabCumulative: 'Cumulative', subTabDay: 'Daily Wins', subTabWeek: 'Weekly Wins', unitTimes: 'Wins', empty: 'No data available' },
+      'ja': { title: '2026 スターダイヤ争奪戦', time: '開催期間：2026/04/07 ~ 2026/04/30', rules: '詳細ルール', myRank: '私の順位', myScore: '獲得ダイヤ', myScoreTimes: '獲得回数', unranked: 'ランク外', langName: '日本語', tabDay: 'デイリー', tabWeek: 'ウィークリー', tabCumulative: '累積回数', subTabDay: 'デイリー累積', subTabWeek: 'ウィークリー累積', unitTimes: '回', empty: 'データがありません' }
     };
     const langs =['zh-TW', 'zh-CN', 'en', 'ja'];
     let currentLangIdx = 0;
@@ -251,13 +240,11 @@
       });
       document.getElementById('langBtn').innerText = dict.langName;
       
-      // 更新個人的「未上榜」狀態
       const myRankEl = document.getElementById('my-rank');
       if (myRankEl && !myRankEl.classList.contains('skeleton') && myRankEl.getAttribute('data-raw') === '-1') {
         myRankEl.innerText = dict.unranked;
       }
 
-      // 更新下方標題 (鑽石 vs 次數)
       const isCumulative = currentMode.includes('cumulative');
       document.getElementById('my-score-label').innerText = isCumulative ? dict.myScoreTimes : dict.myScore;
     }
@@ -295,21 +282,18 @@
     }
 
     function triggerFetch() {
-      // 畫面先轉為 loading
+      // 畫面轉為載入中的骨架屏
       document.getElementById('leaderboard-list').innerHTML = `<div class="list-item"><div class="rank-num skeleton">1</div><div class="user-info skeleton" style="width:100px;">Loading</div></div>`;
       document.getElementById('podium-area').innerHTML = `<div class="podium-item rank-2"><div class="avatar-wrapper"><div class="avatar-circle skeleton" style="width:65px; height:65px;"></div></div></div><div class="podium-item rank-1"><div class="avatar-wrapper"><div class="avatar-circle skeleton" style="width:80px; height:80px;"></div></div></div><div class="podium-item rank-3"><div class="avatar-wrapper"><div class="avatar-circle skeleton" style="width:65px; height:65px;"></div></div></div>`;
       
-      // 更新底部單位顯示
       const isCumulative = currentMode.includes('cumulative');
       document.getElementById('my-diamond-icon').style.display = isCumulative ? 'none' : 'block';
       document.getElementById('my-score-unit').style.display = isCumulative ? 'inline' : 'none';
       document.getElementById('my-score-label').innerText = isCumulative ? i18n[langs[currentLangIdx]].myScoreTimes : i18n[langs[currentLangIdx]].myScore;
 
-      // 如果有 Token 或處於 DevMode，重新抓取資料
+      // 純粹依賴 API，若已有 Token 則直接發送請求
       if (swagToken) {
         fetchApiData(swagToken);
-      } else if (document.getElementById('dev-banner').style.display === 'block') {
-        enableDevMode(); // 重新產生假資料
       }
     }
 
@@ -317,12 +301,12 @@
     // 4. 渲染資料邏輯 (Podium + List + Footer)
     // ==========================================
     function getAvatarUrl(userId) {
-      // 利用 dicebear 產生隨機但固定的頭像
       return `https://api.dicebear.com/8.x/initials/svg?seed=${userId}&backgroundColor=1e293b`;
     }
 
     function renderData(leaderboard, meData) {
       const isCumulative = currentMode.includes('cumulative');
+      const emptyText = i18n[langs[currentLangIdx]].empty;
 
       // --- 渲染底部個人資料 ---
       const myRankEl = document.getElementById('my-rank');
@@ -332,23 +316,26 @@
       myRankEl.classList.remove('skeleton');
       myScoreWrapEl.classList.remove('skeleton');
       
-      myRankEl.setAttribute('data-raw', meData.rank);
-      if (meData.rank === -1) {
+      // 綁定個人的排名與 total_diamonds
+      const myRankValue = (meData && meData.rank) ? meData.rank : -1;
+      const myScoreValue = (meData && meData.total_diamonds) ? meData.total_diamonds : 0;
+
+      myRankEl.setAttribute('data-raw', myRankValue);
+      if (myRankValue === -1 || myRankValue === 0) {
         myRankEl.innerText = i18n[langs[currentLangIdx]].unranked;
       } else {
-        myRankEl.innerText = 'No.' + meData.rank;
+        myRankEl.innerText = 'No.' + myRankValue;
       }
-      myScoreEl.innerText = (meData.total_diamonds || meData.score || 0).toLocaleString();
+      myScoreEl.innerText = myScoreValue.toLocaleString();
 
       // --- 分離前三名與後續名單 ---
-      const top3 = leaderboard.slice(0, 3);
-      const rest = leaderboard.slice(3);
+      const top3 = (leaderboard || []).slice(0, 3);
+      const rest = (leaderboard ||[]).slice(3);
 
       // --- 渲染 Top 3 置頂頒獎台 ---
       const podiumArea = document.getElementById('podium-area');
       podiumArea.innerHTML = '';
       
-      // 防呆：如果人數不足，給予空物件
       const podiumMap = [
         { data: top3[1], rank: 2 },
         { data: top3[0], rank: 1 },
@@ -358,8 +345,11 @@
       let podiumHTML = '';
       podiumMap.forEach(item => {
         if(item.data) {
-          const userText = item.data.user_id || item.data.masked_user_id;
-          const score = item.data.total_diamonds || item.data.score || 0;
+          // 嚴格對應 API 欄位：優先取 masked_user_id，若無則取 user_id
+          const userText = item.data.masked_user_id || item.data.user_id || 'Unknown';
+          // 嚴格對應 API 欄位：total_diamonds
+          const score = item.data.total_diamonds || 0;
+          
           const iconHTML = isCumulative ? '' : `<svg class="diamond-icon" style="width:12px;height:12px;" viewBox="0 0 24 24"><path d="M12 2L2 9l10 13L22 9l-10-7z"/></svg>`;
           const unitHTML = isCumulative ? `<span>${i18n[langs[currentLangIdx]].unitTimes}</span>` : '';
 
@@ -374,7 +364,6 @@
             </div>
           `;
         } else {
-          // 空缺位置保留空間，維持排版
           podiumHTML += `<div class="podium-item rank-${item.rank}"></div>`;
         }
       });
@@ -385,15 +374,17 @@
       listContainer.innerHTML = '';
       
       if (rest.length === 0 && top3.length === 0) {
-        listContainer.innerHTML = '<div style="text-align:center; padding: 40px; color: var(--text-muted);">目前暫無資料</div>';
+        listContainer.innerHTML = `<div class="empty-state">${emptyText}</div>`;
         return;
       }
 
       rest.forEach(user => {
         const item = document.createElement('div');
         item.className = `list-item`;
-        const userText = user.user_id || user.masked_user_id;
-        const score = user.total_diamonds || user.score || 0;
+        
+        // 嚴格對應 API 欄位
+        const userText = user.masked_user_id || user.user_id || 'Unknown';
+        const score = user.total_diamonds || 0;
         
         const iconHTML = isCumulative ? '' : `<svg class="diamond-icon" viewBox="0 0 24 24"><path d="M12 2L2 9l10 13L22 9l-10-7zm0 2.8l6.3 4.4H5.7L12 4.8zM4.1 10h15.8L12 20.3 4.1 10z"/></svg>`;
         const unitHTML = isCumulative ? `<span style="font-size:13px; color:var(--accent-gold); margin-left:4px;">${i18n[langs[currentLangIdx]].unitTimes}</span>` : '';
@@ -422,72 +413,53 @@
         });
         if (!res.ok) throw new Error(`API Response: ${res.status}`);
         const data = await res.json();
-        renderData(data.leaderboard, data.me);
+        
+        // API 返回結構需包含 data.leaderboard (陣列) 與 data.me (物件)
+        renderData(data.leaderboard ||[], data.me || {});
       } catch (err) {
         console.error('Fetch Data Error:', err);
+        // 若 API 發生錯誤，畫面上顯示無資料以防破版
+        document.getElementById('leaderboard-list').innerHTML = `<div class="empty-state">無法取得排名資料，請稍後再試</div>`;
+        document.getElementById('podium-area').innerHTML = '';
       }
     }
 
     // ==========================================
-    // 6. Dev Mode 假資料預覽邏輯
-    // ==========================================
-    function enableDevMode() {
-      document.getElementById('dev-banner').style.display = 'block';
-      
-      const isCumulative = currentMode.includes('cumulative');
-      let multiplier = isCumulative ? 1 : 10000;
-      let mockLeaderboard =[];
-
-      // 產生 10 筆假資料測試
-      for(let i=1; i<=10; i++){
-        mockLeaderboard.push({
-           rank: i, 
-           masked_user_id: `User_${Math.random().toString(36).substr(2, 4)}`, 
-           total_diamonds: Math.floor((100 - i * 8) * multiplier)
-        });
-      }
-
-      const mockMe = { rank: 15, total_diamonds: isCumulative ? 5 : 50000 };
-      renderData(mockLeaderboard, mockMe);
-    }
-
-    // ==========================================
-    // 7. SWAG Iframe 通訊協議 & PWA 攔截
+    // 6. SWAG Iframe 通訊協議 & PWA 攔截
     // ==========================================
     function postIframeReady() { window.parent.postMessage({ type: 'IFRAME_READY' }, '*'); }
 
     window.addEventListener('DOMContentLoaded', () => {
       applyLang(langs[0]);
+      
+      // Step 1: 立刻告訴 SWAG 主視窗我們已經準備好接收 Token
       setTimeout(postIframeReady, 100);
 
+      // Step 2: 啟動重試機制，直到拿到 Token
       handshakeRetryInterval = setInterval(() => {
         if (!swagToken) postIframeReady();
       }, 3000);
-
-      if (window.self === window.top) {
-        setTimeout(() => {
-          if (!swagToken) {
-            clearInterval(handshakeRetryInterval);
-            enableDevMode();
-          }
-        }, 2000);
-      }
     });
 
     window.addEventListener('message', (event) => {
       const data = event.data;
       if (!data) return;
 
+      // Step 3: 接收 Token 後，停止重試並發送 API 請求
       if (data.type === 'SET_TOKEN') {
         if (swagToken === data.token) return;
         swagToken = data.token;
-        if (handshakeRetryInterval) { clearInterval(handshakeRetryInterval); handshakeRetryInterval = null; }
+        if (handshakeRetryInterval) { 
+          clearInterval(handshakeRetryInterval); 
+          handshakeRetryInterval = null; 
+        }
         fetchApiData(swagToken);
       }
     });
 
+    // PWA iOS 開新分頁攔截
     document.addEventListener('click', (e) => {
-      if (window.self === window.top) return;
+      if (window.self === window.top) return; // 如果不是 iframe 就忽略
       const link = e.target.closest('a[target="_blank"]');
       if (link) {
         try {
