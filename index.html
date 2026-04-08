@@ -516,7 +516,9 @@
   <script>
     const API_ENDPOINT = 'https://swag-campaign-api-905468082258.asia-east1.run.app/api/leaderboard';
     let swagToken = null;
+    let apiUrlPrefix = '';
     let handshakeRetryInterval = null;
+    let countdownInterval = null;
 
     const crownSVG = `<svg viewBox="0 0 24 24" fill="none" class="crown-icon"><path d="M2 19H22V21H2V19ZM3 5L7 12L12 3L17 12L21 5L19 17H5L3 5Z" fill="var(--gold)"/><path d="M12 9C12.5523 9 13 8.55228 13 8C13 7.44772 12.5523 7 12 7C11.4477 7 11 7.44772 11 8C11 8.55228 11.4477 9 12 9Z" fill="#FFF"/></svg>`;
 
@@ -537,16 +539,18 @@
     };
 
     function openModal() {
-      const m = document.getElementById('ruleModal');
-      m.style.display = 'flex';
-      void m.offsetWidth;
-      m.classList.add('show');
+      const modal = document.getElementById('ruleModal');
+      modal.style.display = 'flex';
+      void modal.offsetWidth;
+      modal.classList.add('show');
     }
 
     function closeModal() {
-      const m = document.getElementById('ruleModal');
-      m.classList.remove('show');
-      setTimeout(() => { m.style.display = 'none'; }, 250);
+      const modal = document.getElementById('ruleModal');
+      modal.classList.remove('show');
+      setTimeout(() => {
+        modal.style.display = 'none';
+      }, 250);
     }
 
     function setThemeColor(mode) {
@@ -559,6 +563,7 @@
         <div class="podium-item"><div class="avatar-wrapper"><div class="avatar-round skeleton" style="width:84px;height:84px;border-radius:50%"></div></div><div class="nickname skeleton" style="width:70px;height:14px"></div></div>
         <div class="podium-item"><div class="avatar-wrapper"><div class="avatar-round skeleton"></div></div><div class="nickname skeleton" style="width:70px;height:14px"></div></div>
       `;
+
       document.getElementById('listView').innerHTML = Array.from({ length: 8 }).map(() => `
         <div class="list-row"><div class="rank-num skeleton sk-text-short"></div><div class="sk-avatar skeleton"></div><div class="user-info"><div class="skeleton sk-text"></div></div></div>
       `).join('');
@@ -579,13 +584,23 @@
     }
 
     function formatValue(value) {
-      const num = Number(value || 0);
-      return num.toLocaleString();
+      return Number(value || 0).toLocaleString();
+    }
+
+    function createPlaceholderAvatar(label = 'U') {
+      const firstChar = String(label).trim().charAt(0) || 'U';
+      const svg = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 80 80">
+          <rect width="80" height="80" rx="20" fill="#2A2A2A"/>
+          <circle cx="40" cy="30" r="14" fill="#5A5A5A"/>
+          <path d="M18 64c4-12 16-18 22-18s18 6 22 18" fill="#5A5A5A"/>
+          <text x="40" y="72" text-anchor="middle" font-size="10" fill="#C8C8C8" font-family="Arial, sans-serif">${firstChar}</text>
+        </svg>`;
+      return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
     }
 
     function getAvatar(item) {
-      return `https://api.dicebear.com/8.x/initials/svg?seed=${encodeURIComponent(item.user_id || item.masked_user_id || 'User')}`;
-    }`;
+      return createPlaceholderAvatar(item.user_id || item.masked_user_id || item.nickname || item.name || 'U');
     }
 
     function getUserName(item) {
@@ -595,27 +610,31 @@
     function normalizeApiPayload(payload, mode, boardType) {
       const leaderboard = Array.isArray(payload?.leaderboard) ? payload.leaderboard : [];
       const me = payload?.me || {};
-      const previousTop10Ids = new Set(
-        Array.isArray(payload?.previous_top10_ids)
-          ? payload.previous_top10_ids
-          : Array.isArray(payload?.yesterday_top10_ids)
-            ? payload.yesterday_top10_ids
-            : []
-      );
+
+      let previousTop10Ids = new Set();
+      if (mode === 'day' && boardType === 'current' && state.cache.day.previous?.leaderboard) {
+        previousTop10Ids = new Set(
+          state.cache.day.previous.leaderboard.slice(0, 10).map(item => item.rawUserId)
+        );
+      }
 
       return {
         mode,
         boardType,
         title: boardType === 'previous' ? `${modeConfig[mode].label}（前一期）` : `${modeConfig[mode].label}即時榜`,
         unit: modeConfig[mode].unit,
-        leaderboard: leaderboard.map((item, index) => ({
-          rank: Number(item.rank ?? (index + 1)),
-          name: getUserName(item),
-          avatar: getAvatar(item),
-          value: Number(item.total_diamonds ?? item.value ?? item.total ?? 0),
-          isMe: Boolean(item.is_me),
-          wasPrevTop10: mode === 'day' && boardType === 'current' && previousTop10Ids.has(item.user_id || item.masked_user_id || item.nickname)
-        })),
+        leaderboard: leaderboard.map((item, index) => {
+          const rawUserId = getUserName(item) || `user_${index + 1}`;
+          return {
+            rank: Number(item.rank ?? (index + 1)),
+            name: rawUserId,
+            rawUserId,
+            avatar: getAvatar(item),
+            value: Number(item.total_diamonds ?? item.value ?? item.total ?? 0),
+            isMe: Boolean(item.is_me),
+            wasPrevTop10: mode === 'day' && boardType === 'current' && previousTop10Ids.has(rawUserId)
+          };
+        }),
         me: {
           rank: Number(me.rank ?? -1),
           name: getUserName(me),
@@ -630,10 +649,12 @@
       if (cacheHit) return cacheHit;
 
       const url = new URL(API_ENDPOINT);
-      url.searchParams.set('mode', mode);
+      url.searchParams.set('mode', mode === 'all' ? 'all' : mode);
+
       if (boardType === 'previous') {
         const now = new Date();
         const target = new Date(now);
+
         if (mode === 'day') {
           target.setDate(target.getDate() - 1);
           url.searchParams.set('date', target.toISOString().slice(0, 10));
@@ -646,9 +667,7 @@
       }
 
       const res = await fetch(url.toString(), {
-        headers: {
-          Authorization: `Bearer ${swagToken}`
-        }
+        headers: { Authorization: `Bearer ${swagToken}` }
       });
 
       if (!res.ok) throw new Error(`API Response: ${res.status}`);
@@ -661,18 +680,21 @@
     function renderPodium(data) {
       const top3 = data.leaderboard.slice(0, 3);
       const podium = document.getElementById('podiumContent');
+
       if (top3.length === 0) {
-        podium.innerHTML = `<div style="padding: 24px; color: var(--text-secondary); text-align:center; width:100%;">暫無資料</div>`;
+        podium.innerHTML = `<div style="padding:24px; color:var(--text-secondary); text-align:center; width:100%;">暫無資料</div>`;
         return;
       }
 
-      const order = [1, 0, 2].filter(i => top3[i]);
+      const order = [1, 0, 2].filter(index => top3[index]);
       const themeColor = modeConfig[data.mode].color;
-      podium.innerHTML = order.map((sourceIndex, visualIndex) => {
+
+      podium.innerHTML = order.map(sourceIndex => {
         const item = top3[sourceIndex];
         const rank = item.rank;
         const rankClass = rank === 1 ? 'no1' : rank === 2 ? 'no2' : 'no3';
         const badgeClass = rank === 1 ? 'badge-1' : rank === 2 ? 'badge-2' : 'badge-3';
+
         return `
           <div class="podium-item ${rankClass}">
             <div class="avatar-wrapper">
@@ -690,6 +712,7 @@
     function renderList(data) {
       const themeColor = modeConfig[data.mode].color;
       const list = document.getElementById('listView');
+
       list.innerHTML = data.leaderboard.map(item => `
         <div class="list-row ${item.isMe ? 'is-me' : ''}">
           <div class="rank-num">${item.rank}</div>
@@ -702,12 +725,12 @@
           </div>
           <div class="data-value" style="color:${themeColor}">${formatValue(item.value)} <span style="font-size:12px">${data.unit}</span></div>
         </div>
-      `).join('') || `<div style="padding:24px;text-align:center;color:var(--text-secondary);">暫無資料</div>`;
+      `).join('') || `<div style="padding:24px; text-align:center; color:var(--text-secondary);">暫無資料</div>`;
     }
 
     function renderFooter(data) {
       const me = data.me || {};
-      document.getElementById('footerAvatar').src = me.avatar || getAvatar({ user_id: 'Me' });
+      document.getElementById('footerAvatar').src = me.avatar || createPlaceholderAvatar('M');
       document.getElementById('footerName').innerText = me.name || '我';
       document.getElementById('myRankNum').innerText = formatRank(me.rank);
       document.getElementById('myValueText').innerText = `${formatValue(me.value)} ${data.unit}`;
@@ -717,12 +740,12 @@
 
       const gapText = document.getElementById('gapText');
       if (me.rank > 1) {
-        const prev = data.leaderboard.find(x => x.rank === me.rank - 1);
+        const prev = data.leaderboard.find(item => item.rank === me.rank - 1);
         gapText.innerText = prev ? `距離前一名還差 ${(prev.value - me.value).toLocaleString()} ${data.unit}` : '繼續加油衝榜';
       } else if (me.rank === 1) {
         gapText.innerText = '目前為榜首，請持續守榜';
       } else {
-        const top10 = data.leaderboard.find(x => x.rank === 10);
+        const top10 = data.leaderboard.find(item => item.rank === 10);
         gapText.innerText = top10 ? `距離前十還差 ${(top10.value - me.value).toLocaleString()} ${data.unit}` : '目前尚未入榜';
       }
     }
@@ -738,40 +761,53 @@
     }
 
     async function changeMode(mode, el) {
-      document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-item').forEach(tab => tab.classList.remove('active'));
       if (el) el.classList.add('active');
+
       state.currentMode = mode;
       state.currentBoardType = 'current';
       showSkeleton();
+
       try {
+        if (mode === 'day' && !state.cache.day.previous) {
+          try {
+            await fetchBoard('day', 'previous');
+          } catch (error) {
+            console.warn('昨日榜單預先載入失敗', error);
+          }
+        }
+
         const data = await fetchBoard(mode, 'current');
         renderBoard(data);
-      } catch (err) {
-        console.error(err);
-        document.getElementById('listView').innerHTML = `<div style="padding:24px;text-align:center;color:#fca5a5;">資料讀取失敗</div>`;
+      } catch (error) {
+        console.error(error);
+        document.getElementById('listView').innerHTML = `<div style="padding:24px; text-align:center; color:#fca5a5;">資料讀取失敗</div>`;
       }
     }
 
     async function openPreviousBoard(event, mode) {
       event.stopPropagation();
-      document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-item').forEach(tab => tab.classList.remove('active'));
       const tab = document.querySelector(`.tab-item[data-mode="${mode}"]`);
       if (tab) tab.classList.add('active');
+
       state.currentMode = mode;
       state.currentBoardType = 'previous';
       showSkeleton();
+
       try {
         const data = await fetchBoard(mode, 'previous');
         renderBoard(data);
-      } catch (err) {
-        console.error(err);
-        document.getElementById('listView').innerHTML = `<div style="padding:24px;text-align:center;color:#fca5a5;">前一期榜單讀取失敗</div>`;
+      } catch (error) {
+        console.error(error);
+        document.getElementById('listView').innerHTML = `<div style="padding:24px; text-align:center; color:#fca5a5;">前一期榜單讀取失敗</div>`;
       }
     }
 
     function updateCountdown() {
       const now = new Date();
       const next = new Date(now);
+
       if (state.currentMode === 'week') {
         const day = next.getDay();
         const diff = day === 0 ? 7 : 7 - day;
@@ -783,6 +819,7 @@
       } else {
         next.setHours(0, 0, 0, 0);
       }
+
       const ms = Math.max(0, next - now);
       const hh = String(Math.floor(ms / 3600000)).padStart(2, '0');
       const mm = String(Math.floor((ms % 3600000) / 60000)).padStart(2, '0');
@@ -794,28 +831,100 @@
       window.parent.postMessage({ type: 'IFRAME_READY' }, '*');
     }
 
+    function enableDevMode() {
+      const mockCurrent = [
+        { rank: 1, masked_user_id: '5e69***8583', total_diamonds: 1254018 },
+        { rank: 2, masked_user_id: '58fe***bff3', total_diamonds: 1140660 },
+        { rank: 3, masked_user_id: '5da1***7b48', total_diamonds: 1113679 },
+        { rank: 4, masked_user_id: '6335***cd9a', total_diamonds: 961030 },
+        { rank: 5, masked_user_id: '5e0a***9dbc', total_diamonds: 957995 },
+        { rank: 6, masked_user_id: '5d10***1001', total_diamonds: 900000 },
+        { rank: 7, masked_user_id: '5d10***1002', total_diamonds: 860000 },
+        { rank: 8, masked_user_id: '5d10***1003', total_diamonds: 830000 },
+        { rank: 9, masked_user_id: '5d10***1004', total_diamonds: 810000 },
+        { rank: 10, masked_user_id: '5d10***1005', total_diamonds: 790000 }
+      ];
+
+      const mockPrevious = [
+        { rank: 1, masked_user_id: '58fe***bff3', total_diamonds: 1240000 },
+        { rank: 2, masked_user_id: '6335***cd9a', total_diamonds: 1150000 },
+        { rank: 3, masked_user_id: '5da1***7b48', total_diamonds: 1080000 },
+        { rank: 4, masked_user_id: 'old***1001', total_diamonds: 980000 },
+        { rank: 5, masked_user_id: 'old***1002', total_diamonds: 960000 },
+        { rank: 6, masked_user_id: 'old***1003', total_diamonds: 940000 },
+        { rank: 7, masked_user_id: 'old***1004', total_diamonds: 920000 },
+        { rank: 8, masked_user_id: 'old***1005', total_diamonds: 900000 },
+        { rank: 9, masked_user_id: 'old***1006', total_diamonds: 880000 },
+        { rank: 10, masked_user_id: 'old***1007', total_diamonds: 860000 }
+      ];
+
+      const mockMe = { rank: -1, total_diamonds: 0, masked_user_id: '我' };
+      state.cache.day.previous = normalizeApiPayload({ leaderboard: mockPrevious, me: mockMe }, 'day', 'previous');
+      state.cache.day.current = normalizeApiPayload({ leaderboard: mockCurrent, me: mockMe }, 'day', 'current');
+      renderBoard(state.cache.day.current);
+    }
+
     function startApp() {
-      setInterval(updateCountdown, 1000);
+      if (!countdownInterval) {
+        countdownInterval = setInterval(updateCountdown, 1000);
+      }
       updateCountdown();
       changeMode('day', document.querySelector('.tab-item[data-mode="day"]'));
     }
 
-    window.addEventListener('message', async (event) => {
-      const data = event.data || {};
-      if (data.type === 'AUTH_SUCCESS' || data.type === 'INIT_AUTH') {
-        swagToken = data.token || data.accessToken || data.swagToken || null;
-        if (swagToken) {
-          clearInterval(handshakeRetryInterval);
-          startApp();
-        }
-      }
-    });
-
     window.addEventListener('DOMContentLoaded', () => {
       setTimeout(postIframeReady, 100);
+
       handshakeRetryInterval = setInterval(() => {
         if (!swagToken) postIframeReady();
       }, 3000);
+
+      if (window.self === window.top) {
+        setTimeout(() => {
+          if (!swagToken) {
+            clearInterval(handshakeRetryInterval);
+            enableDevMode();
+          }
+        }, 2000);
+      }
+    });
+
+    window.addEventListener('message', (event) => {
+      const data = event.data;
+      if (!data) return;
+
+      if (data.type === 'SET_DOMAIN_CONFIG') {
+        apiUrlPrefix = data.apiUrlPrefix;
+      }
+
+      if (data.type === 'SET_TOKEN') {
+        if (swagToken === data.token) return;
+        swagToken = data.token;
+
+        if (handshakeRetryInterval) {
+          clearInterval(handshakeRetryInterval);
+          handshakeRetryInterval = null;
+        }
+
+        startApp();
+      }
+    });
+
+    document.addEventListener('click', (event) => {
+      if (window.self === window.top) return;
+
+      const link = event.target.closest('a[target="_blank"]');
+      if (!link) return;
+
+      try {
+        const url = new URL(link.href);
+        if (url.hostname === 'swag.live' || url.hostname === 'www.swag.live') {
+          event.preventDefault();
+          window.parent.postMessage({ type: 'PWA_NAVIGATE', url: link.href }, '*');
+        }
+      } catch (error) {
+        console.error('URL 解析失敗', error);
+      }
     });
   </script>
 </body>
