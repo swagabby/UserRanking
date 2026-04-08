@@ -149,22 +149,16 @@
     </div>
   </div>
 
-  <script>
-    // ==========================================
-    // 1. 環境設定與變數
-    // ==========================================
+ <script>
     const API_ENDPOINT = 'https://swag-campaign-api-905468082258.asia-east1.run.app/api/leaderboard';
     const DEFAULT_AVATAR = 'https://ui-avatars.com/api/?name=SWAG&background=1e293b&color=fff&size=100';
     let swagToken = null;
     let currentTab = 'daily';
     let handshakeRetryInterval = null;
-    
-    // 【核心變數】儲存從後端抓到的乾淨日榜資料，提供前端自行計算
     let cachedDailyData = null;
+    let isDataRendered = false; // 新增：追蹤是否成功渲染
 
-    // ==========================================
-    // 2. 多語系設定
-    // ==========================================
+    // --- 多語系 ---
     const i18n = {
       'zh-TW': { title: '2026 璀璨之星爭奪戰', time: '活動時間：2026/04/07 ~ 2026/04/30', rules: '查看詳細活動規則', myRank: '我的排名', myScore: '累積鑽石', tabDaily: '本日排行', tabWeekly: '本週排行', unranked: '未上榜', langName: '繁體中文' },
       'en': { title: '2026 Star Diamond Battle', time: 'Period: Apr 7 - Apr 30, 2026', rules: 'View Rules', myRank: 'My Rank', myScore: 'Diamonds', tabDaily: 'Daily', tabWeekly: 'Weekly', unranked: 'Unranked', langName: 'English' }
@@ -186,9 +180,6 @@
       applyLang(langs[currentLangIdx]);
     }
 
-    // ==========================================
-    // 3. UI 渲染邏輯 (頒獎台 + 列表)
-    // ==========================================
     function showSkeleton() {
       document.getElementById('my-rank').classList.add('skeleton');
       document.getElementById('my-score-wrap').classList.add('skeleton');
@@ -200,7 +191,23 @@
       `;
     }
 
+    // --- 錯誤顯示器 (把 Skeleton 換成真實錯誤訊息) ---
+    function showErrorOnScreen(title, message) {
+      document.getElementById('my-rank').classList.remove('skeleton');
+      document.getElementById('my-score-wrap').classList.remove('skeleton');
+      document.getElementById('my-rank').innerText = '載入失敗';
+      document.getElementById('my-score').innerText = '--';
+      document.getElementById('podium-container').innerHTML = '';
+      document.getElementById('leaderboard-list').innerHTML = `
+        <div style="text-align:center; padding: 30px 20px; color: #ef4444; background: rgba(239,68,68,0.1); border-radius: 8px; margin-top: 20px;">
+          <div style="font-size: 16px; font-weight: bold; margin-bottom: 8px;">⚠️ ${title}</div>
+          <div style="font-size: 13px;">${message}</div>
+        </div>
+      `;
+    }
+
     function renderData(leaderboard, meData) {
+      isDataRendered = true; // 標記已成功渲染
       const myRankEl = document.getElementById('my-rank');
       myRankEl.classList.remove('skeleton');
       document.getElementById('my-score-wrap').classList.remove('skeleton');
@@ -220,7 +227,6 @@
       const top3 = leaderboard.slice(0, 3);
       const others = leaderboard.slice(3, 10);
 
-      // 渲染 Top 3 頒獎台
       top3.forEach((user) => {
         const crowns =['👑', '🥈', '🥉'];
         const avatarUrl = user.avatar_url || DEFAULT_AVATAR;
@@ -228,126 +234,66 @@
         item.className = `podium-item rank-${user.rank}`;
         item.innerHTML = `
           <div class="crown">${crowns[user.rank - 1]}</div>
-          <div class="avatar-wrap">
-            <img class="avatar-img" src="${avatarUrl}" alt="avatar" onerror="this.src='${DEFAULT_AVATAR}'"/>
-          </div>
+          <div class="avatar-wrap"><img class="avatar-img" src="${avatarUrl}" onerror="this.src='${DEFAULT_AVATAR}'"/></div>
           <div class="podium-name">${user.masked_user_id}</div>
-          <div class="podium-score">
-            <svg class="diamond-icon" viewBox="0 0 24 24" style="width:12px;height:12px;"><path d="M12 2L2 9l10 13L22 9l-10-7z"/></svg>
-            ${user.total_diamonds.toLocaleString()}
-          </div>
+          <div class="podium-score"><svg class="diamond-icon" viewBox="0 0 24 24" style="width:12px;height:12px;"><path d="M12 2L2 9l10 13L22 9l-10-7z"/></svg>${user.total_diamonds.toLocaleString()}</div>
         `;
         podiumContainer.appendChild(item);
       });
 
-      // 渲染其餘名單
       others.forEach(user => {
         const avatarUrl = user.avatar_url || DEFAULT_AVATAR;
         const item = document.createElement('div');
         item.className = 'list-item';
         item.innerHTML = `
           <div class="rank-num">${user.rank}</div>
-          <img class="list-avatar" src="${avatarUrl}" alt="avatar" onerror="this.src='${DEFAULT_AVATAR}'"/>
+          <img class="list-avatar" src="${avatarUrl}" onerror="this.src='${DEFAULT_AVATAR}'"/>
           <div class="user-info"><div class="user-id">${user.masked_user_id}</div></div>
-          <div class="score-wrap">
-            <span class="score-val">${user.total_diamonds.toLocaleString()}</span>
-            <svg class="diamond-icon" viewBox="0 0 24 24"><path d="M12 2L2 9l10 13L22 9l-10-7zm0 2.8l6.3 4.4H5.7L12 4.8zM4.1 10h15.8L12 20.3 4.1 10z"/></svg>
-          </div>
+          <div class="score-wrap"><span class="score-val">${user.total_diamonds.toLocaleString()}</span><svg class="diamond-icon" viewBox="0 0 24 24"><path d="M12 2L2 9l10 13L22 9l-10-7zm0 2.8l6.3 4.4H5.7L12 4.8zM4.1 10h15.8L12 20.3 4.1 10z"/></svg></div>
         `;
         listContainer.appendChild(item);
       });
     }
 
-    // ==========================================
-    // 4. 【核心】前端運算資料加工廠
-    // ==========================================
     function processAndRender() {
       if (!cachedDailyData) return;
-      
       let displayLeaderboard = cachedDailyData.leaderboard;
       let displayMe = cachedDailyData.me;
-
-      // 當前為「週榜」時，不呼叫 API，直接將快取的日榜分數 * 7
       if (currentTab === 'weekly') {
         const WEEKLY_MULTIPLIER = 7;
-        
-        displayLeaderboard = cachedDailyData.leaderboard.map(user => ({
-          ...user,
-          total_diamonds: user.total_diamonds * WEEKLY_MULTIPLIER
-        }));
-        
-        displayMe = {
-          ...cachedDailyData.me,
-          total_diamonds: cachedDailyData.me.total_diamonds * WEEKLY_MULTIPLIER
-        };
+        displayLeaderboard = cachedDailyData.leaderboard.map(user => ({...user, total_diamonds: user.total_diamonds * WEEKLY_MULTIPLIER}));
+        displayMe = {...cachedDailyData.me, total_diamonds: cachedDailyData.me.total_diamonds * WEEKLY_MULTIPLIER};
       }
-
       renderData(displayLeaderboard, displayMe);
     }
 
-    // ==========================================
-    // 5. Tabs 切換 (完全無痛、不依賴網路)
-    // ==========================================
     function switchTab(type) {
       if (currentTab === type) return;
       currentTab = type;
-      
-      const wrapper = document.getElementById('tabs-wrapper');
-      wrapper.setAttribute('data-active', type);
-      
+      document.getElementById('tabs-wrapper').setAttribute('data-active', type);
       document.querySelectorAll('.tab-btn').forEach(btn => {
         btn.classList.remove('active');
         if (btn.getAttribute('onclick').includes(type)) btn.classList.add('active');
       });
-
-      // 直接使用暫存資料重算並渲染
-      if (cachedDailyData) {
-        processAndRender();
-      } else if (window.self === window.top) {
-        enableDevMode();
-      }
+      if (cachedDailyData) processAndRender();
+      else if (window.self === window.top) enableDevMode();
     }
 
-    // ==========================================
-    // 6. API 呼叫 (只負責拿原始日榜資料)
-    // ==========================================
-     async function fetchApiData(token) {
+    async function fetchApiData(token) {
       try {
-        const res = await fetch(API_ENDPOINT, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        
+        const res = await fetch(API_ENDPOINT, { headers: { 'Authorization': `Bearer ${token}` } });
         if (!res.ok) {
-          // 如果後端回傳 401 或 500 等錯誤，主動拋出
-          throw new Error(`伺服器回應錯誤: ${res.status}`);
+           if (res.status === 401) throw new Error("Token 驗證失敗 (401)，可能已過期或被主站阻擋。");
+           if (res.status === 429) throw new Error("請求太頻繁被限流 (429)。");
+           throw new Error(`伺服器回應錯誤狀態碼: ${res.status}`);
         }
-        
         cachedDailyData = await res.json();
         processAndRender();
-
       } catch (err) {
-        console.error('Fetch Data Error:', err);
-        
-        // 移除 Skeleton，並在畫面上顯示明顯的錯誤提示
-        document.getElementById('my-rank').classList.remove('skeleton');
-        document.getElementById('my-score-wrap').classList.remove('skeleton');
-        document.getElementById('my-rank').innerText = '載入失敗';
-        document.getElementById('my-score').innerText = '--';
-        
-        document.getElementById('podium-container').innerHTML = '';
-        document.getElementById('leaderboard-list').innerHTML = `
-          <div style="text-align:center; padding: 30px 20px; color: #ef4444; background: rgba(239,68,68,0.1); border-radius: 8px;">
-            <div style="font-size: 16px; font-weight: bold; margin-bottom: 8px;">⚠️ 資料獲取失敗</div>
-            <div style="font-size: 13px;">${err.message}</div>
-            <div style="font-size: 12px; margin-top: 8px; color: #94a3b8;">請確認 API 狀態或 Token 是否有效。</div>
-          </div>
-        `;
+        showErrorOnScreen("API 呼叫失敗", err.message);
       }
     }
 
-    // ==========================================
-    // 7. Dev Mode (本地預覽假資料)
-    // ==========================================
     function enableDevMode() {
       document.getElementById('dev-banner').style.display = 'block';
       cachedDailyData = {
@@ -364,9 +310,6 @@
       processAndRender();
     }
 
-    // ==========================================
-    // 8. SWAG Iframe 握手協議與 PWA 攔截
-    // ==========================================
     function postIframeReady() { window.parent.postMessage({ type: 'IFRAME_READY' }, '*'); }
     
     window.addEventListener('DOMContentLoaded', () => {
@@ -375,10 +318,19 @@
       setTimeout(postIframeReady, 100);
       handshakeRetryInterval = setInterval(() => { if (!swagToken) postIframeReady(); }, 3000);
 
-      // 若兩秒後還是沒 Token 且不在 iframe 內，啟動預覽模式
-      if (window.self === window.top) {
-        setTimeout(() => { if (!swagToken) { clearInterval(handshakeRetryInterval); enableDevMode(); } }, 1500);
-      }
+      // --- 防卡死偵測機制 ---
+      setTimeout(() => {
+        if (!isDataRendered) {
+          if (window.self === window.top && !swagToken) {
+             // 不在 Iframe 內，直接強切 DevMode
+             clearInterval(handshakeRetryInterval);
+             enableDevMode();
+          } else if (!swagToken) {
+             // 在 Iframe 內，但等了 4 秒還沒收到 Token
+             showErrorOnScreen("Iframe 通訊失敗", "等不到 SWAG 主站發送的 Token。請確認您的網域已加入主站 tokenWhitelistDomains 白名單！");
+          }
+        }
+      }, 4000);
     });
 
     window.addEventListener('message', (event) => {
@@ -388,12 +340,10 @@
         if (swagToken === data.token) return;
         swagToken = data.token;
         if (handshakeRetryInterval) { clearInterval(handshakeRetryInterval); handshakeRetryInterval = null; }
-        // 收到 Token，去跟後端拿資料
         fetchApiData(swagToken);
       }
     });
 
-    // PWA 導航攔截
     document.addEventListener('click', (e) => {
       if (window.self === window.top) return;
       const link = e.target.closest('a[target="_blank"]');
