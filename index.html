@@ -30,14 +30,7 @@
       padding-bottom: 50px;
     }
 
-    /* === 語系切換器 === */
-    .lang-switcher {
-      position: absolute; top: 16px; right: 16px; background: var(--glass-bg);
-      border: 1px solid var(--glass-border); color: var(--text-main); padding: 6px 12px;
-      border-radius: 20px; font-size: 14px; cursor: pointer; z-index: 100; backdrop-filter: blur(10px);
-    }
-    
-    /* === Header === */
+    .lang-switcher { position: absolute; top: 16px; right: 16px; background: var(--glass-bg); border: 1px solid var(--glass-border); color: var(--text-main); padding: 6px 12px; border-radius: 20px; font-size: 14px; cursor: pointer; z-index: 100; backdrop-filter: blur(10px); }
     .header { text-align: center; padding: 60px 20px 20px; }
     .title { font-size: 32px; font-weight: 800; background: linear-gradient(135deg, #fbbf24, #f59e0b); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 8px; }
     .subtitle { font-size: 14px; color: var(--text-muted); margin-bottom: 12px;}
@@ -46,43 +39,35 @@
     .container { max-width: 500px; margin: 0 auto; padding: 0 16px; }
     .glass-card { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 16px; padding: 20px; margin-bottom: 24px; backdrop-filter: blur(12px); }
 
-    /* === Tabs 日/週榜切換 === */
     .tabs-wrapper { display: flex; background: rgba(0,0,0,0.3); border-radius: 30px; padding: 4px; margin-bottom: 20px; position: relative; }
     .tab-btn { flex: 1; text-align: center; padding: 10px 0; color: var(--text-muted); font-size: 15px; font-weight: 600; cursor: pointer; border-radius: 26px; transition: all 0.3s; z-index: 2; }
     .tab-btn.active { color: #fff; }
     .tab-indicator { position: absolute; top: 4px; left: 4px; bottom: 4px; width: calc(50% - 4px); background: linear-gradient(135deg, #3b82f6, #1d4ed8); border-radius: 26px; transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); z-index: 1; }
     .tabs-wrapper[data-active="weekly"] .tab-indicator { transform: translateX(100%); }
 
-    /* === 個人狀態區塊 === */
     .me-section { display: flex; justify-content: space-between; align-items: center; }
     .me-block { display: flex; flex-direction: column; }
     .me-label { font-size: 12px; color: var(--text-muted); margin-bottom: 4px; }
     .me-value { font-size: 24px; font-weight: 700; color: var(--accent-gold); }
     .me-value.rank-text { color: #fff; }
 
-    /* === 頒獎台 Top 3 === */
     .podium-container { display: flex; justify-content: center; align-items: flex-end; gap: 10px; margin: 20px 0 40px; height: 180px; }
     .podium-item { display: flex; flex-direction: column; align-items: center; text-align: center; position: relative; animation: slideUp 0.5s ease-out forwards; opacity: 0; }
     @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-    
-    .podium-item:nth-child(1) { order: 2; margin-bottom: 20px; animation-delay: 0.1s; } /* Rank 1 */
-    .podium-item:nth-child(2) { order: 1; margin-bottom: 0px; animation-delay: 0.0s;} /* Rank 2 */
-    .podium-item:nth-child(3) { order: 3; margin-bottom: 0px; animation-delay: 0.2s;} /* Rank 3 */
+    .podium-item:nth-child(1) { order: 2; margin-bottom: 20px; animation-delay: 0.1s; } 
+    .podium-item:nth-child(2) { order: 1; margin-bottom: 0px; animation-delay: 0.0s;} 
+    .podium-item:nth-child(3) { order: 3; margin-bottom: 0px; animation-delay: 0.2s;} 
 
     .avatar-wrap { position: relative; border-radius: 50%; padding: 4px; background: #333; margin-bottom: 8px; }
     .rank-1 .avatar-wrap { background: var(--rank1-color); width: 84px; height: 84px; box-shadow: 0 0 20px rgba(255, 215, 0, 0.4); }
     .rank-2 .avatar-wrap { background: var(--rank2-color); width: 68px; height: 68px; }
     .rank-3 .avatar-wrap { background: var(--rank3-color); width: 68px; height: 68px; }
-    
     .avatar-img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; background-color: #1e293b; border: 2px solid var(--bg-dark); }
-    
     .crown { position: absolute; top: -18px; left: 50%; transform: translateX(-50%); font-size: 24px; line-height: 1; }
     .rank-2 .crown, .rank-3 .crown { font-size: 18px; top: -14px; }
-    
     .podium-name { font-size: 13px; font-weight: 600; color: #fff; margin-bottom: 4px; width: 80px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .podium-score { font-size: 12px; color: var(--accent-gold); font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 2px; }
 
-    /* === 排行榜清單 Rank 4-10 === */
     .list-item { display: flex; align-items: center; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05); animation: fadeIn 0.5s ease-out forwards; }
     @keyframes fadeIn { from{opacity:0} to{opacity:1} }
     .list-item:last-child { border-bottom: none; }
@@ -94,7 +79,6 @@
     .score-val { font-size: 15px; font-weight: 600; color: var(--accent-gold); }
     .diamond-icon { width: 16px; height: 16px; fill: var(--accent-gold); }
 
-    /* === Skeleton & Dev Mode Banner === */
     .skeleton { background: linear-gradient(90deg, var(--skeleton-base) 25%, var(--skeleton-shine) 50%, var(--skeleton-base) 75%); background-size: 200% 100%; animation: skeleton-loading 1.5s infinite; border-radius: 4px; color: transparent !important; }
     .skeleton * { visibility: hidden; }
     @keyframes skeleton-loading { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
@@ -105,7 +89,7 @@
 <body>
 
   <!-- 本地預覽防呆提示 -->
-  <div id="dev-banner">⚠️ [DEV MODE] 目前處於本地預覽模式，資料皆為假資料！</div>
+  <div id="dev-banner">⚠️ [免 Token 測試模式] 目前顯示為本地假資料！</div>
 
   <button class="lang-switcher" id="langBtn" onclick="toggleLang()">繁體中文</button>
 
@@ -116,14 +100,12 @@
   </div>
 
   <div class="container">
-    <!-- 日榜/週榜 Tabs (前端無痛切換) -->
     <div class="tabs-wrapper" id="tabs-wrapper" data-active="daily">
       <div class="tab-indicator"></div>
       <div class="tab-btn active" onclick="switchTab('daily')" data-i18n="tabDaily">本日排行</div>
       <div class="tab-btn" onclick="switchTab('weekly')" data-i18n="tabWeekly">本週排行</div>
     </div>
 
-    <!-- 個人區塊 -->
     <div class="glass-card me-section">
       <div class="me-block">
         <div class="me-label" data-i18n="myRank">我的排名</div>
@@ -138,35 +120,23 @@
       </div>
     </div>
 
-    <!-- 排行榜區塊 -->
     <div class="glass-card">
-      <div id="podium-container" class="podium-container">
-        <!-- 頒獎台 Top 3 動態插入區 -->
-      </div>
-      <div id="leaderboard-list">
-        <!-- 列表 Rank 4-10 動態插入區 -->
-      </div>
+      <div id="podium-container" class="podium-container"></div>
+      <div id="leaderboard-list"></div>
     </div>
   </div>
 
-<script>
+  <script>
+    // ==========================================
+    // 💡 測試區：如果填入真實 Token，會直接打 API 取資料。
+    // 如果留空 ('')，則會直接顯示假資料 (Dev Mode)。
+    // ==========================================
+    const TEMP_TEST_TOKEN = ''; 
+
     const API_ENDPOINT = 'https://swag-campaign-api-905468082258.asia-east1.run.app/api/leaderboard';
     const DEFAULT_AVATAR = 'https://ui-avatars.com/api/?name=SWAG&background=1e293b&color=fff&size=100';
-    let swagToken = null;
     let currentTab = 'daily';
-    let handshakeRetryInterval = null;
     let cachedDailyData = null;
-    let isDataRendered = false;
-
-    // --- 在畫面上動態插入一個 Debug 面板 ---
-    const debugBox = document.createElement('div');
-    debugBox.style = "position:fixed; bottom:0; left:0; width:100%; height:150px; background:rgba(0,0,0,0.85); color:#0f0; font-family:monospace; font-size:11px; padding:10px; overflow-y:auto; z-index:99999; border-top:2px solid #333;";
-    debugBox.innerHTML = '<div style="color:#fbbf24; margin-bottom:5px;">🛠️[連線監聽面板] 正在監聽來自父層的訊息...</div>';
-    document.body.appendChild(debugBox);
-    function logDebug(msg) {
-      debugBox.innerHTML += `<div style="margin-bottom:4px; border-bottom:1px dashed #333; padding-bottom:2px;">${msg}</div>`;
-      debugBox.scrollTop = debugBox.scrollHeight;
-    }
 
     // --- 多語系 ---
     const i18n = {
@@ -197,6 +167,7 @@
       document.getElementById('leaderboard-list').innerHTML = `
         <div class="list-item"><div class="rank-num skeleton">1</div><div class="user-info skeleton">Mask</div><div class="score-wrap skeleton">0</div></div>
         <div class="list-item"><div class="rank-num skeleton">2</div><div class="user-info skeleton">Mask</div><div class="score-wrap skeleton">0</div></div>
+        <div class="list-item"><div class="rank-num skeleton">3</div><div class="user-info skeleton">Mask</div><div class="score-wrap skeleton">0</div></div>
       `;
     }
 
@@ -215,7 +186,6 @@
     }
 
     function renderData(leaderboard, meData) {
-      isDataRendered = true; 
       const myRankEl = document.getElementById('my-rank');
       myRankEl.classList.remove('skeleton');
       document.getElementById('my-score-wrap').classList.remove('skeleton');
@@ -273,28 +243,7 @@
         btn.classList.remove('active');
         if (btn.getAttribute('onclick').includes(type)) btn.classList.add('active');
       });
-      if (cachedDailyData) processAndRender();
-      else if (window.self === window.top) enableDevMode();
-    }
-
-    async function fetchApiData(token) {
-      logDebug(`⏳ 開始使用 Token 呼叫 API...`);
-      try {
-        const res = await fetch(API_ENDPOINT, { headers: { 'Authorization': `Bearer ${token}` } });
-        if (!res.ok) {
-           if (res.status === 401) throw new Error("Token 驗證失敗 (401)，可能已過期或被主站阻擋。");
-           if (res.status === 429) throw new Error("請求太頻繁被限流 (429)。");
-           throw new Error(`伺服器回應錯誤狀態碼: ${res.status}`);
-        }
-        cachedDailyData = await res.json();
-        logDebug(`✅ API 呼叫成功，正在渲染畫面...`);
-        // 成功取得資料後，隱藏 Debug 面板以保持畫面美觀
-        setTimeout(() => { debugBox.style.display = 'none'; }, 2000);
-        processAndRender();
-      } catch (err) {
-        logDebug(`❌ API 錯誤: ${err.message}`);
-        showErrorOnScreen("API 呼叫失敗", err.message);
-      }
+      processAndRender();
     }
 
     function enableDevMode() {
@@ -303,69 +252,41 @@
         leaderboard:[
           { rank: 1, masked_user_id: "5e69***8583", total_diamonds: 1254018, avatar_url: "" },
           { rank: 2, masked_user_id: "58fe***bff3", total_diamonds: 1140660, avatar_url: "" },
-          { rank: 3, masked_user_id: "5da1***7b48", total_diamonds: 1113679, avatar_url: "" }
+          { rank: 3, masked_user_id: "5da1***7b48", total_diamonds: 1113679, avatar_url: "" },
+          { rank: 4, masked_user_id: "6335***cd9a", total_diamonds: 961030, avatar_url: "" },
+          { rank: 5, masked_user_id: "5e0a***9dbc", total_diamonds: 957995, avatar_url: "" },
+          { rank: 6, masked_user_id: "6657***0a71", total_diamonds: 902374, avatar_url: "" }
         ],
         me: { rank: 4, total_diamonds: 961030 }
       };
       processAndRender();
     }
 
-    function postIframeReady() { 
-      logDebug(`📤 發送 IFRAME_READY 請求 Token...`);
-      window.parent.postMessage({ type: 'IFRAME_READY' }, '*'); 
+    // --- 直接執行，不再等待 Iframe 握手 ---
+    async function init() {
+      if (!TEMP_TEST_TOKEN) {
+        // 沒有填 Token，直接進入假資料預覽模式
+        enableDevMode();
+        return;
+      }
+      
+      try {
+        const res = await fetch(API_ENDPOINT, { headers: { 'Authorization': `Bearer ${TEMP_TEST_TOKEN}` } });
+        if (!res.ok) {
+           if (res.status === 401) throw new Error("Token 驗證失敗 (401)，請確認 TEMP_TEST_TOKEN 是否正確且未過期。");
+           throw new Error(`伺服器回應錯誤狀態碼: ${res.status}`);
+        }
+        cachedDailyData = await res.json();
+        processAndRender();
+      } catch (err) {
+        showErrorOnScreen("資料獲取失敗", err.message);
+      }
     }
     
     window.addEventListener('DOMContentLoaded', () => {
       applyLang(langs[0]);
       showSkeleton();
-      setTimeout(postIframeReady, 100);
-      handshakeRetryInterval = setInterval(() => { if (!swagToken) postIframeReady(); }, 3000);
-
-      setTimeout(() => {
-        if (!isDataRendered) {
-          if (window.self === window.top && !swagToken) {
-             clearInterval(handshakeRetryInterval);
-             enableDevMode();
-          } else if (!swagToken) {
-             logDebug(`🛑 4 秒超時！仍未收到 SET_TOKEN`);
-             showErrorOnScreen("Iframe 通訊失敗", "等不到 SWAG 主站發送的 Token。請看下方黑底綠字的監聽面板，截圖給主站工程師確認。");
-          }
-        }
-      }, 4000);
-    });
-
-    // 🏆 終極監聽器：把主站丟過來的所有東西印在畫面上
-    window.addEventListener('message', (event) => {
-      let dataStr = typeof event.data === 'object' ? JSON.stringify(event.data) : event.data;
-      // 過濾掉太多無關的套件訊息 (如 react devtools)
-      if (dataStr && !dataStr.includes('react-devtools') && !dataStr.includes('webpack')) {
-         logDebug(`📥 收到父層訊息: ${dataStr}`);
-      }
-      
-      const data = event.data;
-      if (!data) return;
-      if (data.type === 'SET_TOKEN') {
-        logDebug(`🔑 成功解析到 Token!`);
-        if (swagToken === data.token) return;
-        swagToken = data.token;
-        if (handshakeRetryInterval) { clearInterval(handshakeRetryInterval); handshakeRetryInterval = null; }
-        fetchApiData(swagToken);
-      }
-    });
-
-    document.addEventListener('click', (e) => {
-      if (window.self === window.top) return;
-      const link = e.target.closest('a[target="_blank"]');
-      if (link) {
-        try {
-          const url = new URL(link.href);
-          if (url.hostname.includes('swag.live')) {
-            e.preventDefault();
-            logDebug(`🚀 攔截跳轉: 請求父層開啟 ${link.href}`);
-            window.parent.postMessage({ type: 'PWA_NAVIGATE', url: link.href }, '*');
-          }
-        } catch(err) {}
-      }
+      setTimeout(init, 500); // 稍微延遲 0.5 秒讓骨架屏特效展示一下
     });
   </script>
 </body>
