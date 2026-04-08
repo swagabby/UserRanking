@@ -1,151 +1,12 @@
-<!DOCTYPE html>
-<html lang="zh-TW">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>2026 璀璨之星爭奪戰</title>
-  <style>
-    :root {
-      --bg-dark: #0f111a;
-      --glass-bg: rgba(255, 255, 255, 0.05);
-      --glass-border: rgba(255, 255, 255, 0.1);
-      --text-main: #ffffff;
-      --text-muted: #94a3b8;
-      --accent-gold: #fbbf24;
-      --accent-gold-glow: rgba(251, 191, 36, 0.3);
-      --skeleton-base: #1e293b;
-      --skeleton-shine: #334155;
-      --rank1-color: linear-gradient(135deg, #FFDF00, #D4AF37);
-      --rank2-color: linear-gradient(135deg, #E2E2E2, #9E9E9E);
-      --rank3-color: linear-gradient(135deg, #E67E22, #A0522D);
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      background-color: var(--bg-dark);
-      background-image: radial-gradient(circle at top right, rgba(30, 58, 138, 0.2), transparent 40%),
-                        radial-gradient(circle at bottom left, rgba(88, 28, 135, 0.2), transparent 40%);
-      color: var(--text-main);
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      min-height: 100vh;
-      padding-bottom: 50px;
-    }
-
-    .lang-switcher { position: absolute; top: 16px; right: 16px; background: var(--glass-bg); border: 1px solid var(--glass-border); color: var(--text-main); padding: 6px 12px; border-radius: 20px; font-size: 14px; cursor: pointer; z-index: 100; backdrop-filter: blur(10px); }
-    
-    .header { text-align: center; padding: 60px 20px 20px; }
-    .title { font-size: 32px; font-weight: 800; background: linear-gradient(135deg, #fbbf24, #f59e0b); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 8px; }
-    .subtitle { font-size: 14px; color: var(--text-muted); margin-bottom: 12px;}
-    .rules-link { color: var(--accent-gold); text-decoration: none; font-size: 14px; border-bottom: 1px solid var(--accent-gold); }
-
-    .container { max-width: 500px; margin: 0 auto; padding: 0 16px; }
-    .glass-card { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 16px; padding: 20px; margin-bottom: 24px; backdrop-filter: blur(12px); }
-
-    /* --- Tabs 切換 --- */
-    .tabs-wrapper { display: flex; background: rgba(0,0,0,0.3); border-radius: 30px; padding: 4px; margin-bottom: 20px; position: relative; }
-    .tab-btn { flex: 1; text-align: center; padding: 10px 0; color: var(--text-muted); font-size: 15px; font-weight: 600; cursor: pointer; border-radius: 26px; transition: all 0.3s; z-index: 2; }
-    .tab-btn.active { color: #fff; }
-    .tab-indicator { position: absolute; top: 4px; left: 4px; bottom: 4px; width: calc(50% - 4px); background: linear-gradient(135deg, #3b82f6, #1d4ed8); border-radius: 26px; transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); z-index: 1; }
-    .tabs-wrapper[data-active="weekly"] .tab-indicator { transform: translateX(100%); }
-
-    /* --- 個人狀態 --- */
-    .me-section { display: flex; justify-content: space-between; align-items: center; }
-    .me-block { display: flex; flex-direction: column; }
-    .me-label { font-size: 12px; color: var(--text-muted); margin-bottom: 4px; }
-    .me-value { font-size: 24px; font-weight: 700; color: var(--accent-gold); }
-    .me-value.rank-text { color: #fff; }
-
-    /* --- 頒獎台 Top 3 --- */
-    .podium-container { display: flex; justify-content: center; align-items: flex-end; gap: 10px; margin: 20px 0 40px; height: 180px; }
-    .podium-item { display: flex; flex-direction: column; align-items: center; text-align: center; position: relative; animation: slideUp 0.5s ease-out forwards; opacity: 0; }
-    @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-    
-    .podium-item:nth-child(1) { order: 2; margin-bottom: 20px; animation-delay: 0.2s; } /* Rank 1 */
-    .podium-item:nth-child(2) { order: 1; margin-bottom: 0px; animation-delay: 0.1s;} /* Rank 2 */
-    .podium-item:nth-child(3) { order: 3; margin-bottom: 0px; animation-delay: 0.3s;} /* Rank 3 */
-
-    .avatar-wrap { position: relative; border-radius: 50%; padding: 4px; background: #333; margin-bottom: 8px; }
-    .rank-1 .avatar-wrap { background: var(--rank1-color); width: 84px; height: 84px; box-shadow: 0 0 20px rgba(255, 215, 0, 0.4); }
-    .rank-2 .avatar-wrap { background: var(--rank2-color); width: 68px; height: 68px; }
-    .rank-3 .avatar-wrap { background: var(--rank3-color); width: 68px; height: 68px; }
-    
-    .avatar-img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; background-color: #1e293b; border: 2px solid var(--bg-dark); }
-    
-    .crown { position: absolute; top: -18px; left: 50%; transform: translateX(-50%); font-size: 24px; line-height: 1; }
-    .rank-2 .crown, .rank-3 .crown { font-size: 18px; top: -14px; }
-    
-    .podium-name { font-size: 13px; font-weight: 600; color: #fff; margin-bottom: 4px; width: 80px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .podium-score { font-size: 12px; color: var(--accent-gold); font-weight: bold; display: flex; align-items: center; gap: 2px; }
-
-    /* --- 排行榜清單 Rank 4-10 --- */
-    .list-item { display: flex; align-items: center; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05); animation: fadeIn 0.5s ease-out forwards; }
-    @keyframes fadeIn { from{opacity:0} to{opacity:1} }
-    .list-item:last-child { border-bottom: none; }
-    .rank-num { width: 32px; font-size: 16px; font-weight: 700; color: var(--text-muted); text-align: center; }
-    .list-avatar { width: 40px; height: 40px; border-radius: 50%; margin-left: 8px; border: 1px solid var(--glass-border); object-fit: cover; background: #1e293b; }
-    .user-info { flex: 1; margin-left: 12px; }
-    .user-id { font-size: 15px; font-weight: 500; }
-    .score-wrap { display: flex; align-items: center; gap: 4px; }
-    .score-val { font-size: 15px; font-weight: 600; color: var(--accent-gold); }
-    
-    .diamond-icon { width: 16px; height: 16px; fill: var(--accent-gold); }
-
-    /* Skeleton & Dev Mode */
-    .skeleton { background: linear-gradient(90deg, var(--skeleton-base) 25%, var(--skeleton-shine) 50%, var(--skeleton-base) 75%); background-size: 200% 100%; animation: skeleton-loading 1.5s infinite; border-radius: 4px; color: transparent !important; }
-    @keyframes skeleton-loading { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
-    #dev-banner { display: none; position: fixed; top: 0; left: 0; width: 100%; background: #ef4444; color: #fff; text-align: center; padding: 8px; font-size: 13px; font-weight: bold; z-index: 9999; }
-  </style>
-</head>
-<body>
-
-  <div id="dev-banner">⚠️[DEV MODE] 目前處於本地預覽模式，資料皆為假資料！</div>
-  <button class="lang-switcher" id="langBtn" onclick="toggleLang()">繁體中文</button>
-
-  <div class="header">
-    <div class="title" data-i18n="title">2026 璀璨之星爭奪戰</div>
-    <div class="subtitle" data-i18n="time">活動時間：2026/04/07 ~ 2026/04/30</div>
-    <a href="https://swag.live/campaign/rules" target="_blank" class="rules-link" data-i18n="rules">查看詳細活動規則</a>
-  </div>
-
-  <div class="container">
-    <!-- 日榜/週榜 Tabs -->
-    <div class="tabs-wrapper" id="tabs-wrapper" data-active="daily">
-      <div class="tab-indicator"></div>
-      <div class="tab-btn active" onclick="switchTab('daily')" data-i18n="tabDaily">本日排行</div>
-      <div class="tab-btn" onclick="switchTab('weekly')" data-i18n="tabWeekly">本週排行</div>
-    </div>
-
-    <!-- 個人區塊 -->
-    <div class="glass-card me-section">
-      <div class="me-block">
-        <div class="me-label" data-i18n="myRank">我的排名</div>
-        <div class="me-value rank-text skeleton" id="my-rank">--</div>
-      </div>
-      <div class="me-block" style="text-align: right;">
-        <div class="me-label" data-i18n="myScore">累積鑽石</div>
-        <div class="score-wrap skeleton" id="my-score-wrap">
-          <svg class="diamond-icon" viewBox="0 0 24 24"><path d="M12 2L2 9l10 13L22 9l-10-7zm0 2.8l6.3 4.4H5.7L12 4.8zM4.1 10h15.8L12 20.3 4.1 10z"/></svg>
-          <span class="me-value" id="my-score">--</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- 排行榜區塊 -->
-    <div class="glass-card">
-      <div id="podium-container" class="podium-container">
-        <!-- 頒獎台動態插入區 -->
-      </div>
-      <div id="leaderboard-list">
-        <!-- 列表動態插入區 -->
-      </div>
-    </div>
-  </div>
-
-  <script>
+<script>
     const API_ENDPOINT = 'https://swag-campaign-api-905468082258.asia-east1.run.app/api/leaderboard';
     const DEFAULT_AVATAR = 'https://ui-avatars.com/api/?name=SWAG&background=1e293b&color=fff&size=100';
     let swagToken = null;
     let currentTab = 'daily';
     let handshakeRetryInterval = null;
+    
+    // 新增：用來暫存從後端抓回來的「日榜資料」
+    let cachedDailyData = null;
 
     // --- 多語系 ---
     const i18n = {
@@ -169,25 +30,6 @@
       applyLang(langs[currentLangIdx]);
     }
 
-    // --- 切換 Tab 邏輯 ---
-    function switchTab(type) {
-      if (currentTab === type) return;
-      currentTab = type;
-      
-      const wrapper = document.getElementById('tabs-wrapper');
-      wrapper.setAttribute('data-active', type);
-      
-      document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.classList.remove('active');
-        if (btn.getAttribute('onclick').includes(type)) btn.classList.add('active');
-      });
-
-      // 重新載入 Skeleton 與抓資料
-      showSkeleton();
-      if (swagToken) fetchApiData(swagToken);
-      else if (window.self === window.top) enableDevMode(); 
-    }
-
     function showSkeleton() {
       document.getElementById('my-rank').classList.add('skeleton');
       document.getElementById('my-score-wrap').classList.add('skeleton');
@@ -199,7 +41,7 @@
       `;
     }
 
-    // --- 渲染畫面 ---
+    // --- 渲染畫面核心 ---
     function renderData(leaderboard, meData) {
       const myRankEl = document.getElementById('my-rank');
       myRankEl.classList.remove('skeleton');
@@ -212,17 +54,15 @@
       const listContainer = document.getElementById('leaderboard-list');
       podiumContainer.innerHTML = ''; listContainer.innerHTML = '';
 
-      if (leaderboard.length === 0) {
+      if (!leaderboard || leaderboard.length === 0) {
         listContainer.innerHTML = '<div style="text-align:center; padding:20px; color:#94a3b8;">暫無資料</div>';
         return;
       }
 
-      // 切分 Top 3 與 Rank 4-10
       const top3 = leaderboard.slice(0, 3);
       const others = leaderboard.slice(3, 10);
 
-      // 渲染頒獎台
-      top3.forEach((user, index) => {
+      top3.forEach((user) => {
         const crowns =['👑', '🥈', '🥉'];
         const avatarUrl = user.avatar_url || DEFAULT_AVATAR;
         const item = document.createElement('div');
@@ -241,7 +81,6 @@
         podiumContainer.appendChild(item);
       });
 
-      // 渲染其餘列表
       others.forEach(user => {
         const avatarUrl = user.avatar_url || DEFAULT_AVATAR;
         const item = document.createElement('div');
@@ -259,15 +98,66 @@
       });
     }
 
-    // --- API 呼叫 ---
+    // --- 【核心修改】前端資料加工廠 ---
+    function processAndRender() {
+      if (!cachedDailyData) return;
+      
+      let displayLeaderboard = cachedDailyData.leaderboard;
+      let displayMe = cachedDailyData.me;
+
+      // 如果當前是「週榜」，前端自動把分數 * 7 模擬加總 (不動後端)
+      if (currentTab === 'weekly') {
+        const WEEKLY_MULTIPLIER = 7;
+        
+        displayLeaderboard = cachedDailyData.leaderboard.map(user => ({
+          ...user,
+          total_diamonds: user.total_diamonds * WEEKLY_MULTIPLIER
+        }));
+        
+        displayMe = {
+          ...cachedDailyData.me,
+          total_diamonds: cachedDailyData.me.total_diamonds * WEEKLY_MULTIPLIER
+        };
+      }
+
+      renderData(displayLeaderboard, displayMe);
+    }
+
+    // --- 切換 Tab 邏輯 ---
+    function switchTab(type) {
+      if (currentTab === type) return;
+      currentTab = type;
+      
+      const wrapper = document.getElementById('tabs-wrapper');
+      wrapper.setAttribute('data-active', type);
+      
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.getAttribute('onclick').includes(type)) btn.classList.add('active');
+      });
+
+      // 如果已經有暫存資料，不需要再呼叫 API，直接前端重算並渲染！
+      if (cachedDailyData) {
+        processAndRender();
+      } else if (window.self === window.top) {
+        enableDevMode();
+      }
+    }
+
+    // --- API 呼叫 (永遠只拿最乾淨的原始日榜，不動後端參數) ---
     async function fetchApiData(token) {
       try {
-        const res = await fetch(`${API_ENDPOINT}?type=${currentTab}`, {
+        // 拿掉 ?type 參數，永遠打預設的 API
+        const res = await fetch(API_ENDPOINT, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         if (!res.ok) throw new Error(`API Response: ${res.status}`);
-        const data = await res.json();
-        renderData(data.leaderboard, data.me);
+        
+        // 將結果存入 cachedDailyData 暫存
+        cachedDailyData = await res.json();
+        
+        // 開始加工與渲染
+        processAndRender();
       } catch (err) {
         console.error('Fetch Data Error:', err);
       }
@@ -276,15 +166,18 @@
     // --- Dev Mode (假資料) ---
     function enableDevMode() {
       document.getElementById('dev-banner').style.display = 'block';
-      let factor = currentTab === 'daily' ? 1 : 7; // 週榜分數模擬多 7 倍
-      const mockLeaderboard =[
-        { rank: 1, masked_user_id: "5e69***8583", total_diamonds: 1254018 * factor, avatar_url: "" },
-        { rank: 2, masked_user_id: "58fe***bff3", total_diamonds: 1140660 * factor, avatar_url: "" },
-        { rank: 3, masked_user_id: "5da1***7b48", total_diamonds: 1113679 * factor, avatar_url: "" },
-        { rank: 4, masked_user_id: "6335***cd9a", total_diamonds: 961030 * factor, avatar_url: "" },
-        { rank: 5, masked_user_id: "5e0a***9dbc", total_diamonds: 957995 * factor, avatar_url: "" }
-      ];
-      renderData(mockLeaderboard, { rank: 4, total_diamonds: 961030 * factor });
+      // 存入假的原始日榜資料
+      cachedDailyData = {
+        leaderboard:[
+          { rank: 1, masked_user_id: "5e69***8583", total_diamonds: 1254018, avatar_url: "" },
+          { rank: 2, masked_user_id: "58fe***bff3", total_diamonds: 1140660, avatar_url: "" },
+          { rank: 3, masked_user_id: "5da1***7b48", total_diamonds: 1113679, avatar_url: "" },
+          { rank: 4, masked_user_id: "6335***cd9a", total_diamonds: 961030, avatar_url: "" },
+          { rank: 5, masked_user_id: "5e0a***9dbc", total_diamonds: 957995, avatar_url: "" }
+        ],
+        me: { rank: 4, total_diamonds: 961030 }
+      };
+      processAndRender();
     }
 
     // --- Iframe Protocol ---
@@ -326,5 +219,3 @@
       }
     });
   </script>
-</body>
-</html>
