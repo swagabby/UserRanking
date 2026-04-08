@@ -1,292 +1,1001 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="zh-Hant">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>2026 璀璨之星爭奪戰</title>
-  <style>
-    /* === 核心變數 & 基礎重置 === */
-    :root {
-      --bg-dark: #0f111a;
-      --glass-bg: rgba(255, 255, 255, 0.05);
-      --glass-border: rgba(255, 255, 255, 0.1);
-      --text-main: #ffffff;
-      --text-muted: #94a3b8;
-      --accent-gold: #fbbf24;
-      --skeleton-base: #1e293b;
-      --skeleton-shine: #334155;
-      --rank1-color: linear-gradient(135deg, #FFDF00, #D4AF37);
-      --rank2-color: linear-gradient(135deg, #E2E2E2, #9E9E9E);
-      --rank3-color: linear-gradient(135deg, #E67E22, #A0522D);
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      background-color: var(--bg-dark);
-      background-image: radial-gradient(circle at top right, rgba(30, 58, 138, 0.2), transparent 40%),
-                        radial-gradient(circle at bottom left, rgba(88, 28, 135, 0.2), transparent 40%);
-      color: var(--text-main);
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      min-height: 100vh;
-      padding-bottom: 50px;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>2026 璀璨之星爭奪戰 - 榮譽榜</title>
+<style>
+  /* =========================================
+     1. Design Tokens (系統化設計規範)
+     ========================================= */
+  :root {
+    --font-family: "PingFang TC", "Microsoft JhengHei", -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-title-l: 22px;
+    --font-title-m: 20px;
+    --font-body-l: 16px;
+    --font-body-m: 14px;
+    --font-body-s: 12px;
 
-    .lang-switcher { position: absolute; top: 16px; right: 16px; background: var(--glass-bg); border: 1px solid var(--glass-border); color: var(--text-main); padding: 6px 12px; border-radius: 20px; font-size: 14px; cursor: pointer; z-index: 100; backdrop-filter: blur(10px); }
-    .header { text-align: center; padding: 60px 20px 20px; }
-    .title { font-size: 32px; font-weight: 800; background: linear-gradient(135deg, #fbbf24, #f59e0b); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 8px; }
-    .subtitle { font-size: 14px; color: var(--text-muted); margin-bottom: 12px;}
-    .rules-link { color: var(--accent-gold); text-decoration: none; font-size: 14px; border-bottom: 1px solid var(--accent-gold); }
-
-    .container { max-width: 500px; margin: 0 auto; padding: 0 16px; }
-    .glass-card { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 16px; padding: 20px; margin-bottom: 24px; backdrop-filter: blur(12px); }
-
-    .tabs-wrapper { display: flex; background: rgba(0,0,0,0.3); border-radius: 30px; padding: 4px; margin-bottom: 20px; position: relative; }
-    .tab-btn { flex: 1; text-align: center; padding: 10px 0; color: var(--text-muted); font-size: 15px; font-weight: 600; cursor: pointer; border-radius: 26px; transition: all 0.3s; z-index: 2; }
-    .tab-btn.active { color: #fff; }
-    .tab-indicator { position: absolute; top: 4px; left: 4px; bottom: 4px; width: calc(50% - 4px); background: linear-gradient(135deg, #3b82f6, #1d4ed8); border-radius: 26px; transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); z-index: 1; }
-    .tabs-wrapper[data-active="weekly"] .tab-indicator { transform: translateX(100%); }
-
-    .me-section { display: flex; justify-content: space-between; align-items: center; }
-    .me-block { display: flex; flex-direction: column; }
-    .me-label { font-size: 12px; color: var(--text-muted); margin-bottom: 4px; }
-    .me-value { font-size: 24px; font-weight: 700; color: var(--accent-gold); }
-    .me-value.rank-text { color: #fff; }
-
-    .podium-container { display: flex; justify-content: center; align-items: flex-end; gap: 10px; margin: 20px 0 40px; height: 180px; }
-    .podium-item { display: flex; flex-direction: column; align-items: center; text-align: center; position: relative; animation: slideUp 0.5s ease-out forwards; opacity: 0; }
-    @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-    .podium-item:nth-child(1) { order: 2; margin-bottom: 20px; animation-delay: 0.1s; } 
-    .podium-item:nth-child(2) { order: 1; margin-bottom: 0px; animation-delay: 0.0s;} 
-    .podium-item:nth-child(3) { order: 3; margin-bottom: 0px; animation-delay: 0.2s;} 
-
-    .avatar-wrap { position: relative; border-radius: 50%; padding: 4px; background: #333; margin-bottom: 8px; }
-    .rank-1 .avatar-wrap { background: var(--rank1-color); width: 84px; height: 84px; box-shadow: 0 0 20px rgba(255, 215, 0, 0.4); }
-    .rank-2 .avatar-wrap { background: var(--rank2-color); width: 68px; height: 68px; }
-    .rank-3 .avatar-wrap { background: var(--rank3-color); width: 68px; height: 68px; }
-    .avatar-img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; background-color: #1e293b; border: 2px solid var(--bg-dark); }
-    .crown { position: absolute; top: -18px; left: 50%; transform: translateX(-50%); font-size: 24px; line-height: 1; }
-    .rank-2 .crown, .rank-3 .crown { font-size: 18px; top: -14px; }
-    .podium-name { font-size: 13px; font-weight: 600; color: #fff; margin-bottom: 4px; width: 80px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .podium-score { font-size: 12px; color: var(--accent-gold); font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 2px; }
-
-    .list-item { display: flex; align-items: center; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05); animation: fadeIn 0.5s ease-out forwards; }
-    @keyframes fadeIn { from{opacity:0} to{opacity:1} }
-    .list-item:last-child { border-bottom: none; }
-    .rank-num { width: 32px; font-size: 16px; font-weight: 700; color: var(--text-muted); text-align: center; }
-    .list-avatar { width: 40px; height: 40px; border-radius: 50%; margin-left: 8px; border: 1px solid var(--glass-border); object-fit: cover; background: #1e293b; }
-    .user-info { flex: 1; margin-left: 12px; }
-    .user-id { font-size: 15px; font-weight: 500; }
-    .score-wrap { display: flex; align-items: center; gap: 4px; }
-    .score-val { font-size: 15px; font-weight: 600; color: var(--accent-gold); }
-    .diamond-icon { width: 16px; height: 16px; fill: var(--accent-gold); }
-
-    .skeleton { background: linear-gradient(90deg, var(--skeleton-base) 25%, var(--skeleton-shine) 50%, var(--skeleton-base) 75%); background-size: 200% 100%; animation: skeleton-loading 1.5s infinite; border-radius: 4px; color: transparent !important; }
-    .skeleton * { visibility: hidden; }
-    @keyframes skeleton-loading { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+    --surface: #0f111a;
+    --surface-container: #1a1d2e;
+    --surface-container-variant: #2a2d3e;
+    --text-primary: #FFFFFF;
+    --text-secondary: #94a3b8;
+    --outline: #334155;
+    --outline-variant: rgba(71, 71, 71, 0.4);
     
-    #dev-banner { display: none; position: fixed; top: 0; left: 0; width: 100%; background: #ef4444; color: #fff; text-align: center; padding: 8px; font-size: 13px; font-weight: bold; z-index: 9999; }
-  </style>
+    --primary: #fbbf24;
+    --primary-glow: rgba(251, 191, 36, 0.3);
+    --gold: #fbbf24;
+    --silver: #C8C8C8;
+    --bronze: #CD7F32;
+
+    --radius-s: 8px;
+    --radius-m: 12px;
+    --radius-l: 16px;
+    --radius-xl: 24px;
+    --radius-full: 1000px;
+    
+    --space-2: 4px;
+    --space-3: 8px;
+    --space-4: 12px;
+    --space-5: 16px;
+    --space-6: 24px;
+  }
+
+  /* =========================================
+     2. Base & Layout
+     ========================================= */
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  
+  body {
+    font-family: var(--font-family);
+    background-color: #0A0A0A;
+    background-image: radial-gradient(circle at top right, rgba(30, 58, 138, 0.2), transparent 40%),
+                      radial-gradient(circle at bottom left, rgba(88, 28, 135, 0.2), transparent 40%);
+    color: var(--text-primary);
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .device-container {
+    max-width: 500px;
+    margin: 0 auto;
+    background-color: var(--surface);
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* 上半部固定區域 */
+  .top-fixed-section {
+    flex-shrink: 0;
+    background-color: var(--surface);
+    z-index: 20;
+    position: relative;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+    border-bottom: 1px solid var(--outline-variant);
+  }
+
+  /* 下半部滾動區域 */
+  .content-scroll {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding-bottom: 140px;
+    scrollbar-width: none;
+  }
+  .content-scroll::-webkit-scrollbar { display: none; }
+
+  /* =========================================
+     3. UI Components
+     ========================================= */
+  .lang-switcher {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    min-width: 44px;
+    min-height: 44px;
+    border-radius: var(--radius-full);
+    background: rgba(35, 35, 35, 0.6);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid var(--outline);
+    color: var(--text-primary);
+    font-size: var(--font-body-m);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    z-index: 9999;
+  }
+
+  /* Header */
+  .header {
+    padding: 60px 20px 20px;
+    text-align: center;
+    position: relative;
+  }
+  .header-title-row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: var(--space-2);
+  }
+  .header h1 {
+    margin: 0;
+    font-size: var(--font-title-l);
+    font-weight: 800;
+    background: linear-gradient(135deg, #fbbf24, #f59e0b, #d97706);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .subtitle {
+    font-size: var(--font-body-s);
+    color: var(--text-secondary);
+    margin-top: 8px;
+  }
+  .history-icon {
+    position: absolute;
+    top: 60px;
+    right: 20px;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 20px;
+    cursor: pointer;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--outline);
+    border-radius: 50%;
+    transition: all 0.3s;
+  }
+  .history-icon:hover {
+    background: rgba(251, 191, 36, 0.2);
+    border-color: var(--gold);
+  }
+
+  /* Main Tabs */
+  .tabs-main {
+    display: flex;
+    background-color: var(--surface-container);
+    border-bottom: 1px solid var(--outline);
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .tabs-main::-webkit-scrollbar { display: none; }
+  
+  .tab-item {
+    font-size: var(--font-body-m);
+    color: var(--text-secondary);
+    cursor: pointer;
+    white-space: nowrap;
+    padding: 0 var(--space-5);
+    flex: 1;
+    min-height: 48px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    flex-shrink: 0;
+    transition: color 0.3s;
+  }
+  .tab-item.active { color: var(--primary); font-weight: 600; }
+  .tab-item.active::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 20%;
+    width: 60%;
+    height: 3px;
+    border-radius: 3px 3px 0 0;
+    background-color: var(--primary);
+  }
+
+  /* Podium */
+  .podium {
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    padding: 40px 10px 16px;
+    background: linear-gradient(180deg, rgba(251, 191, 36, 0.08) 0%, transparent 100%);
+    gap: var(--space-3);
+    transition: opacity 0.3s;
+  }
+  .podium-item {
+    text-align: center;
+    width: 100px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .avatar-wrapper {
+    position: relative;
+    margin-bottom: var(--space-3);
+  }
+  .avatar-round {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    border: 2px solid var(--outline);
+    object-fit: cover;
+    background: var(--surface-container);
+  }
+  .no1 .avatar-round {
+    width: 84px;
+    height: 84px;
+    border: 3px solid var(--gold);
+    box-shadow: 0 0 24px var(--primary-glow);
+  }
+  
+  .crown-icon {
+    position: absolute;
+    top: -28px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 32px;
+    height: 32px;
+    filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5));
+  }
+  .rank-badge {
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 600;
+    border-radius: var(--radius-full);
+    padding: 2px 8px;
+    border: 2px solid var(--surface);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+    min-width: 24px;
+  }
+  .badge-1 {
+    background: var(--gold);
+    color: #000;
+    top: auto;
+    bottom: -12px;
+  }
+  .badge-2 {
+    background: var(--silver);
+    color: #000;
+  }
+  .badge-3 {
+    background: var(--bronze);
+  }
+
+  .nickname {
+    font-size: var(--font-body-m);
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 90px;
+  }
+  .val-text {
+    font-size: var(--font-body-s);
+    margin-top: 2px;
+    font-weight: 600;
+    color: var(--primary);
+  }
+
+  /* List */
+  .list-row {
+    display: flex;
+    align-items: center;
+    padding: var(--space-4) var(--space-5);
+    border-bottom: 1px solid var(--outline-variant);
+  }
+  .list-row.is-me {
+    background: linear-gradient(90deg, rgba(251, 191, 36, 0.1) 0%, transparent 100%);
+    border-left: 3px solid var(--primary);
+  }
+  .rank-num {
+    width: 36px;
+    font-weight: 600;
+    font-size: var(--font-body-l);
+    color: var(--text-secondary);
+  }
+  .is-me .rank-num {
+    color: var(--primary);
+  }
+  .avatar-square {
+    width: 44px;
+    height: 44px;
+    border-radius: var(--radius-m);
+    margin-right: var(--space-4);
+    object-fit: cover;
+    border: 1px solid var(--outline);
+    background: var(--surface-container);
+  }
+  .is-me .avatar-square {
+    border-color: var(--primary);
+  }
+  .user-info {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    overflow: hidden;
+  }
+  .user-name {
+    font-size: var(--font-body-m);
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .is-me .user-name {
+    font-weight: 600;
+    color: var(--primary);
+  }
+  .yesterday-badge {
+    background: linear-gradient(135deg, #fbbf24, #f59e0b);
+    color: #000;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 6px;
+    border-radius: 4px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .data-value {
+    font-weight: 600;
+    font-size: var(--font-body-m);
+    text-align: right;
+    padding-left: 8px;
+    color: var(--primary);
+  }
+
+  /* Diamond Icon */
+  .diamond-icon {
+    width: 16px;
+    height: 16px;
+    fill: var(--primary);
+  }
+
+  /* Sticky Footer */
+  .sticky-footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    max-width: 500px;
+    margin: 0 auto;
+    background: rgba(26, 29, 46, 0.95);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding: var(--space-4);
+    box-shadow: 0 -12px 32px rgba(0,0,0,0.8);
+    z-index: 30;
+  }
+  .my-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-3);
+  }
+  .my-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-s);
+    margin-right: var(--space-3);
+    border: 1px solid var(--primary);
+  }
+  .footer-tip {
+    font-size: var(--font-body-s);
+    color: var(--text-secondary);
+    text-align: center;
+  }
+
+  /* Skeleton */
+  @keyframes shimmer {
+    0% { background-position: -200px 0; }
+    100% { background-position: 200px 0; }
+  }
+  .skeleton {
+    background: linear-gradient(90deg, var(--surface-container) 25%, var(--surface-container-variant) 50%, var(--surface-container) 75%);
+    background-size: 400px 100%;
+    animation: shimmer 1.5s infinite linear;
+    border-radius: var(--radius-s);
+    color: transparent !important;
+  }
+  .skeleton * { visibility: hidden; }
+
+  /* Modal */
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(8px);
+    z-index: 200;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .modal-overlay.show {
+    display: flex;
+    opacity: 1;
+  }
+  .modal-content {
+    background: var(--surface-container);
+    width: 90%;
+    max-width: 400px;
+    max-height: 80vh;
+    border-radius: var(--radius-xl);
+    padding: var(--space-6);
+    border: 1px solid var(--outline);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.8);
+    overflow-y: auto;
+    transform: translateY(20px);
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+  .modal-overlay.show .modal-content {
+    transform: translateY(0);
+  }
+  .modal-content h2 {
+    margin-top: 0;
+    font-size: var(--font-title-m);
+    text-align: center;
+    color: var(--primary);
+    margin-bottom: var(--space-5);
+  }
+  .modal-close-btn {
+    width: 100%;
+    margin-top: var(--space-5);
+    background: var(--primary);
+    color: #000;
+    border: none;
+    min-height: 44px;
+    padding: 0 var(--space-5);
+    border-radius: var(--radius-full);
+    font-size: var(--font-body-m);
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  /* Dev Banner */
+  #dev-banner {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background: #ef4444;
+    color: #fff;
+    text-align: center;
+    padding: 8px;
+    font-size: 13px;
+    font-weight: bold;
+    z-index: 9999;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+  }
+
+  /* Yesterday List Styles */
+  .yesterday-list {
+    margin-top: var(--space-4);
+  }
+  .yesterday-item {
+    display: flex;
+    align-items: center;
+    padding: var(--space-3) 0;
+    border-bottom: 1px solid var(--outline-variant);
+  }
+  .yesterday-rank {
+    width: 30px;
+    font-weight: 600;
+    color: var(--gold);
+  }
+  .yesterday-name {
+    flex: 1;
+    color: var(--text-primary);
+    font-size: var(--font-body-m);
+  }
+  .yesterday-value {
+    color: var(--text-secondary);
+    font-size: var(--font-body-s);
+  }
+</style>
 </head>
 <body>
 
-  <!-- 本地預覽防呆提示 -->
-  <div id="dev-banner">⚠️ [免 Token 測試模式] 目前顯示為本地假資料！</div>
+  <!-- Dev Mode Banner -->
+  <div id="dev-banner">⚠️ [DEV MODE] 目前處於本地預覽模式，資料皆為假資料</div>
 
-  <button class="lang-switcher" id="langBtn" onclick="toggleLang()">繁體中文</button>
+  <!-- Language Switcher -->
+  <button class="lang-switcher" id="langBtn" onclick="toggleLang()">繁</button>
 
-  <div class="header">
-    <div class="title" data-i18n="title">2026 璀璨之星爭奪戰</div>
-    <div class="subtitle" data-i18n="time">活動時間：2026/04/07 ~ 2026/04/30</div>
-    <a href="https://swag.live/campaign/rules" target="_blank" class="rules-link" data-i18n="rules">查看詳細活動規則</a>
+  <!-- Yesterday Modal -->
+  <div class="modal-overlay" id="yesterdayModal" onclick="closeYesterdayModal(event)">
+    <div class="modal-content" onclick="event.stopPropagation()">
+      <h2 id="yesterdayTitle">昨日榜單</h2>
+      <div class="yesterday-list" id="yesterdayList">
+        <!-- 動態填充 -->
+      </div>
+      <button class="modal-close-btn" onclick="closeYesterdayModal()">關閉</button>
+    </div>
   </div>
 
-  <div class="container">
-    <div class="tabs-wrapper" id="tabs-wrapper" data-active="daily">
-      <div class="tab-indicator"></div>
-      <div class="tab-btn active" onclick="switchTab('daily')" data-i18n="tabDaily">本日排行</div>
-      <div class="tab-btn" onclick="switchTab('weekly')" data-i18n="tabWeekly">本週排行</div>
-    </div>
-
-    <div class="glass-card me-section">
-      <div class="me-block">
-        <div class="me-label" data-i18n="myRank">我的排名</div>
-        <div class="me-value rank-text skeleton" id="my-rank">--</div>
+  <div class="device-container">
+    <!-- Top Fixed Section -->
+    <div class="top-fixed-section">
+      <div class="header">
+        <div class="header-title-row">
+          <h1 id="mainTitle" data-i18n="title">2026 璀璨之星爭奪戰</h1>
+        </div>
+        <div class="subtitle" data-i18n="subtitle">活動時間：2026/04/07 ~ 2026/04/30</div>
+        <!-- History Icon (只在日榜和週榜顯示) -->
+        <div class="history-icon" id="historyIcon" style="display: none;" onclick="openYesterdayModal()">📜</div>
       </div>
-      <div class="me-block" style="text-align: right;">
-        <div class="me-label" data-i18n="myScore">累積鑽石</div>
-        <div class="score-wrap skeleton" id="my-score-wrap">
-          <svg class="diamond-icon" viewBox="0 0 24 24"><path d="M12 2L2 9l10 13L22 9l-10-7zm0 2.8l6.3 4.4H5.7L12 4.8zM4.1 10h15.8L12 20.3 4.1 10z"/></svg>
-          <span class="me-value" id="my-score">--</span>
+
+      <!-- Main Tabs -->
+      <div class="tabs-main">
+        <div class="tab-item active" onclick="changeMode('day', this)" data-i18n="tabDay">日榜</div>
+        <div class="tab-item" onclick="changeMode('week', this)" data-i18n="tabWeek">週榜</div>
+        <div class="tab-item" onclick="changeMode('all', this)" data-i18n="tabAll">累積榜</div>
+      </div>
+
+      <!-- Podium (前三名) -->
+      <div id="podiumView">
+        <div class="podium" id="podiumContent">
+          <!-- Loading skeleton -->
+          <div class="podium-item"><div class="avatar-wrapper"><div class="avatar-round skeleton"></div></div><div class="nickname skeleton">Loading</div></div>
+          <div class="podium-item"><div class="avatar-wrapper"><div class="avatar-round skeleton"></div></div><div class="nickname skeleton">Loading</div></div>
+          <div class="podium-item"><div class="avatar-wrapper"><div class="avatar-round skeleton"></div></div><div class="nickname skeleton">Loading</div></div>
         </div>
       </div>
     </div>
 
-    <div class="glass-card">
-      <div id="podium-container" class="podium-container"></div>
-      <div id="leaderboard-list"></div>
+    <!-- Content Scroll -->
+    <div class="content-scroll" id="scrollArea">
+      <div class="list-table" id="listView">
+        <!-- Loading skeleton -->
+        <div class="list-row">
+          <div class="rank-num skeleton">4</div>
+          <div class="avatar-square skeleton"></div>
+          <div class="user-info"><div class="user-name skeleton">Loading...</div></div>
+          <div class="data-value skeleton">0</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sticky Footer -->
+    <div class="sticky-footer" id="footerBar">
+      <div class="my-info">
+        <div style="display:flex; align-items:center;">
+          <img src="" class="my-avatar" id="footerAvatar" style="display:none;">
+          <div style="display:flex; flex-direction:column; justify-content:center;">
+            <span style="font-size:var(--font-body-m);" id="myRankText">
+              <span data-i18n="myRank">我的排名</span>：<strong id="myRankNum" style="color:var(--primary)">--</strong>
+            </span>
+            <span style="font-size:var(--font-body-m); margin-top: 4px;" id="myScoreText">
+              <span data-i18n="myScore">累積鑽石</span>：<strong id="myScoreNum" style="color:var(--primary)">--</strong>
+              <svg class="diamond-icon" viewBox="0 0 24 24" style="display:inline-block; vertical-align:middle; margin-left:4px;">
+                <path d="M12 2L2 9l10 13L22 9l-10-7zm0 2.8l6.3 4.4H5.7L12 4.8zM4.1 10h15.8L12 20.3 4.1 10z"/>
+              </svg>
+            </span>
+          </div>
+        </div>
+      </div>
+      <div class="footer-tip" id="footerTip">資料載入中...</div>
     </div>
   </div>
 
   <script>
     // ==========================================
-    // 💡 測試區：如果填入真實 Token，會直接打 API 取資料。
-    // 如果留空 ('')，則會直接顯示假資料 (Dev Mode)。
+    // 1. 環境變數與狀態
     // ==========================================
-    const TEMP_TEST_TOKEN = ''; 
-
     const API_ENDPOINT = 'https://swag-campaign-api-905468082258.asia-east1.run.app/api/leaderboard';
-    const DEFAULT_AVATAR = 'https://ui-avatars.com/api/?name=SWAG&background=1e293b&color=fff&size=100';
-    let currentTab = 'daily';
-    let cachedDailyData = null;
-
-    // --- 多語系 ---
-    const i18n = {
-      'zh-TW': { title: '2026 璀璨之星爭奪戰', time: '活動時間：2026/04/07 ~ 2026/04/30', rules: '查看詳細活動規則', myRank: '我的排名', myScore: '累積鑽石', tabDaily: '本日排行', tabWeekly: '本週排行', unranked: '未上榜', langName: '繁體中文' },
-      'en': { title: '2026 Star Diamond Battle', time: 'Period: Apr 7 - Apr 30, 2026', rules: 'View Rules', myRank: 'My Rank', myScore: 'Diamonds', tabDaily: 'Daily', tabWeekly: 'Weekly', unranked: 'Unranked', langName: 'English' }
+    let swagToken = null;
+    let handshakeRetryInterval = null;
+    let currentMode = 'day';
+    let apiData = {
+      day: null,
+      week: null,
+      all: null
     };
-    const langs =['zh-TW', 'en'];
+    let yesterdayData = {
+      day: null,
+      week: null
+    };
+
+    // ==========================================
+    // 2. 多語系
+    // ==========================================
+    const i18n = {
+      'zh-TW': {
+        title: '2026 璀璨之星爭奪戰',
+        subtitle: '活動時間：2026/04/07 ~ 2026/04/30',
+        tabDay: '日榜',
+        tabWeek: '週榜',
+        tabAll: '累積榜',
+        myRank: '我的排名',
+        myScore: '累積鑽石',
+        unranked: '未上榜',
+        langName: '繁',
+        yesterdayTitle: '昨日榜單',
+        yesterdayDay: '昨日日榜 Top 10',
+        yesterdayWeek: '上週週榜 Top 10'
+      },
+      'zh-CN': {
+        title: '2026 璀璨之星争夺战',
+        subtitle: '活动时间：2026/04/07 ~ 2026/04/30',
+        tabDay: '日榜',
+        tabWeek: '周榜',
+        tabAll: '累计榜',
+        myRank: '我的排名',
+        myScore: '累计钻石',
+        unranked: '未上榜',
+        langName: '简',
+        yesterdayTitle: '昨日榜单',
+        yesterdayDay: '昨日日榜 Top 10',
+        yesterdayWeek: '上周周榜 Top 10'
+      },
+      'en': {
+        title: '2026 Star Diamond Battle',
+        subtitle: 'Period: Apr 7 - Apr 30, 2026',
+        tabDay: 'Daily',
+        tabWeek: 'Weekly',
+        tabAll: 'All-time',
+        myRank: 'My Rank',
+        myScore: 'Diamonds',
+        unranked: 'Unranked',
+        langName: 'EN',
+        yesterdayTitle: 'Yesterday\'s Leaderboard',
+        yesterdayDay: 'Yesterday\'s Daily Top 10',
+        yesterdayWeek: 'Last Week\'s Top 10'
+      },
+      'ja': {
+        title: '2026 スターダイヤ争奪戦',
+        subtitle: '開催期間：2026/04/07 ~ 2026/04/30',
+        tabDay: '日間',
+        tabWeek: '週間',
+        tabAll: '累計',
+        myRank: '私の順位',
+        myScore: '獲得ダイヤ',
+        unranked: 'ランク外',
+        langName: '日',
+        yesterdayTitle: '昨日のランキング',
+        yesterdayDay: '昨日の日間 Top 10',
+        yesterdayWeek: '先週の週間 Top 10'
+      }
+    };
+    const langs = ['zh-TW', 'zh-CN', 'en', 'ja'];
     let currentLangIdx = 0;
 
     function applyLang(langKey) {
       const dict = i18n[langKey];
-      document.querySelectorAll('[data-i18n]').forEach(el => { el.innerText = dict[el.getAttribute('data-i18n')]; });
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (dict[key]) el.innerText = dict[key];
+      });
       document.getElementById('langBtn').innerText = dict.langName;
-      const myRankEl = document.getElementById('my-rank');
-      if (myRankEl && !myRankEl.classList.contains('skeleton') && myRankEl.getAttribute('data-raw') === '-1') {
-        myRankEl.innerText = dict.unranked;
+      
+      // 更新昨日榜單標題
+      if (currentMode === 'day') {
+        document.getElementById('yesterdayTitle').innerText = dict.yesterdayDay;
+      } else if (currentMode === 'week') {
+        document.getElementById('yesterdayTitle').innerText = dict.yesterdayWeek;
       }
     }
+
     function toggleLang() {
       currentLangIdx = (currentLangIdx + 1) % langs.length;
       applyLang(langs[currentLangIdx]);
     }
 
-    function showSkeleton() {
-      document.getElementById('my-rank').classList.add('skeleton');
-      document.getElementById('my-score-wrap').classList.add('skeleton');
-      document.getElementById('podium-container').innerHTML = '';
-      document.getElementById('leaderboard-list').innerHTML = `
-        <div class="list-item"><div class="rank-num skeleton">1</div><div class="user-info skeleton">Mask</div><div class="score-wrap skeleton">0</div></div>
-        <div class="list-item"><div class="rank-num skeleton">2</div><div class="user-info skeleton">Mask</div><div class="score-wrap skeleton">0</div></div>
-        <div class="list-item"><div class="rank-num skeleton">3</div><div class="user-info skeleton">Mask</div><div class="score-wrap skeleton">0</div></div>
-      `;
+    // ==========================================
+    // 3. 渲染邏輯
+    // ==========================================
+    const crownSVG = `<svg viewBox="0 0 24 24" fill="none" class="crown-icon"><path d="M2 19H22V21H2V19ZM3 5L7 12L12 3L17 12L21 5L19 17H5L3 5Z" fill="var(--gold)"/><path d="M12 9C12.5523 9 13 8.55228 13 8C13 7.44772 12.5523 7 12 7C11.4477 7 11 7.44772 11 8C11 8.55228 11.4477 9 12 9Z" fill="#FFF"/></svg>`;
+
+    function getAvatarUrl(userId, avatarUrl) {
+      if (avatarUrl && avatarUrl.startsWith('http')) {
+        return avatarUrl;
+      }
+      // 使用 DiceBear API 作為後備
+      return `https://api.dicebear.com/8.x/avataaars/svg?seed=${userId}`;
     }
 
-    function showErrorOnScreen(title, message) {
-      document.getElementById('my-rank').classList.remove('skeleton');
-      document.getElementById('my-score-wrap').classList.remove('skeleton');
-      document.getElementById('my-rank').innerText = '載入失敗';
-      document.getElementById('my-score').innerText = '--';
-      document.getElementById('podium-container').innerHTML = '';
-      document.getElementById('leaderboard-list').innerHTML = `
-        <div style="text-align:center; padding: 30px 20px; color: #ef4444; background: rgba(239,68,68,0.1); border-radius: 8px; margin-top: 20px;">
-          <div style="font-size: 16px; font-weight: bold; margin-bottom: 8px;">⚠️ ${title}</div>
-          <div style="font-size: 13px;">${message}</div>
-        </div>
-      `;
+    function wasInYesterdayTop10(userId) {
+      if (!yesterdayData[currentMode]) return false;
+      return yesterdayData[currentMode].some(item => item.user_id === userId);
     }
 
-    function renderData(leaderboard, meData) {
-      const myRankEl = document.getElementById('my-rank');
-      myRankEl.classList.remove('skeleton');
-      document.getElementById('my-score-wrap').classList.remove('skeleton');
-      myRankEl.setAttribute('data-raw', meData.rank);
-      myRankEl.innerText = meData.rank === -1 ? i18n[langs[currentLangIdx]].unranked : 'No.' + meData.rank;
-      document.getElementById('my-score').innerText = meData.total_diamonds.toLocaleString();
-
-      const podiumContainer = document.getElementById('podium-container');
-      const listContainer = document.getElementById('leaderboard-list');
-      podiumContainer.innerHTML = ''; listContainer.innerHTML = '';
-
-      if (!leaderboard || leaderboard.length === 0) {
-        listContainer.innerHTML = '<div style="text-align:center; padding:20px; color:#94a3b8;">暫無資料</div>';
+    function renderPodium(leaderboard) {
+      const podiumEl = document.getElementById('podiumContent');
+      
+      if (!leaderboard || leaderboard.length < 3) {
+        podiumEl.innerHTML = '<div style="text-align:center; padding:20px; color:var(--text-secondary);">暫無資料</div>';
         return;
       }
 
       const top3 = leaderboard.slice(0, 3);
-      const others = leaderboard.slice(3, 10);
+      const [first, second, third] = [top3[0], top3[1], top3[2]];
 
-      top3.forEach((user) => {
-        const crowns =['👑', '🥈', '🥉'];
-        const avatarUrl = user.avatar_url || DEFAULT_AVATAR;
-        const item = document.createElement('div');
-        item.className = `podium-item rank-${user.rank}`;
-        item.innerHTML = `<div class="crown">${crowns[user.rank - 1]}</div><div class="avatar-wrap"><img class="avatar-img" src="${avatarUrl}" onerror="this.src='${DEFAULT_AVATAR}'"/></div><div class="podium-name">${user.masked_user_id}</div><div class="podium-score"><svg class="diamond-icon" viewBox="0 0 24 24" style="width:12px;height:12px;"><path d="M12 2L2 9l10 13L22 9l-10-7z"/></svg>${user.total_diamonds.toLocaleString()}</div>`;
-        podiumContainer.appendChild(item);
-      });
-
-      others.forEach(user => {
-        const avatarUrl = user.avatar_url || DEFAULT_AVATAR;
-        const item = document.createElement('div');
-        item.className = 'list-item';
-        item.innerHTML = `<div class="rank-num">${user.rank}</div><img class="list-avatar" src="${avatarUrl}" onerror="this.src='${DEFAULT_AVATAR}'"/><div class="user-info"><div class="user-id">${user.masked_user_id}</div></div><div class="score-wrap"><span class="score-val">${user.total_diamonds.toLocaleString()}</span><svg class="diamond-icon" viewBox="0 0 24 24"><path d="M12 2L2 9l10 13L22 9l-10-7zm0 2.8l6.3 4.4H5.7L12 4.8zM4.1 10h15.8L12 20.3 4.1 10z"/></svg></div>`;
-        listContainer.appendChild(item);
-      });
+      podiumEl.innerHTML = `
+        <div class="podium-item no2">
+          <div class="avatar-wrapper">
+            <div class="rank-badge badge-2">2</div>
+            <img src="${getAvatarUrl(second.user_id, second.avatar_url)}" class="avatar-round">
+          </div>
+          <div class="nickname">${second.masked_user_id || second.user_id}</div>
+          <div class="val-text">${second.total_diamonds.toLocaleString()}</div>
+        </div>
+        <div class="podium-item no1">
+          <div class="avatar-wrapper">
+            ${crownSVG}
+            <img src="${getAvatarUrl(first.user_id, first.avatar_url)}" class="avatar-round">
+            <div class="rank-badge badge-1">1</div>
+          </div>
+          <div class="nickname" style="font-weight:600">${first.masked_user_id || first.user_id}</div>
+          <div class="val-text">${first.total_diamonds.toLocaleString()}</div>
+        </div>
+        <div class="podium-item no3">
+          <div class="avatar-wrapper">
+            <div class="rank-badge badge-3">3</div>
+            <img src="${getAvatarUrl(third.user_id, third.avatar_url)}" class="avatar-round">
+          </div>
+          <div class="nickname">${third.masked_user_id || third.user_id}</div>
+          <div class="val-text">${third.total_diamonds.toLocaleString()}</div>
+        </div>
+      `;
     }
 
-    function processAndRender() {
-      if (!cachedDailyData) return;
-      let displayLeaderboard = cachedDailyData.leaderboard;
-      let displayMe = cachedDailyData.me;
-      if (currentTab === 'weekly') {
-        const WEEKLY_MULTIPLIER = 7;
-        displayLeaderboard = cachedDailyData.leaderboard.map(user => ({...user, total_diamonds: user.total_diamonds * WEEKLY_MULTIPLIER}));
-        displayMe = {...cachedDailyData.me, total_diamonds: cachedDailyData.me.total_diamonds * WEEKLY_MULTIPLIER};
-      }
-      renderData(displayLeaderboard, displayMe);
-    }
-
-    function switchTab(type) {
-      if (currentTab === type) return;
-      currentTab = type;
-      document.getElementById('tabs-wrapper').setAttribute('data-active', type);
-      document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.classList.remove('active');
-        if (btn.getAttribute('onclick').includes(type)) btn.classList.add('active');
-      });
-      processAndRender();
-    }
-
-    function enableDevMode() {
-      document.getElementById('dev-banner').style.display = 'block';
-      cachedDailyData = {
-        leaderboard:[
-          { rank: 1, masked_user_id: "5e69***8583", total_diamonds: 1254018, avatar_url: "" },
-          { rank: 2, masked_user_id: "58fe***bff3", total_diamonds: 1140660, avatar_url: "" },
-          { rank: 3, masked_user_id: "5da1***7b48", total_diamonds: 1113679, avatar_url: "" },
-          { rank: 4, masked_user_id: "6335***cd9a", total_diamonds: 961030, avatar_url: "" },
-          { rank: 5, masked_user_id: "5e0a***9dbc", total_diamonds: 957995, avatar_url: "" },
-          { rank: 6, masked_user_id: "6657***0a71", total_diamonds: 902374, avatar_url: "" }
-        ],
-        me: { rank: 4, total_diamonds: 961030 }
-      };
-      processAndRender();
-    }
-
-    // --- 直接執行，不再等待 Iframe 握手 ---
-    async function init() {
-      if (!TEMP_TEST_TOKEN) {
-        // 沒有填 Token，直接進入假資料預覽模式
-        enableDevMode();
+    function renderList(leaderboard, meData) {
+      const listEl = document.getElementById('listView');
+      
+      if (!leaderboard || leaderboard.length === 0) {
+        listEl.innerHTML = '<div style="text-align:center; padding:20px; color:var(--text-secondary);">暫無資料</div>';
         return;
       }
+
+      // 從第4名開始顯示
+      const listItems = leaderboard.slice(3);
       
-      try {
-        const res = await fetch(API_ENDPOINT, { headers: { 'Authorization': `Bearer ${TEMP_TEST_TOKEN}` } });
-        if (!res.ok) {
-           if (res.status === 401) throw new Error("Token 驗證失敗 (401)，請確認 TEMP_TEST_TOKEN 是否正確且未過期。");
-           throw new Error(`伺服器回應錯誤狀態碼: ${res.status}`);
+      listEl.innerHTML = listItems.map(item => {
+        const isMe = item.user_id === meData?.user_id;
+        const showYesterdayBadge = wasInYesterdayTop10(item.user_id) && (currentMode === 'day' || currentMode === 'week');
+        
+        return `
+          <div class="list-row ${isMe ? 'is-me' : ''}">
+            <div class="rank-num">${item.rank}</div>
+            <img src="${getAvatarUrl(item.user_id, item.avatar_url)}" class="avatar-square">
+            <div class="user-info">
+              <div class="user-name">${item.masked_user_id || item.user_id}</div>
+              ${showYesterdayBadge ? '<span class="yesterday-badge">昨日TOP10</span>' : ''}
+            </div>
+            <div class="data-value">${item.total_diamonds.toLocaleString()}</div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderFooter(meData) {
+      const dict = i18n[langs[currentLangIdx]];
+      const myRankNum = document.getElementById('myRankNum');
+      const myScoreNum = document.getElementById('myScoreNum');
+      const footerAvatar = document.getElementById('footerAvatar');
+      
+      if (meData && meData.rank !== -1) {
+        myRankNum.innerText = `#${meData.rank}`;
+        myScoreNum.innerText = meData.total_diamonds.toLocaleString();
+        
+        if (meData.avatar_url) {
+          footerAvatar.src = getAvatarUrl(meData.user_id, meData.avatar_url);
+          footerAvatar.style.display = 'block';
         }
-        cachedDailyData = await res.json();
-        processAndRender();
-      } catch (err) {
-        showErrorOnScreen("資料獲取失敗", err.message);
+      } else {
+        myRankNum.innerText = dict.unranked;
+        myScoreNum.innerText = '0';
       }
     }
-    
+
+    function renderMode(mode) {
+      const data = apiData[mode];
+      if (!data) return;
+
+      renderPodium(data.leaderboard);
+      renderList(data.leaderboard, data.me);
+      renderFooter(data.me);
+      
+      // 顯示/隱藏歷史按鈕
+      const historyIcon = document.getElementById('historyIcon');
+      historyIcon.style.display = (mode === 'day' || mode === 'week') ? 'flex' : 'none';
+      
+      // 重置滾動位置
+      document.getElementById('scrollArea').scrollTop = 0;
+    }
+
+    // ==========================================
+    // 4. API 獲取
+    // ==========================================
+    async function fetchApiData(token) {
+      try {
+        const res = await fetch(API_ENDPOINT, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        if (!res.ok) throw new Error(`API Response: ${res.status}`);
+        const data = await res.json();
+        
+        // 儲存所有模式的資料
+        apiData.day = data.day || { leaderboard: [], me: { rank: -1, total_diamonds: 0 } };
+        apiData.week = data.week || { leaderboard: [], me: { rank: -1, total_diamonds: 0 } };
+        apiData.all = data.all || { leaderboard: [], me: { rank: -1, total_diamonds: 0 } };
+        
+        // 儲存昨日資料（如果API有提供）
+        if (data.yesterday_day) yesterdayData.day = data.yesterday_day;
+        if (data.yesterday_week) yesterdayData.week = data.yesterday_week;
+        
+        // 渲染當前模式
+        renderMode(currentMode);
+        
+      } catch (err) {
+        console.error('Fetch Data Error:', err);
+        document.getElementById('footerTip').innerText = '資料載入失敗，請重新整理';
+      }
+    }
+
+    // ==========================================
+    // 5. Dev Mode
+    // ==========================================
+    function enableDevMode() {
+      document.getElementById('dev-banner').style.display = 'block';
+      
+      // 模擬假資料
+      const mockLeaderboard = Array.from({ length: 15 }, (_, i) => ({
+        rank: i + 1,
+        user_id: `user_${i + 1}`,
+        masked_user_id: `5e69***${1000 + i}`,
+        total_diamonds: 1000000 - (i * 50000),
+        avatar_url: null
+      }));
+      
+      const mockMe = {
+        user_id: 'user_7',
+        rank: 7,
+        total_diamonds: 650000,
+        avatar_url: null
+      };
+      
+      apiData.day = { leaderboard: mockLeaderboard, me: mockMe };
+      apiData.week = { leaderboard: mockLeaderboard, me: mockMe };
+      apiData.all = { leaderboard: mockLeaderboard, me: mockMe };
+      
+      // 模擬昨日前10名
+      yesterdayData.day = mockLeaderboard.slice(0, 10).map(item => ({
+        user_id: item.user_id,
+        rank: item.rank,
+        total_diamonds: item.total_diamonds + 10000
+      }));
+      
+      renderMode(currentMode);
+      console.warn("⚠️ 已進入本地 Dev Mode");
+    }
+
+    // ==========================================
+    // 6. SWAG Iframe 通訊
+    // ==========================================
+    function postIframeReady() {
+      window.parent.postMessage({ type: 'IFRAME_READY' }, '*');
+    }
+
     window.addEventListener('DOMContentLoaded', () => {
       applyLang(langs[0]);
-      showSkeleton();
-      setTimeout(init, 500); // 稍微延遲 0.5 秒讓骨架屏特效展示一下
+      
+      setTimeout(postIframeReady, 100);
+      
+      handshakeRetryInterval = setInterval(() => {
+        if (!swagToken) postIframeReady();
+      }, 3000);
+      
+      if (window.self === window.top) {
+        setTimeout(() => {
+          if (!swagToken) {
+            clearInterval(handshakeRetryInterval);
+            enableDevMode();
+          }
+        }, 2000);
+      }
+    });
+
+    window.addEventListener('message', (event) => {
+      const data = event.data;
+      if (!data) return;
+      
+      if (data.type === 'SET_TOKEN') {
+        if (swagToken === data.token) return;
+        swagToken = data.token;
+        
+        if (handshakeRetryInterval) {
+          clearInterval(handshakeRetryInterval);
+          handshakeRetryInterval = null;
+        }
+        
+        fetchApiData(swagToken);
+      }
+    });
+
+    // ==========================================
+    // 7. Tab 切換
+    // ==========================================
+    function changeMode(mode, el) {
+      document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+      el.classList.add('active');
+      
+      currentMode = mode;
+      renderMode(mode);
+    }
+
+    // ==========================================
+    // 8. 昨日榜單 Modal
+    // ==========================================
+    function openYesterdayModal() {
+      const modal = document.getElementById('yesterdayModal');
+      const yesterdayList = document.getElementById('yesterdayList');
+      const dict = i18n[langs[currentLangIdx]];
+      
+      const data = yesterdayData[currentMode];
+      
+      if (currentMode === 'day') {
+        document.getElementById('yesterdayTitle').innerText = dict.yesterdayDay;
+      } else if (currentMode === 'week') {
+        document.getElementById('yesterdayTitle').innerText = dict.yesterdayWeek;
+      }
+      
+      if (!data || data.length === 0) {
+        yesterdayList.innerHTML = '<div style="text-align:center; padding:20px; color:var(--text-secondary);">暫無昨日資料</div>';
+      } else {
+        yesterdayList.innerHTML = data.map(item => `
+          <div class="yesterday-item">
+            <div class="yesterday-rank">#${item.rank}</div>
+            <div class="yesterday-name">${item.masked_user_id || item.user_id}</div>
+            <div class="yesterday-value">${item.total_diamonds.toLocaleString()}</div>
+          </div>
+        `).join('');
+      }
+      
+      modal.style.display = 'flex';
+      void modal.offsetWidth;
+      modal.classList.add('show');
+    }
+
+    function closeYesterdayModal(event) {
+      if (event && event.target !== event.currentTarget) return;
+      const modal = document.getElementById('yesterdayModal');
+      modal.classList.remove('show');
+      setTimeout(() => modal.style.display = 'none', 300);
+    }
+
+    // ==========================================
+    // 9. PWA 導航攔截
+    // ==========================================
+    document.addEventListener('click', (e) => {
+      if (window.self === window.top) return;
+      
+      const link = e.target.closest('a[target="_blank"]');
+      if (link) {
+        try {
+          const url = new URL(link.href);
+          if (url.hostname === 'swag.live' || url.hostname === 'www.swag.live') {
+            e.preventDefault();
+            window.parent.postMessage({ type: 'PWA_NAVIGATE', url: link.href }, '*');
+          }
+        } catch(err) {
+          console.error("URL 解析失敗", err);
+        }
+      }
     });
   </script>
 </body>
