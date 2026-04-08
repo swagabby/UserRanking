@@ -149,14 +149,24 @@
     </div>
   </div>
 
- <script>
+<script>
     const API_ENDPOINT = 'https://swag-campaign-api-905468082258.asia-east1.run.app/api/leaderboard';
     const DEFAULT_AVATAR = 'https://ui-avatars.com/api/?name=SWAG&background=1e293b&color=fff&size=100';
     let swagToken = null;
     let currentTab = 'daily';
     let handshakeRetryInterval = null;
     let cachedDailyData = null;
-    let isDataRendered = false; // 新增：追蹤是否成功渲染
+    let isDataRendered = false;
+
+    // --- 在畫面上動態插入一個 Debug 面板 ---
+    const debugBox = document.createElement('div');
+    debugBox.style = "position:fixed; bottom:0; left:0; width:100%; height:150px; background:rgba(0,0,0,0.85); color:#0f0; font-family:monospace; font-size:11px; padding:10px; overflow-y:auto; z-index:99999; border-top:2px solid #333;";
+    debugBox.innerHTML = '<div style="color:#fbbf24; margin-bottom:5px;">🛠️[連線監聽面板] 正在監聽來自父層的訊息...</div>';
+    document.body.appendChild(debugBox);
+    function logDebug(msg) {
+      debugBox.innerHTML += `<div style="margin-bottom:4px; border-bottom:1px dashed #333; padding-bottom:2px;">${msg}</div>`;
+      debugBox.scrollTop = debugBox.scrollHeight;
+    }
 
     // --- 多語系 ---
     const i18n = {
@@ -187,11 +197,9 @@
       document.getElementById('leaderboard-list').innerHTML = `
         <div class="list-item"><div class="rank-num skeleton">1</div><div class="user-info skeleton">Mask</div><div class="score-wrap skeleton">0</div></div>
         <div class="list-item"><div class="rank-num skeleton">2</div><div class="user-info skeleton">Mask</div><div class="score-wrap skeleton">0</div></div>
-        <div class="list-item"><div class="rank-num skeleton">3</div><div class="user-info skeleton">Mask</div><div class="score-wrap skeleton">0</div></div>
       `;
     }
 
-    // --- 錯誤顯示器 (把 Skeleton 換成真實錯誤訊息) ---
     function showErrorOnScreen(title, message) {
       document.getElementById('my-rank').classList.remove('skeleton');
       document.getElementById('my-score-wrap').classList.remove('skeleton');
@@ -207,7 +215,7 @@
     }
 
     function renderData(leaderboard, meData) {
-      isDataRendered = true; // 標記已成功渲染
+      isDataRendered = true; 
       const myRankEl = document.getElementById('my-rank');
       myRankEl.classList.remove('skeleton');
       document.getElementById('my-score-wrap').classList.remove('skeleton');
@@ -232,12 +240,7 @@
         const avatarUrl = user.avatar_url || DEFAULT_AVATAR;
         const item = document.createElement('div');
         item.className = `podium-item rank-${user.rank}`;
-        item.innerHTML = `
-          <div class="crown">${crowns[user.rank - 1]}</div>
-          <div class="avatar-wrap"><img class="avatar-img" src="${avatarUrl}" onerror="this.src='${DEFAULT_AVATAR}'"/></div>
-          <div class="podium-name">${user.masked_user_id}</div>
-          <div class="podium-score"><svg class="diamond-icon" viewBox="0 0 24 24" style="width:12px;height:12px;"><path d="M12 2L2 9l10 13L22 9l-10-7z"/></svg>${user.total_diamonds.toLocaleString()}</div>
-        `;
+        item.innerHTML = `<div class="crown">${crowns[user.rank - 1]}</div><div class="avatar-wrap"><img class="avatar-img" src="${avatarUrl}" onerror="this.src='${DEFAULT_AVATAR}'"/></div><div class="podium-name">${user.masked_user_id}</div><div class="podium-score"><svg class="diamond-icon" viewBox="0 0 24 24" style="width:12px;height:12px;"><path d="M12 2L2 9l10 13L22 9l-10-7z"/></svg>${user.total_diamonds.toLocaleString()}</div>`;
         podiumContainer.appendChild(item);
       });
 
@@ -245,12 +248,7 @@
         const avatarUrl = user.avatar_url || DEFAULT_AVATAR;
         const item = document.createElement('div');
         item.className = 'list-item';
-        item.innerHTML = `
-          <div class="rank-num">${user.rank}</div>
-          <img class="list-avatar" src="${avatarUrl}" onerror="this.src='${DEFAULT_AVATAR}'"/>
-          <div class="user-info"><div class="user-id">${user.masked_user_id}</div></div>
-          <div class="score-wrap"><span class="score-val">${user.total_diamonds.toLocaleString()}</span><svg class="diamond-icon" viewBox="0 0 24 24"><path d="M12 2L2 9l10 13L22 9l-10-7zm0 2.8l6.3 4.4H5.7L12 4.8zM4.1 10h15.8L12 20.3 4.1 10z"/></svg></div>
-        `;
+        item.innerHTML = `<div class="rank-num">${user.rank}</div><img class="list-avatar" src="${avatarUrl}" onerror="this.src='${DEFAULT_AVATAR}'"/><div class="user-info"><div class="user-id">${user.masked_user_id}</div></div><div class="score-wrap"><span class="score-val">${user.total_diamonds.toLocaleString()}</span><svg class="diamond-icon" viewBox="0 0 24 24"><path d="M12 2L2 9l10 13L22 9l-10-7zm0 2.8l6.3 4.4H5.7L12 4.8zM4.1 10h15.8L12 20.3 4.1 10z"/></svg></div>`;
         listContainer.appendChild(item);
       });
     }
@@ -280,6 +278,7 @@
     }
 
     async function fetchApiData(token) {
+      logDebug(`⏳ 開始使用 Token 呼叫 API...`);
       try {
         const res = await fetch(API_ENDPOINT, { headers: { 'Authorization': `Bearer ${token}` } });
         if (!res.ok) {
@@ -288,8 +287,12 @@
            throw new Error(`伺服器回應錯誤狀態碼: ${res.status}`);
         }
         cachedDailyData = await res.json();
+        logDebug(`✅ API 呼叫成功，正在渲染畫面...`);
+        // 成功取得資料後，隱藏 Debug 面板以保持畫面美觀
+        setTimeout(() => { debugBox.style.display = 'none'; }, 2000);
         processAndRender();
       } catch (err) {
+        logDebug(`❌ API 錯誤: ${err.message}`);
         showErrorOnScreen("API 呼叫失敗", err.message);
       }
     }
@@ -300,17 +303,17 @@
         leaderboard:[
           { rank: 1, masked_user_id: "5e69***8583", total_diamonds: 1254018, avatar_url: "" },
           { rank: 2, masked_user_id: "58fe***bff3", total_diamonds: 1140660, avatar_url: "" },
-          { rank: 3, masked_user_id: "5da1***7b48", total_diamonds: 1113679, avatar_url: "" },
-          { rank: 4, masked_user_id: "6335***cd9a", total_diamonds: 961030, avatar_url: "" },
-          { rank: 5, masked_user_id: "5e0a***9dbc", total_diamonds: 957995, avatar_url: "" },
-          { rank: 6, masked_user_id: "6657***0a71", total_diamonds: 902374, avatar_url: "" }
+          { rank: 3, masked_user_id: "5da1***7b48", total_diamonds: 1113679, avatar_url: "" }
         ],
         me: { rank: 4, total_diamonds: 961030 }
       };
       processAndRender();
     }
 
-    function postIframeReady() { window.parent.postMessage({ type: 'IFRAME_READY' }, '*'); }
+    function postIframeReady() { 
+      logDebug(`📤 發送 IFRAME_READY 請求 Token...`);
+      window.parent.postMessage({ type: 'IFRAME_READY' }, '*'); 
+    }
     
     window.addEventListener('DOMContentLoaded', () => {
       applyLang(langs[0]);
@@ -318,25 +321,31 @@
       setTimeout(postIframeReady, 100);
       handshakeRetryInterval = setInterval(() => { if (!swagToken) postIframeReady(); }, 3000);
 
-      // --- 防卡死偵測機制 ---
       setTimeout(() => {
         if (!isDataRendered) {
           if (window.self === window.top && !swagToken) {
-             // 不在 Iframe 內，直接強切 DevMode
              clearInterval(handshakeRetryInterval);
              enableDevMode();
           } else if (!swagToken) {
-             // 在 Iframe 內，但等了 4 秒還沒收到 Token
-             showErrorOnScreen("Iframe 通訊失敗", "等不到 SWAG 主站發送的 Token。請確認您的網域已加入主站 tokenWhitelistDomains 白名單！");
+             logDebug(`🛑 4 秒超時！仍未收到 SET_TOKEN`);
+             showErrorOnScreen("Iframe 通訊失敗", "等不到 SWAG 主站發送的 Token。請看下方黑底綠字的監聽面板，截圖給主站工程師確認。");
           }
         }
       }, 4000);
     });
 
+    // 🏆 終極監聽器：把主站丟過來的所有東西印在畫面上
     window.addEventListener('message', (event) => {
+      let dataStr = typeof event.data === 'object' ? JSON.stringify(event.data) : event.data;
+      // 過濾掉太多無關的套件訊息 (如 react devtools)
+      if (dataStr && !dataStr.includes('react-devtools') && !dataStr.includes('webpack')) {
+         logDebug(`📥 收到父層訊息: ${dataStr}`);
+      }
+      
       const data = event.data;
       if (!data) return;
       if (data.type === 'SET_TOKEN') {
+        logDebug(`🔑 成功解析到 Token!`);
         if (swagToken === data.token) return;
         swagToken = data.token;
         if (handshakeRetryInterval) { clearInterval(handshakeRetryInterval); handshakeRetryInterval = null; }
@@ -352,6 +361,7 @@
           const url = new URL(link.href);
           if (url.hostname.includes('swag.live')) {
             e.preventDefault();
+            logDebug(`🚀 攔截跳轉: 請求父層開啟 ${link.href}`);
             window.parent.postMessage({ type: 'PWA_NAVIGATE', url: link.href }, '*');
           }
         } catch(err) {}
