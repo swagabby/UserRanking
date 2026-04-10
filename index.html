@@ -88,7 +88,7 @@
     .content-scroll {
       flex-grow: 1;
       overflow-y: auto;
-      padding-bottom: 40px;
+      padding-bottom: 120px;
       scrollbar-width: none;
     }
     .content-scroll::-webkit-scrollbar { display: none; }
@@ -458,6 +458,42 @@
       z-index: 9999;
       box-shadow: 0 4px 6px rgba(0,0,0,0.3);
     }
+    
+    /* Bottom My Rank Bar */
+    .my-rank-bar {
+      position: sticky;
+      bottom: 0;
+      z-index: 30;
+      display: none;
+      align-items: center;
+      gap: var(--space-4);
+      padding: 12px var(--space-5) calc(12px + env(safe-area-inset-bottom, 0px));
+      border-top: 1px solid var(--outline);
+      background: linear-gradient(180deg, rgba(25,25,25,0.9) 0%, rgba(35,35,35,0.98) 100%);
+      backdrop-filter: blur(8px);
+    }
+    .my-rank-bar.show {
+      display: flex;
+    }
+    .my-rank-title {
+      font-size: var(--font-body-s);
+      color: var(--text-secondary);
+    }
+    .my-rank-main {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: var(--font-body-m);
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-top: 2px;
+    }
+    .my-rank-value {
+      margin-left: auto;
+      color: var(--primary);
+      font-weight: 700;
+      white-space: nowrap;
+    }
   </style>
 </head>
 <body>
@@ -531,6 +567,13 @@
         </div>
       </div>
     </div>
+     <div class="my-rank-bar" id="myRankBar">
+      <div>
+        <div class="my-rank-title">我的排名</div>
+        <div class="my-rank-main" id="myRankMain">尚未取得使用者資訊</div>
+      </div>
+      <div class="my-rank-value" id="myRankValue">--</div>
+    </div>
   </div>
 
   <script>
@@ -540,6 +583,7 @@
     const API_ENDPOINT = 'https://swag-campaign-api-905468082258.asia-east1.run.app/api/leaderboard';
     const BLACK_IMG = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"><rect width="200" height="200" fill="black"/></svg>';
     let swagToken = null;
+        let currentUserId = '';
     let handshakeRetryInterval = null;
     let currentTab = 'daily';
     const USER_HANDLE_OVERRIDES = {
@@ -633,6 +677,46 @@
       };
     }
 
+      function parseUserIdFromToken(token) {
+      try {
+        const parts = String(token || '').split('.');
+        if (parts.length < 2) return '';
+        const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
+        return sanitizeUserId(
+          payload.user_id || payload.userId || payload.uid || payload.sub || payload.id || ''
+        );
+      } catch {
+        return '';
+      }
+    }
+
+    function renderMyRankBar(data = []) {
+      const bar = document.getElementById('myRankBar');
+      const main = document.getElementById('myRankMain');
+      const value = document.getElementById('myRankValue');
+      if (!bar || !main || !value) return;
+
+      if (!data.length || !currentUserId) {
+        bar.classList.remove('show');
+        return;
+      }
+
+      const myData = data.find((u) => sanitizeUserId(u.user_id) === currentUserId);
+
+      if (!myData) {
+        main.textContent = '未進榜';
+        value.textContent = currentTab === 'cumulative' ? '0 次' : '0 💎';
+        bar.classList.add('show');
+        return;
+      }
+
+      main.textContent = `第 ${myData.rank} 名`;
+      value.textContent = currentTab === 'cumulative'
+        ? `${myData.total_first_count || 0} 次`
+        : `${Number(myData.total_diamonds || 0).toLocaleString()} 💎`;
+      bar.classList.add('show');
+    }
+
     function buildCumulativeBoard(dailyBoard, weeklyBoard) {
       const map = new Map();
       const ensure = (uid) => {
@@ -684,6 +768,7 @@
       if (!data.length) {
         listContainer.innerHTML = '<div class="empty-state">暫無資料</div>';
         podiumContainer.innerHTML = '<div class="empty-state">暫無資料</div>';
+        renderMyRankBar([]);
         return;
       }
 
@@ -738,6 +823,7 @@
 
       // 重置滾動位置
       document.getElementById('scrollArea').scrollTop = 0;
+            renderMyRankBar(data);
     }
 
     // ==========================================
@@ -925,6 +1011,7 @@
       if (swagToken === data.token) return;
 
       swagToken = data.token;
+            currentUserId = sanitizeUserId(data.userId || data.user_id || parseUserIdFromToken(data.token));
       if (handshakeRetryInterval) {
         clearInterval(handshakeRetryInterval);
         handshakeRetryInterval = null;
