@@ -222,7 +222,9 @@
     .avatar-round {
       width: 64px;
       height: 64px;
-      border-radius: 50%;
+      aspect-ratio: 1 / 1;
+      display: block;
+      border-radius: var(--avatar-shape);
       border: 2px solid var(--outline);
       object-fit: cover;
       background: var(--avatar-fallback-bg);
@@ -230,6 +232,7 @@
     .no1 .avatar-round {
       width: 84px;
       height: 84px;
+      border-radius: 50%;
       border: 3px solid var(--gold);
       box-shadow: 0 0 24px rgba(255, 165, 0, 0.3);
     }
@@ -277,7 +280,7 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      max-width: 90px;
+      text-decoration: none;
     }
     .val-text {
       font-size: var(--font-body-s);
@@ -329,6 +332,7 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+      text-decoration: none;
     }
     .data-value {
       font-weight: 600;
@@ -538,6 +542,9 @@
     let swagToken = null;
     let handshakeRetryInterval = null;
     let currentTab = 'daily';
+    const USER_HANDLE_OVERRIDES = {
+      '6656d72201b11ef86bf3a93c': 'littlebeach12321'
+    };
 
     const boardData = {
       daily: [],
@@ -568,9 +575,28 @@
     }
 
     function sanitizeUserId(value) {
-      return String(value ?? '')
-        .replaceAll('"/>', '')
+      const raw = String(value ?? '')
+        .replace(/['"<>`]/g, '')
+        .replace(/\/+/g, '')
+        .replace(/\s+/g, '')
+        .replace(/[^a-zA-Z0-9_-]/g, '')
         .trim();
+            const profileMatch = raw.match(/swag\.live\/user\/([a-zA-Z0-9]+)/i);
+      return profileMatch?.[1] || raw;
+    }
+
+    function getUserHandle(userId) {
+      const sanitized = sanitizeUserId(userId);
+      if (!sanitized) return '';
+      if (sanitized.startsWith('@')) return sanitized.slice(1);
+      if (USER_HANDLE_OVERRIDES[sanitized]) return USER_HANDLE_OVERRIDES[sanitized];
+      return '';
+    }
+
+    function getUserDisplayName(userId) {
+      const sanitized = sanitizeUserId(userId);
+      const handle = getUserHandle(sanitized);
+      return handle ? `@${handle}` : sanitized;
     }
 
     function escapeHtml(str) {
@@ -622,7 +648,12 @@
 
     function renderAvatar(userId, cls) {
       const safeUserId = escapeHtml(userId);
-      return `<img class="${cls}" src="${getAvatarUrl(userId)}" alt="${safeUserId}" referrerpolicy="no-referrer" loading="lazy" onerror="this.onerror=null;this.src='${BLACK_IMG}'"/>`;
+      return `<img class="${cls}" src="${getAvatarUrl(userId)}" alt="${safeUserId}" referrerpolicy="no-referrer" loading="lazy" onerror="this.onerror=null;this.src='${BLACK_IMG}`;
+    }
+ function renderUserLabel(userId, className) {
+      const safeId = escapeHtml(sanitizeUserId(userId));
+      const safeDisplayName = escapeHtml(getUserDisplayName(userId));
+      return `<a class="${className}" href="https://swag.live/user/${safeId}" target="_blank" rel="noopener noreferrer">${safeDisplayName}</a>`;
     }
 
     // ==========================================
@@ -664,7 +695,7 @@
             ${rankBadge}
             ${renderAvatar(user.user_id, 'avatar-round')}
           </div>
-          <div class="nickname">${escapeHtml(user.user_id)}</div>
+          ${renderUserLabel(user.user_id, 'nickname')}
           <div class="val-text">${scoreText}</div>
         `;
         podiumContainer.appendChild(div);
@@ -684,7 +715,7 @@
           <div class="rank-num">${user.rank}</div>
           ${renderAvatar(user.user_id, 'avatar-square')}
           <div class="user-info">
-            <div class="user-name">${escapeHtml(user.user_id)}</div>
+            ${renderUserLabel(user.user_id, 'user-name')}
             </div>
           ${scoreBlock}
         `;
