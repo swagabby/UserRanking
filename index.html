@@ -40,6 +40,8 @@
       --space-4: 12px;
       --space-5: 16px;
       --space-6: 24px;
+      --avatar-fallback-bg: #000000;
+      --avatar-shape: 50%;
     }
 
     /* =========================================
@@ -119,7 +121,7 @@
       font-size: 18px;
       color: var(--text-secondary);
       cursor: pointer;
-      border-radius: 50%;
+      border-radius: var(--avatar-shape);
       transition: background 0.3s;
     }
     .info-icon:hover {
@@ -223,7 +225,7 @@
       border-radius: 50%;
       border: 2px solid var(--outline);
       object-fit: cover;
-      background: var(--surface-container);
+      background: var(--avatar-fallback-bg);
     }
     .no1 .avatar-round {
       width: 84px;
@@ -308,11 +310,11 @@
     .avatar-square {
       width: 44px;
       height: 44px;
-      border-radius: var(--radius-m);
+      border-radius: var(--avatar-shape);
       margin-right: var(--space-4);
       object-fit: cover;
       border: 1px solid var(--outline);
-      background: var(--surface-container);
+      background: var(--avatar-fallback-bg);
     }
     .user-info {
       flex: 1;
@@ -565,8 +567,25 @@
       return `https://public.swag.live/users/${safeId}/picture.jpg?size=512x512&format=jpg`;
     }
 
+    function sanitizeUserId(value) {
+      return String(value ?? '')
+        .replaceAll('"/>', '')
+        .trim();
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#39;');
+    }
+
+    
     function normalizeUser(user, rankFallback = 0) {
-      const userId = user.user_id || user.userid || user.username || user.masked_user_id || user.id || 'unknown';
+      const rawUserId = user.user_id || user.userid || user.username || user.masked_user_id || user.id || 'unknown';
+      const userId = sanitizeUserId(rawUserId) || 'unknown';
       return {
         user_id: userId,
         rank: Number(user.rank ?? rankFallback),
@@ -602,7 +621,8 @@
     }
 
     function renderAvatar(userId, cls) {
-      return `<img class="${cls}" src="${getAvatarUrl(userId)}" alt="${userId}" referrerpolicy="no-referrer" loading="lazy" onerror="this.onerror=null;this.src='${BLACK_IMG}'"/>`;
+      const safeUserId = escapeHtml(userId);
+      return `<img class="${cls}" src="${getAvatarUrl(userId)}" alt="${safeUserId}" referrerpolicy="no-referrer" loading="lazy" onerror="this.onerror=null;this.src='${BLACK_IMG}'"/>`;
     }
 
     // ==========================================
@@ -644,7 +664,7 @@
             ${rankBadge}
             ${renderAvatar(user.user_id, 'avatar-round')}
           </div>
-          <div class="nickname">${user.user_id}</div>
+          <div class="nickname">${escapeHtml(user.user_id)}</div>
           <div class="val-text">${scoreText}</div>
         `;
         podiumContainer.appendChild(div);
@@ -664,8 +684,8 @@
           <div class="rank-num">${user.rank}</div>
           ${renderAvatar(user.user_id, 'avatar-square')}
           <div class="user-info">
-            <div class="user-name">${user.user_id}</div>
-          </div>
+            <div class="user-name">${escapeHtml(user.user_id)}</div>
+            </div>
           ${scoreBlock}
         `;
         listContainer.appendChild(item);
