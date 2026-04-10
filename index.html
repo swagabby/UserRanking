@@ -593,8 +593,19 @@
       return '';
     }
 
-    function getUserDisplayName(userId) {
-      const sanitized = sanitizeUserId(userId);
+   function normalizeDisplayName(rawName) {
+      const sanitized = String(rawName ?? '').trim().replace(/['"<>`]/g, '');
+      if (!sanitized) return '';
+      return sanitized.startsWith('@') ? sanitized : `@${sanitized}`;
+    }
+
+    function getUserDisplayName(user) {
+      const preferredName = normalizeDisplayName(
+        user?.username || user?.user_name || user?.display_name || user?.nickname
+      );
+      if (preferredName) return preferredName;
+
+      const sanitized = sanitizeUserId(user?.user_id);
       const handle = getUserHandle(sanitized);
       return handle ? `@${handle}` : sanitized;
     }
@@ -614,6 +625,7 @@
       const userId = sanitizeUserId(rawUserId) || 'unknown';
       return {
         user_id: userId,
+        username: user.username || user.user_name || user.display_name || user.nickname || '',
         rank: Number(user.rank ?? rankFallback),
         total_diamonds: Number(user.total_diamonds || user.score || 0),
         daily_first_count: Number(user.daily_first_count || user.daily_top1_count || 0),
@@ -625,18 +637,20 @@
       const map = new Map();
       const ensure = (uid) => {
         if (!map.has(uid)) {
-          map.set(uid, { user_id: uid, daily_first_count: 0, weekly_first_count: 0, total_first_count: 0 });
+          map.set(uid, { user_id: uid, username: '', daily_first_count: 0, weekly_first_count: 0, total_first_count: 0 });
         }
         return map.get(uid);
       };
 
       dailyBoard.forEach((u) => {
         const user = ensure(u.user_id);
+        if (!user.username && u.username) user.username = u.username;
         user.daily_first_count += (u.daily_first_count || 0) + (u.rank === 1 ? 1 : 0);
       });
 
       weeklyBoard.forEach((u) => {
         const user = ensure(u.user_id);
+        if (!user.username && u.username) user.username = u.username;
         user.weekly_first_count += (u.weekly_first_count || 0) + (u.rank === 1 ? 1 : 0);
       });
 
@@ -650,9 +664,9 @@
       const safeUserId = escapeHtml(userId);
       return `<img class="${cls}" src="${getAvatarUrl(userId)}" alt="${safeUserId}" referrerpolicy="no-referrer" loading="lazy" onerror="this.onerror=null;this.src='${BLACK_IMG}`;
     }
- function renderUserLabel(userId, className) {
-      const safeId = escapeHtml(sanitizeUserId(userId));
-      const safeDisplayName = escapeHtml(getUserDisplayName(userId));
+ function renderUserLabel(user, className) {
+      const safeId = escapeHtml(sanitizeUserId(user?.user_id));
+      const safeDisplayName = escapeHtml(getUserDisplayName(user));
       return `<a class="${className}" href="https://swag.live/user/${safeId}" target="_blank" rel="noopener noreferrer">${safeDisplayName}</a>`;
     }
 
@@ -695,7 +709,7 @@
             ${rankBadge}
             ${renderAvatar(user.user_id, 'avatar-round')}
           </div>
-          ${renderUserLabel(user.user_id, 'nickname')}
+          ${renderUserLabel(user, 'nickname')}
           <div class="val-text">${scoreText}</div>
         `;
         podiumContainer.appendChild(div);
@@ -715,7 +729,7 @@
           <div class="rank-num">${user.rank}</div>
           ${renderAvatar(user.user_id, 'avatar-square')}
           <div class="user-info">
-            ${renderUserLabel(user.user_id, 'user-name')}
+            ${renderUserLabel(user, 'user-name')}
             </div>
           ${scoreBlock}
         `;
