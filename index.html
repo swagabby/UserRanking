@@ -170,7 +170,7 @@
       font-size: var(--font-body-m);
       color: var(--text-secondary);
       cursor: pointer;
-      white-space: normal;
+      white-space: nowrap;
       padding: 0 var(--space-5);
       flex: 1;
       min-height: 48px;
@@ -277,9 +277,9 @@
     .nickname {
       font-size: var(--font-body-m);
       color: var(--text-primary);
-      white-space: nowrap;
+      white-space: normal;
       overflow: hidden;
-      word-break: break-word;
+       word-break: break-word;
       line-height: 1.3;
       max-width: 100%;
       min-height: 2.6em;
@@ -288,7 +288,7 @@
       -webkit-line-clamp: 2;
       text-decoration: none;
     }
-        .podium-item.no2 .nickname {
+      .podium-item.no2 .nickname {
       margin-top: 4px;
     }
     .podium-item.no3 .nickname {
@@ -806,7 +806,7 @@
           : `${user.total_diamonds.toLocaleString()}`;
         const scoreBlock = currentTab === 'cumulative'
           ? `<div class="val-text"><span class="val-number">${scoreText}</span></div>`
-          : `<div class="val-text"><span class="val-number">${scoreText}</span>${renderDiamondIcon()}</div>`;
+          : `<div class="val-text"><span class="val-number">${scoreText}</span>${renderDiamondIcon()}</div>`;        
 
         const rankBadge = user.rank === 1 
           ? `${crownSVG}<div class="rank-badge badge-1">1</div>`
@@ -832,7 +832,6 @@
         const scoreBlock = currentTab === 'cumulative'
           ? `<span class="data-value">${user.total_first_count} 次</span>`
           : `<span class="data-value">${user.total_diamonds.toLocaleString()}${renderDiamondIcon()}</span>`;
-        
         item.innerHTML = `
           <div class="rank-num">${user.rank}</div>
           ${renderAvatar(user.user_id, 'avatar-square')}
