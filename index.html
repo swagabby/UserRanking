@@ -1,1485 +1,488 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>2026 璀璨之星爭奪戰</title>
+  <style>
+    :root {
+      --bg-dark: #0f111a;
+      --glass-bg: rgba(255, 255, 255, 0.05);
+      --glass-border: rgba(255, 255, 255, 0.12);
+      --text-main: #fff;
+      --text-muted: #94a3b8;
+      --accent-gold: #fbbf24;
+    }
+      * { box-sizing: border-box; margin: 0; padding: 0; }
 
- <!DOCTYPE html>
- <html lang="zh-TW">
- <head>
-   <meta charset="UTF-8">
-   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-   <title>2026 璀璨之星爭奪戰</title>
-   <style>
--    /* === 核心變數 & 重置 === */
-     :root {
-       --bg-dark: #0f111a;
-       --glass-bg: rgba(255, 255, 255, 0.05);
-       --glass-border: rgba(255, 255, 255, 0.1);
-       --text-main: #ffffff;
-       --text-muted: #94a3b8;
-       --accent-gold: #fbbf24;
-       --accent-gold-glow: rgba(251, 191, 36, 0.3);
-       --skeleton-base: #1e293b;
-       --skeleton-shine: #334155;
-     }
-+
-     * { box-sizing: border-box; margin: 0; padding: 0; }
-+
-     body {
-       background-color: var(--bg-dark);
-       background-image: radial-gradient(circle at top right, rgba(30, 58, 138, 0.2), transparent 40%),
-                         radial-gradient(circle at bottom left, rgba(88, 28, 135, 0.2), transparent 40%);
-       color: var(--text-main);
-       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-       min-height: 100vh;
-       padding-bottom: 50px;
-     }
- 
--    /* === 語系切換器 === */
--    .lang-switcher {
--      position: absolute;
--      top: 16px;
--      right: 16px;
--      background: var(--glass-bg);
--      border: 1px solid var(--glass-border);
--      color: var(--text-main);
--      padding: 6px 12px;
--      border-radius: 20px;
--      font-size: 14px;
--      cursor: pointer;
--      backdrop-filter: blur(10px);
--      -webkit-backdrop-filter: blur(10px);
--      z-index: 100;
--    }
--
--    /* === Header === */
-     .header {
-       text-align: center;
--      padding: 60px 20px 30px;
-+      padding: 42px 20px 20px;
-       position: relative;
-     }
-+
-     .title {
-       font-size: 32px;
-       font-weight: 800;
-       background: linear-gradient(135deg, #fbbf24, #f59e0b, #d97706);
-       -webkit-background-clip: text;
-       -webkit-text-fill-color: transparent;
-       margin-bottom: 8px;
-     }
--    .subtitle { font-size: 14px; color: var(--text-muted); margin-bottom: 16px;}
--    .rules-link {
--      display: inline-block;
--      color: var(--accent-gold);
--      text-decoration: none;
-+
-+    .subtitle {
-       font-size: 14px;
--      border-bottom: 1px solid var(--accent-gold);
--      padding-bottom: 2px;
-+      color: var(--text-muted);
-+      margin-bottom: 12px;
-+    }
-+
-+    .countdown-wrap {
-+      margin: 0 auto;
-+      width: fit-content;
-+      background: rgba(251, 191, 36, 0.1);
-+      border: 1px solid rgba(251, 191, 36, 0.3);
-+      border-radius: 999px;
-+      padding: 8px 14px;
-+      display: flex;
-+      align-items: center;
-+      gap: 8px;
-+    }
-+
-+    .countdown-label {
-+      color: var(--text-muted);
-+      font-size: 13px;
-+    }
-+
-+    .countdown-time {
-+      color: var(--accent-gold);
-+      font-size: 16px;
-+      font-weight: 700;
-+      letter-spacing: 1px;
-+      min-width: 86px;
-+      text-align: center;
-     }
- 
--    /* === Glassmorphism 容器 === */
-     .container {
--      max-width: 500px;
-+      max-width: 540px;
-       margin: 0 auto;
-       padding: 0 16px;
-     }
-+
-     .glass-card {
-       background: var(--glass-bg);
-       border: 1px solid var(--glass-border);
-       border-radius: 16px;
-       padding: 20px;
-       backdrop-filter: blur(12px);
-       -webkit-backdrop-filter: blur(12px);
-       margin-bottom: 24px;
-     }
- 
--    /* === 個人狀態區塊 === */
--    .me-section { display: flex; justify-content: space-between; align-items: center; }
--    .me-block { display: flex; flex-direction: column; }
--    .me-label { font-size: 12px; color: var(--text-muted); margin-bottom: 4px; }
--    .me-value { font-size: 24px; font-weight: 700; color: var(--accent-gold); }
--    .me-value.rank-text { color: #fff; }
--
--    /* === 排行榜列表 === */
-     .leaderboard-title {
-       font-size: 18px;
-       font-weight: 600;
-       margin-bottom: 16px;
-       display: flex;
-       align-items: center;
-+      justify-content: space-between;
-+      gap: 8px;
-+    }
-+
-+    .tabs {
-+      display: flex;
-       gap: 8px;
-+      margin-bottom: 14px;
-+    }
-+
-+    .tab-btn {
-+      border: 1px solid var(--glass-border);
-+      background: rgba(255, 255, 255, 0.03);
-+      color: var(--text-muted);
-+      border-radius: 999px;
-+      padding: 7px 12px;
-+      font-size: 13px;
-+      cursor: pointer;
-+    }
-+
-+    .tab-btn.active {
-+      color: #111827;
-+      background: var(--accent-gold);
-+      border-color: var(--accent-gold);
-+      font-weight: 700;
-+    }
-+
-+    .podium {
-+      display: grid;
-+      grid-template-columns: repeat(3, 1fr);
-+      gap: 10px;
-+      margin-bottom: 14px;
-+    }
-+
-+    .podium-item {
-+      border: 1px solid rgba(255, 255, 255, 0.08);
-+      border-radius: 12px;
-+      padding: 10px 8px;
-+      text-align: center;
-+      background: rgba(255,255,255,0.03);
-+      min-height: 126px;
-+    }
-+
-+    .podium-item.rank-1 {
-+      background: rgba(251, 191, 36, 0.12);
-+      border-color: rgba(251, 191, 36, 0.35);
-     }
-+
-+    .podium-rank {
-+      font-size: 18px;
-+      margin-bottom: 6px;
-+    }
-+
-+    .avatar {
-+      width: 54px;
-+      height: 54px;
-+      border-radius: 50%;
-+      object-fit: cover;
-+      border: 2px solid rgba(255,255,255,0.25);
-+      margin: 0 auto 6px;
-+      display: block;
-+      background: #111827;
-+    }
-+
-+    .podium-name,
-+    .user-id {
-+      font-size: 13px;
-+      max-width: 100%;
-+      overflow: hidden;
-+      text-overflow: ellipsis;
-+      white-space: nowrap;
-+    }
-+
-+    .podium-score,
-+    .score-val {
-+      color: var(--accent-gold);
-+      font-weight: 700;
-+      font-size: 13px;
-+    }
-+
-     .list-item {
-       display: flex;
-       align-items: center;
--      padding: 12px 0;
-+      padding: 11px 0;
-       border-bottom: 1px solid rgba(255,255,255,0.05);
-+      gap: 10px;
-     }
-+
-     .list-item:last-child { border-bottom: none; }
-+
-     .rank-num {
--      width: 32px;
--      font-size: 16px;
--      font-weight: 700;
--      color: var(--text-muted);
-+      width: 28px;
-       text-align: center;
-+      color: var(--text-muted);
-+      font-weight: 700;
-     }
--    .rank-1 .rank-num { color: #fbbf24; font-size: 20px; text-shadow: 0 0 10px var(--accent-gold-glow); }
--    .rank-2 .rank-num { color: #cbd5e1; font-size: 18px; }
--    .rank-3 .rank-num { color: #b45309; font-size: 18px; }
--    
--    .user-info { flex: 1; margin-left: 12px; }
--    .user-id { font-size: 15px; font-weight: 500; }
--    .score-wrap { display: flex; align-items: center; gap: 4px; }
--    .score-val { font-size: 15px; font-weight: 600; color: var(--accent-gold); }
--    
--    .diamond-icon { width: 16px; height: 16px; fill: var(--accent-gold); }
- 
--    /* === Skeleton Loading === */
--    .skeleton {
--      background: linear-gradient(90deg, var(--skeleton-base) 25%, var(--skeleton-shine) 50%, var(--skeleton-base) 75%);
--      background-size: 200% 100%;
--      animation: skeleton-loading 1.5s infinite;
--      border-radius: 4px;
--      color: transparent !important;
-+    .user-block {
-+      display: flex;
-+      align-items: center;
-+      gap: 10px;
-+      flex: 1;
-+      min-width: 0;
-     }
--    .skeleton * { visibility: hidden; }
--    @keyframes skeleton-loading {
--      0% { background-position: 200% 0; }
--      100% { background-position: -200% 0; }
-+
-+    .avatar-small {
-+      width: 36px;
-+      height: 36px;
-+      border-radius: 50%;
-+      object-fit: cover;
-+      background: #111827;
-+      border: 1px solid rgba(255,255,255,0.2);
-     }
- 
--    /* === Dev Mode Banner === */
-+    .score-wrap { display: flex; align-items: center; gap: 4px; }
-+    .diamond-icon { width: 16px; height: 16px; fill: var(--accent-gold); }
-+
-     #dev-banner {
-       display: none;
-       position: fixed;
-       top: 0; left: 0; width: 100%;
--      background: #ef4444; /* 醒目紅色 */
-+      background: #ef4444;
-       color: #fff;
-       text-align: center;
-       padding: 8px;
-       font-size: 13px;
-       font-weight: bold;
-       z-index: 9999;
--      box-shadow: 0 4px 6px rgba(0,0,0,0.3);
--      animation: slideDown 0.3s ease-out;
-     }
--    @keyframes slideDown { from { transform: translateY(-100%); } to { transform: translateY(0); } }
- 
-+    .empty-state {
-+      text-align:center;
-+      padding: 22px;
-+      color: var(--text-muted);
-+      border: 1px dashed rgba(255,255,255,0.15);
-+      border-radius: 12px;
-+    }
-   </style>
- </head>
- <body>
--
--  <!-- 本地預覽防呆提示 -->
-   <div id="dev-banner">⚠️ [DEV MODE] 目前處於本地預覽模式，資料皆為假資料，請勿作為正式營運參考！</div>
- 
--  <button class="lang-switcher" id="langBtn" onclick="toggleLang()">繁體中文</button>
--
-   <div class="header">
--    <div class="title" data-i18n="title">2026 璀璨之星爭奪戰</div>
--    <div class="subtitle" data-i18n="time">活動時間：2026/04/07 ~ 2026/04/30</div>
--    <!-- 測試 PWA 攔截的連結 -->
--    <a href="https://swag.live/campaign/rules" target="_blank" class="rules-link" data-i18n="rules">查看詳細活動規則</a>
-+    <div class="title">2026 璀璨之星爭奪戰</div>
-+    <div class="subtitle">活動時間：2026/04/07 ~ 2026/04/30</div>
-+    <div class="countdown-wrap">
-+      <span class="countdown-label">日榜結算倒數（GMT+8）</span>
-+      <span class="countdown-time" id="daily-countdown">--:--:--</span>
-+    </div>
-   </div>
- 
-   <div class="container">
--    <!-- 個人資料區塊 -->
--    <div class="glass-card me-section">
--      <div class="me-block">
--        <div class="me-label" data-i18n="myRank">我的排名</div>
--        <div class="me-value rank-text skeleton" id="my-rank">--</div>
--      </div>
--      <div class="me-block" style="text-align: right;">
--        <div class="me-label" data-i18n="myScore">累積鑽石</div>
--        <div class="score-wrap skeleton" id="my-score-wrap">
--          <svg class="diamond-icon" viewBox="0 0 24 24"><path d="M12 2L2 9l10 13L22 9l-10-7zm0 2.8l6.3 4.4H5.7L12 4.8zM4.1 10h15.8L12 20.3 4.1 10z"/></svg>
--          <span class="me-value" id="my-score">--</span>
--        </div>
--      </div>
--    </div>
--
--    <!-- 排行榜區塊 -->
-     <div class="glass-card">
-       <div class="leaderboard-title">
--        <svg class="diamond-icon" viewBox="0 0 24 24"><path d="M12 2L2 9l10 13L22 9l-10-7z"/></svg>
--        <span data-i18n="top10">Top 10 排行榜</span>
-+        <span>排行榜</span>
-       </div>
--      <div id="leaderboard-list">
--        <!-- 預設顯示 5 個 Skeleton 項目 -->
--        <div class="list-item"><div class="rank-num skeleton">1</div><div class="user-info skeleton">MaskedUser</div><div class="score-wrap skeleton">0</div></div>
--        <div class="list-item"><div class="rank-num skeleton">2</div><div class="user-info skeleton">MaskedUser</div><div class="score-wrap skeleton">0</div></div>
--        <div class="list-item"><div class="rank-num skeleton">3</div><div class="user-info skeleton">MaskedUser</div><div class="score-wrap skeleton">0</div></div>
--        <div class="list-item"><div class="rank-num skeleton">4</div><div class="user-info skeleton">MaskedUser</div><div class="score-wrap skeleton">0</div></div>
--        <div class="list-item"><div class="rank-num skeleton">5</div><div class="user-info skeleton">MaskedUser</div><div class="score-wrap skeleton">0</div></div>
-+
-+      <div class="tabs">
-+        <button class="tab-btn active" data-tab="daily">日榜</button>
-+        <button class="tab-btn" data-tab="weekly">週榜</button>
-+        <button class="tab-btn" data-tab="cumulative">累積榜</button>
-       </div>
-+
-+      <div id="podium" class="podium"></div>
-+      <div id="leaderboard-list"></div>
-     </div>
-   </div>
- 
-   <script>
--    // ==========================================
--    // 1. 環境變數與狀態設定
--    // ==========================================
-     const API_ENDPOINT = 'https://swag-campaign-api-905468082258.asia-east1.run.app/api/leaderboard';
-     let swagToken = null;
--    let apiUrlPrefix = '';
-     let handshakeRetryInterval = null;
-+    let currentTab = 'daily';
- 
--    // ==========================================
--    // 2. 多語系 (I18n) 實作
--    // ==========================================
--    const i18n = {
--      'zh-TW': { title: '2026 璀璨之星爭奪戰', time: '活動時間：2026/04/07 ~ 2026/04/30', rules: '查看詳細活動規則', myRank: '我的排名', myScore: '累積鑽石', top10: 'Top 10 排行榜', unranked: '未上榜', langName: '繁體中文' },
--      'zh-CN': { title: '2026 璀璨之星争夺战', time: '活动时间：2026/04/07 ~ 2026/04/30', rules: '查看详细活动规则', myRank: '我的排名', myScore: '累计钻石', top10: 'Top 10 排行榜', unranked: '未上榜', langName: '简体中文' },
--      'en': { title: '2026 Star Diamond Battle', time: 'Period: Apr 7 - Apr 30, 2026', rules: 'View Rules', myRank: 'My Rank', myScore: 'Diamonds', top10: 'Top 10 Leaderboard', unranked: 'Unranked', langName: 'English' },
--      'ja': { title: '2026 スターダイヤ争奪戦', time: '開催期間：2026/04/07 ~ 2026/04/30', rules: '詳細ルール', myRank: '私の順位', myScore: '獲得ダイヤ', top10: 'トップ 10', unranked: 'ランク外', langName: '日本語' }
-+    const boardData = {
-+      daily: [],
-+      weekly: [],
-+      cumulative: []
-     };
--    const langs =['zh-TW', 'zh-CN', 'en', 'ja'];
--    let currentLangIdx = 0;
- 
--    function applyLang(langKey) {
--      const dict = i18n[langKey];
--      document.querySelectorAll('[data-i18n]').forEach(el => {
--        el.innerText = dict[el.getAttribute('data-i18n')];
--      });
--      document.getElementById('langBtn').innerText = dict.langName;
--      
--      // 更新個人的「未上榜」狀態
--      const myRankEl = document.getElementById('my-rank');
--      if (myRankEl && !myRankEl.classList.contains('skeleton')) {
--        if (myRankEl.getAttribute('data-raw') === '-1') {
--          myRankEl.innerText = dict.unranked;
-+    function getAvatarUrl(userId) {
-+      const safeId = encodeURIComponent(String(userId || ''));
-+      return `https://public.swag.live/users/${safeId}/picture.jpg?size=2048x2048&format=jpg`;
-+    }
-+
-+    function normalizeUser(user, rankFallback = 0) {
-+      const userId = user.user_id || user.userid || user.username || user.masked_user_id || user.id || 'unknown';
-+      return {
-+        user_id: userId,
-+        rank: user.rank ?? rankFallback,
-+        total_diamonds: Number(user.total_diamonds || user.score || 0),
-+        daily_first_count: Number(user.daily_first_count || user.daily_top1_count || 0),
-+        weekly_first_count: Number(user.weekly_first_count || user.weekly_top1_count || 0)
-+      };
-+    }
-+
-+    function buildCumulativeBoard(dailyBoard, weeklyBoard) {
-+      const map = new Map();
-+      const ensure = (uid) => {
-+        if (!map.has(uid)) {
-+          map.set(uid, {
-+            user_id: uid,
-+            daily_first_count: 0,
-+            weekly_first_count: 0,
-+            total_first_count: 0
-+          });
-         }
--      }
-+        return map.get(uid);
-+      };
-+
-+      dailyBoard.forEach((u) => {
-+        const user = ensure(u.user_id);
-+        user.daily_first_count += u.daily_first_count || 0;
-+        if (u.rank === 1) user.daily_first_count += 1;
-+      });
-+
-+      weeklyBoard.forEach((u) => {
-+        const user = ensure(u.user_id);
-+        user.weekly_first_count += u.weekly_first_count || 0;
-+        if (u.rank === 1) user.weekly_first_count += 1;
-+      });
-+
-+      return [...map.values()]
-+        .map((u) => ({ ...u, total_first_count: u.daily_first_count + u.weekly_first_count }))
-+        .sort((a, b) => b.total_first_count - a.total_first_count || a.user_id.localeCompare(b.user_id))
-+        .map((u, idx) => ({ ...u, rank: idx + 1 }));
-     }
--    function toggleLang() {
--      currentLangIdx = (currentLangIdx + 1) % langs.length;
--      applyLang(langs[currentLangIdx]);
--    }
--
--    // ==========================================
--    // 3. 渲染資料邏輯 (移除 Skeleton 並注入真實 DOM)
--    // ==========================================
--    function renderData(leaderboard, meData) {
--      // 處理個人資料
--      const myRankEl = document.getElementById('my-rank');
--      const myScoreWrapEl = document.getElementById('my-score-wrap');
--      const myScoreEl = document.getElementById('my-score');
--      
--      myRankEl.classList.remove('skeleton');
--      myScoreWrapEl.classList.remove('skeleton');
--      
--      myRankEl.setAttribute('data-raw', meData.rank);
--      if (meData.rank === -1) {
--        myRankEl.innerText = i18n[langs[currentLangIdx]].unranked;
--      } else {
--        myRankEl.innerText = 'No.' + meData.rank;
--      }
--      myScoreEl.innerText = meData.total_diamonds.toLocaleString();
- 
--      // 處理排行榜
-+    function renderCurrentBoard() {
-       const listContainer = document.getElementById('leaderboard-list');
--      listContainer.innerHTML = ''; // 清除 Skeleton
--      
--      if (leaderboard.length === 0) {
--        listContainer.innerHTML = '<div style="text-align:center; padding: 20px; color: var(--text-muted);">暫無資料</div>';
-+      const podiumContainer = document.getElementById('podium');
-+      const data = boardData[currentTab] || [];
-+      listContainer.innerHTML = '';
-+      podiumContainer.innerHTML = '';
-+
-+      if (!data.length) {
-+        listContainer.innerHTML = '<div class="empty-state">暫無資料</div>';
-         return;
-       }
- 
--      leaderboard.forEach(user => {
-+      const topThree = data.slice(0, 3);
-+      topThree.forEach((user) => {
-+        const div = document.createElement('div');
-+        div.className = `podium-item rank-${user.rank}`;
-+        const scoreText = currentTab === 'cumulative'
-+          ? `日榜#1：${user.daily_first_count} 次 / 週榜#1：${user.weekly_first_count} 次`
-+          : `${user.total_diamonds.toLocaleString()} 鑽`;
-+        div.innerHTML = `
-+          <div class="podium-rank">${['🥇','🥈','🥉'][user.rank - 1] || user.rank}</div>
-+          <img class="avatar" src="${getAvatarUrl(user.user_id)}" alt="${user.user_id}" referrerpolicy="no-referrer" loading="lazy" />
-+          <div class="podium-name">${user.user_id}</div>
-+          <div class="podium-score">${scoreText}</div>
-+        `;
-+        podiumContainer.appendChild(div);
-+      });
-+
-+      data.slice(3).forEach((user) => {
-         const item = document.createElement('div');
--        item.className = `list-item rank-${user.rank}`;
--        
--        const rankHtml = user.rank <= 3 ? 
--          `<div class="rank-num">${['🥇','🥈','🥉'][user.rank-1]}</div>` : 
--          `<div class="rank-num">${user.rank}</div>`;
-+        item.className = 'list-item';
-+        const scoreBlock = currentTab === 'cumulative'
-+          ? `<span class="score-val">${user.total_first_count} 次</span>`
-+          : `<span class="score-val">${user.total_diamonds.toLocaleString()}</span><svg class="diamond-icon" viewBox="0 0 24 24"><path d="M12 2L2 9l10 13L22 9l-10-7zm0 2.8l6.3 4.4H5.7L12 4.8zM4.1 10h15.8L12 20.3 4.1 10z"/></svg>`;
- 
-         item.innerHTML = `
--          ${rankHtml}
--          <div class="user-info">
-+          <div class="rank-num">${user.rank}</div>
-+          <div class="user-block">
-+            <img class="avatar-small" src="${getAvatarUrl(user.user_id)}" alt="${user.user_id}" referrerpolicy="no-referrer" loading="lazy" />
-             <div class="user-id">${user.user_id}</div>
-           </div>
--          <div class="score-wrap">
--            <span class="score-val">${user.total_diamonds.toLocaleString()}</span>
--            <svg class="diamond-icon" viewBox="0 0 24 24"><path d="M12 2L2 9l10 13L22 9l-10-7zm0 2.8l6.3 4.4H5.7L12 4.8zM4.1 10h15.8L12 20.3 4.1 10z"/></svg>
--          </div>
-+          <div class="score-wrap">${scoreBlock}</div>
-         `;
-         listContainer.appendChild(item);
-       });
-     }
- 
--    // ==========================================
--    // 4. API 獲取 (帶 Token 保護)
--    // ==========================================
-+    async function fetchPeriodBoard(token, period) {
-+      const url = `${API_ENDPOINT}?period=${period}`;
-+      const res = await fetch(url, {
-+        headers: { 'Authorization': `Bearer ${token}` }
-+      });
-+
-+      if (!res.ok) throw new Error(`[${period}] API Response: ${res.status}`);
-+      const data = await res.json();
-+
-+      const list = (data.leaderboard || data.data || []).map((u, idx) => normalizeUser(u, idx + 1));
-+      if (list.length) return list;
-+
-+      if (period === 'daily') return (data.daily_leaderboard || []).map((u, idx) => normalizeUser(u, idx + 1));
-+      if (period === 'weekly') return (data.weekly_leaderboard || []).map((u, idx) => normalizeUser(u, idx + 1));
-+      return [];
-+    }
-+
-     async function fetchApiData(token) {
-       try {
--        const res = await fetch(API_ENDPOINT, {
--          headers: { 'Authorization': `Bearer ${token}` }
--        });
--        if (!res.ok) throw new Error(`API Response: ${res.status}`);
--        const data = await res.json();
--        renderData(data.leaderboard, data.me);
-+        const [daily, weekly] = await Promise.all([
-+          fetchPeriodBoard(token, 'daily'),
-+          fetchPeriodBoard(token, 'weekly')
-+        ]);
-+
-+        boardData.daily = daily;
-+        boardData.weekly = weekly;
-+        boardData.cumulative = buildCumulativeBoard(daily, weekly);
-+        renderCurrentBoard();
-       } catch (err) {
-         console.error('Fetch Data Error:', err);
--        // 若失敗可提示使用者重整，此處直接保留 Skeleton 或顯示錯誤
-+        document.getElementById('leaderboard-list').innerHTML = '<div class="empty-state">讀取排行榜失敗，請稍後重整</div>';
-       }
-     }
- 
--    // ==========================================
--    // 5. Dev Mode 假資料預覽防呆邏輯
--    // ==========================================
-     function enableDevMode() {
--      // 顯示醒目紅色防呆 Banner
-       document.getElementById('dev-banner').style.display = 'block';
--      // 模擬假資料
--      const mockLeaderboard =[
--        { rank: 1, masked_user_id: "5e69***8583", total_diamonds: 1254018 },
--        { rank: 2, masked_user_id: "58fe***bff3", total_diamonds: 1140660 },
--        { rank: 3, masked_user_id: "5da1***7b48", total_diamonds: 1113679 },
--        { rank: 4, masked_user_id: "6335***cd9a", total_diamonds: 961030 },
--        { rank: 5, masked_user_id: "5e0a***9dbc", total_diamonds: 957995 }
-+      boardData.daily = [
-+        { rank: 1, user_id: '100001', total_diamonds: 280000, daily_first_count: 4, weekly_first_count: 1 },
-+        { rank: 2, user_id: '100002', total_diamonds: 230000, daily_first_count: 1, weekly_first_count: 0 },
-+        { rank: 3, user_id: '100003', total_diamonds: 180000, daily_first_count: 0, weekly_first_count: 2 },
-+        { rank: 4, user_id: '100004', total_diamonds: 90000, daily_first_count: 0, weekly_first_count: 0 },
-+        { rank: 5, user_id: '100005', total_diamonds: 60000, daily_first_count: 0, weekly_first_count: 0 }
-       ];
--      const mockMe = { rank: -1, total_diamonds: 0 };
--      renderData(mockLeaderboard, mockMe);
--      console.warn("⚠️ 已進入本地 Dev Mode，畫面上方已顯示防呆警告");
-+
-+      boardData.weekly = [
-+        { rank: 1, user_id: '100003', total_diamonds: 940000, daily_first_count: 0, weekly_first_count: 2 },
-+        { rank: 2, user_id: '100001', total_diamonds: 820000, daily_first_count: 4, weekly_first_count: 1 },
-+        { rank: 3, user_id: '100006', total_diamonds: 640000, daily_first_count: 0, weekly_first_count: 1 },
-+        { rank: 4, user_id: '100002', total_diamonds: 580000, daily_first_count: 1, weekly_first_count: 0 }
-+      ];
-+
-+      boardData.cumulative = buildCumulativeBoard(boardData.daily, boardData.weekly);
-+      renderCurrentBoard();
-+    }
-+
-+    function updateDailyCountdown() {
-+      const now = new Date();
-+      const utcNow = now.getTime() + now.getTimezoneOffset() * 60000;
-+      const gmt8Now = new Date(utcNow + 8 * 60 * 60000);
-+      const target = new Date(gmt8Now);
-+      target.setHours(23, 59, 59, 999);
-+      let diff = target.getTime() - gmt8Now.getTime();
-+      if (diff < 0) diff = 0;
-+
-+      const h = Math.floor(diff / 3600000);
-+      const m = Math.floor((diff % 3600000) / 60000);
-+      const s = Math.floor((diff % 60000) / 1000);
-+
-+      document.getElementById('daily-countdown').textContent =
-+        `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
-+    }
-+
-+    function setupTabs() {
-+      document.querySelectorAll('.tab-btn').forEach(btn => {
-+        btn.addEventListener('click', () => {
-+          document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-+          btn.classList.add('active');
-+          currentTab = btn.dataset.tab;
-+          renderCurrentBoard();
-+        });
-+      });
-     }
- 
--    // ==========================================
--    // 6. SWAG Iframe 通訊協議 (核心)
--    // ==========================================
-     function postIframeReady() {
-       window.parent.postMessage({ type: 'IFRAME_READY' }, '*');
-     }
- 
-     window.addEventListener('DOMContentLoaded', () => {
--      // 初始化語系
--      applyLang(langs[0]);
-+      setupTabs();
-+      updateDailyCountdown();
-+      setInterval(updateDailyCountdown, 1000);
- 
--      // Step 1: 載入後 100ms 立刻發送就緒
-       setTimeout(postIframeReady, 100);
--
--      // Step 2: 啟動 3 秒重試機制
-       handshakeRetryInterval = setInterval(() => {
-         if (!swagToken) postIframeReady();
-       }, 3000);
- 
--      // Dev Mode 偵測：若不在 iframe 內，且 2 秒後未取得 Token，即視為本地開發預覽
-       if (window.self === window.top) {
-         setTimeout(() => {
-           if (!swagToken) {
-             clearInterval(handshakeRetryInterval);
-             enableDevMode();
-           }
--        }, 2000);
-+        }, 1500);
-       }
-     });
- 
-     window.addEventListener('message', (event) => {
--      // 這裡為求安全可加入 event.origin 的判斷，但 SWAG Iframe 協議預設允許 '*'，
--      // 故這裡針對 type 攔截
-       const data = event.data;
-       if (!data) return;
- 
--      // 接收 API 網域配置 (若有需要)
--      if (data.type === 'SET_DOMAIN_CONFIG') {
--        apiUrlPrefix = data.apiUrlPrefix;
--      }
--
--      // Step 3: 接收 Token，清除重試，呼叫後端 API
-       if (data.type === 'SET_TOKEN') {
--        if (swagToken === data.token) return; // 防重複
-+        if (swagToken === data.token) return;
-         swagToken = data.token;
--        
-+
-         if (handshakeRetryInterval) {
-           clearInterval(handshakeRetryInterval);
-           handshakeRetryInterval = null;
-         }
--        
--        fetchApiData(swagToken);
--      }
--    });
- 
--    // ==========================================
--    // 7. PWA 跨視窗導航攔截 (Navigation Interceptor)
--    // ==========================================
--    document.addEventListener('click', (e) => {
--      // 如果不在 iframe 內，則不攔截（Dev Mode 情境）
--      if (window.self === window.top) return;
--
--      const link = e.target.closest('a[target="_blank"]');
--      if (link) {
--        try {
--          const url = new URL(link.href);
--          // 判斷是否為主站網域
--          if (url.hostname === 'swag.live' || url.hostname === 'www.swag.live') {
--            e.preventDefault(); // 阻擋原生開新分頁
--            window.parent.postMessage({ type: 'PWA_NAVIGATE', url: link.href }, '*');
--            console.log("已攔截跳轉並通知 PWA 父層:", link.href);
--          }
--          // 其餘網域 (如 creators.swag.live 或外部網域) 則放行原生行為
--        } catch(err) {
--          console.error("URL 解析失敗", err);
--        }
-+        fetchApiData(swagToken);
-       }
-     });
--
-   </script>
- </body>
- </html>diff --git a/index.html b/index.html
-index 2dbeff0012300ddc8e34217040fea6f21c3a667a..4d3fb3219818710e8433a29c342616f1f178e4f7 100644
---- a/index.html
-+++ b/index.html
-@@ -1,418 +1,501 @@
- <!DOCTYPE html>
- <html lang="zh-TW">
- <head>
-   <meta charset="UTF-8">
-   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-   <title>2026 璀璨之星爭奪戰</title>
-   <style>
--    /* === 核心變數 & 重置 === */
-     :root {
-       --bg-dark: #0f111a;
-       --glass-bg: rgba(255, 255, 255, 0.05);
-       --glass-border: rgba(255, 255, 255, 0.1);
-       --text-main: #ffffff;
-       --text-muted: #94a3b8;
-       --accent-gold: #fbbf24;
-       --accent-gold-glow: rgba(251, 191, 36, 0.3);
-       --skeleton-base: #1e293b;
-       --skeleton-shine: #334155;
-     }
-+
-     * { box-sizing: border-box; margin: 0; padding: 0; }
-+
-     body {
-       background-color: var(--bg-dark);
-       background-image: radial-gradient(circle at top right, rgba(30, 58, 138, 0.2), transparent 40%),
-                         radial-gradient(circle at bottom left, rgba(88, 28, 135, 0.2), transparent 40%);
-       color: var(--text-main);
-       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-       min-height: 100vh;
-       padding-bottom: 50px;
-     }
- 
--    /* === 語系切換器 === */
--    .lang-switcher {
--      position: absolute;
--      top: 16px;
--      right: 16px;
--      background: var(--glass-bg);
--      border: 1px solid var(--glass-border);
--      color: var(--text-main);
--      padding: 6px 12px;
--      border-radius: 20px;
--      font-size: 14px;
--      cursor: pointer;
--      backdrop-filter: blur(10px);
--      -webkit-backdrop-filter: blur(10px);
--      z-index: 100;
--    }
--
--    /* === Header === */
-     .header {
-       text-align: center;
--      padding: 60px 20px 30px;
-+      padding: 42px 20px 20px;
-       position: relative;
-     }
-+
-     .title {
-       font-size: 32px;
-       font-weight: 800;
-       background: linear-gradient(135deg, #fbbf24, #f59e0b, #d97706);
-       -webkit-background-clip: text;
-       -webkit-text-fill-color: transparent;
-       margin-bottom: 8px;
-     }
--    .subtitle { font-size: 14px; color: var(--text-muted); margin-bottom: 16px;}
--    .rules-link {
--      display: inline-block;
--      color: var(--accent-gold);
--      text-decoration: none;
-+
-+    .subtitle {
-       font-size: 14px;
--      border-bottom: 1px solid var(--accent-gold);
--      padding-bottom: 2px;
-+      color: var(--text-muted);
-+      margin-bottom: 12px;
-+    }
-+
-+    .countdown-wrap {
-+      margin: 0 auto;
-+      width: fit-content;
-+      background: rgba(251, 191, 36, 0.1);
-+      border: 1px solid rgba(251, 191, 36, 0.3);
-+      border-radius: 999px;
-+      padding: 8px 14px;
-+      display: flex;
-+      align-items: center;
-+      gap: 8px;
-+    }
-+
-+    .countdown-label {
-+      color: var(--text-muted);
-+      font-size: 13px;
-+    }
-+
-+    .countdown-time {
-+      color: var(--accent-gold);
-+      font-size: 16px;
-+      font-weight: 700;
-+      letter-spacing: 1px;
-+      min-width: 86px;
-+      text-align: center;
-     }
- 
--    /* === Glassmorphism 容器 === */
-     .container {
--      max-width: 500px;
-+      max-width: 540px;
-       margin: 0 auto;
-       padding: 0 16px;
-     }
-+
-     .glass-card {
-       background: var(--glass-bg);
-       border: 1px solid var(--glass-border);
-       border-radius: 16px;
-       padding: 20px;
-       backdrop-filter: blur(12px);
-       -webkit-backdrop-filter: blur(12px);
-       margin-bottom: 24px;
-     }
- 
--    /* === 個人狀態區塊 === */
--    .me-section { display: flex; justify-content: space-between; align-items: center; }
--    .me-block { display: flex; flex-direction: column; }
--    .me-label { font-size: 12px; color: var(--text-muted); margin-bottom: 4px; }
--    .me-value { font-size: 24px; font-weight: 700; color: var(--accent-gold); }
--    .me-value.rank-text { color: #fff; }
--
--    /* === 排行榜列表 === */
-     .leaderboard-title {
-       font-size: 18px;
-       font-weight: 600;
-       margin-bottom: 16px;
-       display: flex;
-       align-items: center;
-+      justify-content: space-between;
-+      gap: 8px;
-+    }
-+
-+    .tabs {
-+      display: flex;
-       gap: 8px;
-+      margin-bottom: 14px;
-+    }
-+
-+    .tab-btn {
-+      border: 1px solid var(--glass-border);
-+      background: rgba(255, 255, 255, 0.03);
-+      color: var(--text-muted);
-+      border-radius: 999px;
-+      padding: 7px 12px;
-+      font-size: 13px;
-+      cursor: pointer;
-+    }
-+
-+    .tab-btn.active {
-+      color: #111827;
-+      background: var(--accent-gold);
-+      border-color: var(--accent-gold);
-+      font-weight: 700;
-+    }
-+
-+    .podium {
-+      display: grid;
-+      grid-template-columns: repeat(3, 1fr);
-+      gap: 10px;
-+      margin-bottom: 14px;
-+    }
-+
-+    .podium-item {
-+      border: 1px solid rgba(255, 255, 255, 0.08);
-+      border-radius: 12px;
-+      padding: 10px 8px;
-+      text-align: center;
-+      background: rgba(255,255,255,0.03);
-+      min-height: 126px;
-+    }
-+
-+    .podium-item.rank-1 {
-+      background: rgba(251, 191, 36, 0.12);
-+      border-color: rgba(251, 191, 36, 0.35);
-     }
-+
-+    .podium-rank {
-+      font-size: 18px;
-+      margin-bottom: 6px;
-+    }
-+
-+    .avatar {
-+      width: 54px;
-+      height: 54px;
-+      border-radius: 50%;
-+      object-fit: cover;
-+      border: 2px solid rgba(255,255,255,0.25);
-+      margin: 0 auto 6px;
-+      display: block;
-+      background: #111827;
-+    }
-+
-+    .podium-name,
-+    .user-id {
-+      font-size: 13px;
-+      max-width: 100%;
-+      overflow: hidden;
-+      text-overflow: ellipsis;
-+      white-space: nowrap;
-+    }
-+
-+    .podium-score,
-+    .score-val {
-+      color: var(--accent-gold);
-+      font-weight: 700;
-+      font-size: 13px;
-+    }
-+
-     .list-item {
-       display: flex;
-       align-items: center;
--      padding: 12px 0;
-+      padding: 11px 0;
-       border-bottom: 1px solid rgba(255,255,255,0.05);
-+      gap: 10px;
-     }
-+
-     .list-item:last-child { border-bottom: none; }
-+
-     .rank-num {
--      width: 32px;
--      font-size: 16px;
--      font-weight: 700;
--      color: var(--text-muted);
-+      width: 28px;
-       text-align: center;
-+      color: var(--text-muted);
-+      font-weight: 700;
-     }
--    .rank-1 .rank-num { color: #fbbf24; font-size: 20px; text-shadow: 0 0 10px var(--accent-gold-glow); }
--    .rank-2 .rank-num { color: #cbd5e1; font-size: 18px; }
--    .rank-3 .rank-num { color: #b45309; font-size: 18px; }
--    
--    .user-info { flex: 1; margin-left: 12px; }
--    .user-id { font-size: 15px; font-weight: 500; }
--    .score-wrap { display: flex; align-items: center; gap: 4px; }
--    .score-val { font-size: 15px; font-weight: 600; color: var(--accent-gold); }
--    
--    .diamond-icon { width: 16px; height: 16px; fill: var(--accent-gold); }
- 
--    /* === Skeleton Loading === */
--    .skeleton {
--      background: linear-gradient(90deg, var(--skeleton-base) 25%, var(--skeleton-shine) 50%, var(--skeleton-base) 75%);
--      background-size: 200% 100%;
--      animation: skeleton-loading 1.5s infinite;
--      border-radius: 4px;
--      color: transparent !important;
-+    .user-block {
-+      display: flex;
-+      align-items: center;
-+      gap: 10px;
-+      flex: 1;
-+      min-width: 0;
-     }
--    .skeleton * { visibility: hidden; }
--    @keyframes skeleton-loading {
--      0% { background-position: 200% 0; }
--      100% { background-position: -200% 0; }
-+
-+    .avatar-small {
-+      width: 36px;
-+      height: 36px;
-+      border-radius: 50%;
-+      object-fit: cover;
-+      background: #111827;
-+      border: 1px solid rgba(255,255,255,0.2);
-     }
- 
--    /* === Dev Mode Banner === */
-+    .score-wrap { display: flex; align-items: center; gap: 4px; }
-+    .diamond-icon { width: 16px; height: 16px; fill: var(--accent-gold); }
-+
-     #dev-banner {
-       display: none;
-       position: fixed;
-       top: 0; left: 0; width: 100%;
--      background: #ef4444; /* 醒目紅色 */
-+      background: #ef4444;
-       color: #fff;
-       text-align: center;
-       padding: 8px;
-       font-size: 13px;
-       font-weight: bold;
-       z-index: 9999;
--      box-shadow: 0 4px 6px rgba(0,0,0,0.3);
--      animation: slideDown 0.3s ease-out;
-     }
--    @keyframes slideDown { from { transform: translateY(-100%); } to { transform: translateY(0); } }
- 
-+    .empty-state {
-+      text-align:center;
-+      padding: 22px;
-+      color: var(--text-muted);
-+      border: 1px dashed rgba(255,255,255,0.15);
-+      border-radius: 12px;
-+    }
-   </style>
- </head>
- <body>
--
--  <!-- 本地預覽防呆提示 -->
-   <div id="dev-banner">⚠️ [DEV MODE] 目前處於本地預覽模式，資料皆為假資料，請勿作為正式營運參考！</div>
- 
--  <button class="lang-switcher" id="langBtn" onclick="toggleLang()">繁體中文</button>
--
-   <div class="header">
--    <div class="title" data-i18n="title">2026 璀璨之星爭奪戰</div>
--    <div class="subtitle" data-i18n="time">活動時間：2026/04/07 ~ 2026/04/30</div>
--    <!-- 測試 PWA 攔截的連結 -->
--    <a href="https://swag.live/campaign/rules" target="_blank" class="rules-link" data-i18n="rules">查看詳細活動規則</a>
-+    <div class="title">2026 璀璨之星爭奪戰</div>
-+    <div class="subtitle">活動時間：2026/04/07 ~ 2026/04/30</div>
-+    <div class="countdown-wrap">
-+      <span class="countdown-label">日榜結算倒數（GMT+8）</span>
-+      <span class="countdown-time" id="daily-countdown">--:--:--</span>
-+    </div>
-   </div>
- 
-   <div class="container">
--    <!-- 個人資料區塊 -->
--    <div class="glass-card me-section">
--      <div class="me-block">
--        <div class="me-label" data-i18n="myRank">我的排名</div>
--        <div class="me-value rank-text skeleton" id="my-rank">--</div>
--      </div>
--      <div class="me-block" style="text-align: right;">
--        <div class="me-label" data-i18n="myScore">累積鑽石</div>
--        <div class="score-wrap skeleton" id="my-score-wrap">
--          <svg class="diamond-icon" viewBox="0 0 24 24"><path d="M12 2L2 9l10 13L22 9l-10-7zm0 2.8l6.3 4.4H5.7L12 4.8zM4.1 10h15.8L12 20.3 4.1 10z"/></svg>
--          <span class="me-value" id="my-score">--</span>
--        </div>
--      </div>
--    </div>
--
--    <!-- 排行榜區塊 -->
-     <div class="glass-card">
-       <div class="leaderboard-title">
--        <svg class="diamond-icon" viewBox="0 0 24 24"><path d="M12 2L2 9l10 13L22 9l-10-7z"/></svg>
--        <span data-i18n="top10">Top 10 排行榜</span>
-+        <span>排行榜</span>
-       </div>
--      <div id="leaderboard-list">
--        <!-- 預設顯示 5 個 Skeleton 項目 -->
--        <div class="list-item"><div class="rank-num skeleton">1</div><div class="user-info skeleton">MaskedUser</div><div class="score-wrap skeleton">0</div></div>
--        <div class="list-item"><div class="rank-num skeleton">2</div><div class="user-info skeleton">MaskedUser</div><div class="score-wrap skeleton">0</div></div>
--        <div class="list-item"><div class="rank-num skeleton">3</div><div class="user-info skeleton">MaskedUser</div><div class="score-wrap skeleton">0</div></div>
--        <div class="list-item"><div class="rank-num skeleton">4</div><div class="user-info skeleton">MaskedUser</div><div class="score-wrap skeleton">0</div></div>
--        <div class="list-item"><div class="rank-num skeleton">5</div><div class="user-info skeleton">MaskedUser</div><div class="score-wrap skeleton">0</div></div>
-+
-+      <div class="tabs">
-+        <button class="tab-btn active" data-tab="daily">日榜</button>
-+        <button class="tab-btn" data-tab="weekly">週榜</button>
-+        <button class="tab-btn" data-tab="cumulative">累積榜</button>
-       </div>
-+
-+      <div id="podium" class="podium"></div>
-+      <div id="leaderboard-list"></div>
-     </div>
-   </div>
- 
-   <script>
--    // ==========================================
--    // 1. 環境變數與狀態設定
--    // ==========================================
-     const API_ENDPOINT = 'https://swag-campaign-api-905468082258.asia-east1.run.app/api/leaderboard';
-     let swagToken = null;
--    let apiUrlPrefix = '';
-     let handshakeRetryInterval = null;
-+    let currentTab = 'daily';
- 
--    // ==========================================
--    // 2. 多語系 (I18n) 實作
--    // ==========================================
--    const i18n = {
--      'zh-TW': { title: '2026 璀璨之星爭奪戰', time: '活動時間：2026/04/07 ~ 2026/04/30', rules: '查看詳細活動規則', myRank: '我的排名', myScore: '累積鑽石', top10: 'Top 10 排行榜', unranked: '未上榜', langName: '繁體中文' },
--      'zh-CN': { title: '2026 璀璨之星争夺战', time: '活动时间：2026/04/07 ~ 2026/04/30', rules: '查看详细活动规则', myRank: '我的排名', myScore: '累计钻石', top10: 'Top 10 排行榜', unranked: '未上榜', langName: '简体中文' },
--      'en': { title: '2026 Star Diamond Battle', time: 'Period: Apr 7 - Apr 30, 2026', rules: 'View Rules', myRank: 'My Rank', myScore: 'Diamonds', top10: 'Top 10 Leaderboard', unranked: 'Unranked', langName: 'English' },
--      'ja': { title: '2026 スターダイヤ争奪戦', time: '開催期間：2026/04/07 ~ 2026/04/30', rules: '詳細ルール', myRank: '私の順位', myScore: '獲得ダイヤ', top10: 'トップ 10', unranked: 'ランク外', langName: '日本語' }
-+    const boardData = {
-+      daily: [],
-+      weekly: [],
-+      cumulative: []
-     };
--    const langs =['zh-TW', 'zh-CN', 'en', 'ja'];
--    let currentLangIdx = 0;
- 
--    function applyLang(langKey) {
--      const dict = i18n[langKey];
--      document.querySelectorAll('[data-i18n]').forEach(el => {
--        el.innerText = dict[el.getAttribute('data-i18n')];
--      });
--      document.getElementById('langBtn').innerText = dict.langName;
--      
--      // 更新個人的「未上榜」狀態
--      const myRankEl = document.getElementById('my-rank');
--      if (myRankEl && !myRankEl.classList.contains('skeleton')) {
--        if (myRankEl.getAttribute('data-raw') === '-1') {
--          myRankEl.innerText = dict.unranked;
-+    function getAvatarUrl(userId) {
-+      const safeId = encodeURIComponent(String(userId || ''));
-+      return `https://public.swag.live/users/${safeId}/picture.jpg?size=2048x2048&format=jpg`;
-+    }
-+
-+    function normalizeUser(user, rankFallback = 0) {
-+      const userId = user.user_id || user.userid || user.username || user.masked_user_id || user.id || 'unknown';
-+      return {
-+        user_id: userId,
-+        rank: user.rank ?? rankFallback,
-+        total_diamonds: Number(user.total_diamonds || user.score || 0),
-+        daily_first_count: Number(user.daily_first_count || user.daily_top1_count || 0),
-+        weekly_first_count: Number(user.weekly_first_count || user.weekly_top1_count || 0)
-+      };
-+    }
-+
-+    function buildCumulativeBoard(dailyBoard, weeklyBoard) {
-+      const map = new Map();
-+      const ensure = (uid) => {
-+        if (!map.has(uid)) {
-+          map.set(uid, {
-+            user_id: uid,
-+            daily_first_count: 0,
-+            weekly_first_count: 0,
-+            total_first_count: 0
-+          });
-         }
--      }
-+        return map.get(uid);
-+      };
-+
-+      dailyBoard.forEach((u) => {
-+        const user = ensure(u.user_id);
-+        user.daily_first_count += u.daily_first_count || 0;
-+        if (u.rank === 1) user.daily_first_count += 1;
-+      });
-+
-+      weeklyBoard.forEach((u) => {
-+        const user = ensure(u.user_id);
-+        user.weekly_first_count += u.weekly_first_count || 0;
-+        if (u.rank === 1) user.weekly_first_count += 1;
-+      });
-+
-+      return [...map.values()]
-+        .map((u) => ({ ...u, total_first_count: u.daily_first_count + u.weekly_first_count }))
-+        .sort((a, b) => b.total_first_count - a.total_first_count || a.user_id.localeCompare(b.user_id))
-+        .map((u, idx) => ({ ...u, rank: idx + 1 }));
-     }
--    function toggleLang() {
--      currentLangIdx = (currentLangIdx + 1) % langs.length;
--      applyLang(langs[currentLangIdx]);
--    }
--
--    // ==========================================
--    // 3. 渲染資料邏輯 (移除 Skeleton 並注入真實 DOM)
--    // ==========================================
--    function renderData(leaderboard, meData) {
--      // 處理個人資料
--      const myRankEl = document.getElementById('my-rank');
--      const myScoreWrapEl = document.getElementById('my-score-wrap');
--      const myScoreEl = document.getElementById('my-score');
--      
--      myRankEl.classList.remove('skeleton');
--      myScoreWrapEl.classList.remove('skeleton');
--      
--      myRankEl.setAttribute('data-raw', meData.rank);
--      if (meData.rank === -1) {
--        myRankEl.innerText = i18n[langs[currentLangIdx]].unranked;
--      } else {
--        myRankEl.innerText = 'No.' + meData.rank;
--      }
--      myScoreEl.innerText = meData.total_diamonds.toLocaleString();
- 
--      // 處理排行榜
-+    function renderCurrentBoard() {
-       const listContainer = document.getElementById('leaderboard-list');
--      listContainer.innerHTML = ''; // 清除 Skeleton
--      
--      if (leaderboard.length === 0) {
--        listContainer.innerHTML = '<div style="text-align:center; padding: 20px; color: var(--text-muted);">暫無資料</div>';
-+      const podiumContainer = document.getElementById('podium');
-+      const data = boardData[currentTab] || [];
-+      listContainer.innerHTML = '';
-+      podiumContainer.innerHTML = '';
-+
-+      if (!data.length) {
-+        listContainer.innerHTML = '<div class="empty-state">暫無資料</div>';
-         return;
-       }
- 
--      leaderboard.forEach(user => {
-+      const topThree = data.slice(0, 3);
-+      topThree.forEach((user) => {
-+        const div = document.createElement('div');
-+        div.className = `podium-item rank-${user.rank}`;
-+        const scoreText = currentTab === 'cumulative'
-+          ? `日榜#1：${user.daily_first_count} 次 / 週榜#1：${user.weekly_first_count} 次`
-+          : `${user.total_diamonds.toLocaleString()} 鑽`;
-+        div.innerHTML = `
-+          <div class="podium-rank">${['🥇','🥈','🥉'][user.rank - 1] || user.rank}</div>
-+          <img class="avatar" src="${getAvatarUrl(user.user_id)}" alt="${user.user_id}" referrerpolicy="no-referrer" loading="lazy" />
-+          <div class="podium-name">${user.user_id}</div>
-+          <div class="podium-score">${scoreText}</div>
-+        `;
-+        podiumContainer.appendChild(div);
-+      });
-+
-+      data.slice(3).forEach((user) => {
-         const item = document.createElement('div');
--        item.className = `list-item rank-${user.rank}`;
--        
--        const rankHtml = user.rank <= 3 ? 
--          `<div class="rank-num">${['🥇','🥈','🥉'][user.rank-1]}</div>` : 
--          `<div class="rank-num">${user.rank}</div>`;
-+        item.className = 'list-item';
-+        const scoreBlock = currentTab === 'cumulative'
-+          ? `<span class="score-val">${user.total_first_count} 次</span>`
-+          : `<span class="score-val">${user.total_diamonds.toLocaleString()}</span><svg class="diamond-icon" viewBox="0 0 24 24"><path d="M12 2L2 9l10 13L22 9l-10-7zm0 2.8l6.3 4.4H5.7L12 4.8zM4.1 10h15.8L12 20.3 4.1 10z"/></svg>`;
- 
-         item.innerHTML = `
--          ${rankHtml}
--          <div class="user-info">
-+          <div class="rank-num">${user.rank}</div>
-+          <div class="user-block">
-+            <img class="avatar-small" src="${getAvatarUrl(user.user_id)}" alt="${user.user_id}" referrerpolicy="no-referrer" loading="lazy" />
-             <div class="user-id">${user.user_id}</div>
-           </div>
--          <div class="score-wrap">
--            <span class="score-val">${user.total_diamonds.toLocaleString()}</span>
--            <svg class="diamond-icon" viewBox="0 0 24 24"><path d="M12 2L2 9l10 13L22 9l-10-7zm0 2.8l6.3 4.4H5.7L12 4.8zM4.1 10h15.8L12 20.3 4.1 10z"/></svg>
--          </div>
-+          <div class="score-wrap">${scoreBlock}</div>
-         `;
-         listContainer.appendChild(item);
-       });
-     }
- 
--    // ==========================================
--    // 4. API 獲取 (帶 Token 保護)
--    // ==========================================
-+    async function fetchPeriodBoard(token, period) {
-+      const url = `${API_ENDPOINT}?period=${period}`;
-+      const res = await fetch(url, {
-+        headers: { 'Authorization': `Bearer ${token}` }
-+      });
-+
-+      if (!res.ok) throw new Error(`[${period}] API Response: ${res.status}`);
-+      const data = await res.json();
-+
-+      const list = (data.leaderboard || data.data || []).map((u, idx) => normalizeUser(u, idx + 1));
-+      if (list.length) return list;
-+
-+      if (period === 'daily') return (data.daily_leaderboard || []).map((u, idx) => normalizeUser(u, idx + 1));
-+      if (period === 'weekly') return (data.weekly_leaderboard || []).map((u, idx) => normalizeUser(u, idx + 1));
-+      return [];
-+    }
-+
-     async function fetchApiData(token) {
-       try {
--        const res = await fetch(API_ENDPOINT, {
--          headers: { 'Authorization': `Bearer ${token}` }
--        });
--        if (!res.ok) throw new Error(`API Response: ${res.status}`);
--        const data = await res.json();
--        renderData(data.leaderboard, data.me);
-+        const [daily, weekly] = await Promise.all([
-+          fetchPeriodBoard(token, 'daily'),
-+          fetchPeriodBoard(token, 'weekly')
-+        ]);
-+
-+        boardData.daily = daily;
-+        boardData.weekly = weekly;
-+        boardData.cumulative = buildCumulativeBoard(daily, weekly);
-+        renderCurrentBoard();
-       } catch (err) {
-         console.error('Fetch Data Error:', err);
--        // 若失敗可提示使用者重整，此處直接保留 Skeleton 或顯示錯誤
-+        document.getElementById('leaderboard-list').innerHTML = '<div class="empty-state">讀取排行榜失敗，請稍後重整</div>';
-       }
-     }
- 
--    // ==========================================
--    // 5. Dev Mode 假資料預覽防呆邏輯
--    // ==========================================
-     function enableDevMode() {
--      // 顯示醒目紅色防呆 Banner
-       document.getElementById('dev-banner').style.display = 'block';
--      // 模擬假資料
--      const mockLeaderboard =[
--        { rank: 1, masked_user_id: "5e69***8583", total_diamonds: 1254018 },
--        { rank: 2, masked_user_id: "58fe***bff3", total_diamonds: 1140660 },
--        { rank: 3, masked_user_id: "5da1***7b48", total_diamonds: 1113679 },
--        { rank: 4, masked_user_id: "6335***cd9a", total_diamonds: 961030 },
--        { rank: 5, masked_user_id: "5e0a***9dbc", total_diamonds: 957995 }
-+      boardData.daily = [
-+        { rank: 1, user_id: '100001', total_diamonds: 280000, daily_first_count: 4, weekly_first_count: 1 },
-+        { rank: 2, user_id: '100002', total_diamonds: 230000, daily_first_count: 1, weekly_first_count: 0 },
-+        { rank: 3, user_id: '100003', total_diamonds: 180000, daily_first_count: 0, weekly_first_count: 2 },
-+        { rank: 4, user_id: '100004', total_diamonds: 90000, daily_first_count: 0, weekly_first_count: 0 },
-+        { rank: 5, user_id: '100005', total_diamonds: 60000, daily_first_count: 0, weekly_first_count: 0 }
-       ];
--      const mockMe = { rank: -1, total_diamonds: 0 };
--      renderData(mockLeaderboard, mockMe);
--      console.warn("⚠️ 已進入本地 Dev Mode，畫面上方已顯示防呆警告");
-+
-+      boardData.weekly = [
-+        { rank: 1, user_id: '100003', total_diamonds: 940000, daily_first_count: 0, weekly_first_count: 2 },
-+        { rank: 2, user_id: '100001', total_diamonds: 820000, daily_first_count: 4, weekly_first_count: 1 },
-+        { rank: 3, user_id: '100006', total_diamonds: 640000, daily_first_count: 0, weekly_first_count: 1 },
-+        { rank: 4, user_id: '100002', total_diamonds: 580000, daily_first_count: 1, weekly_first_count: 0 }
-+      ];
-+
-+      boardData.cumulative = buildCumulativeBoard(boardData.daily, boardData.weekly);
-+      renderCurrentBoard();
-+    }
-+
-+    function updateDailyCountdown() {
-+      const now = new Date();
-+      const utcNow = now.getTime() + now.getTimezoneOffset() * 60000;
-+      const gmt8Now = new Date(utcNow + 8 * 60 * 60000);
-+      const target = new Date(gmt8Now);
-+      target.setHours(23, 59, 59, 999);
-+      let diff = target.getTime() - gmt8Now.getTime();
-+      if (diff < 0) diff = 0;
-+
-+      const h = Math.floor(diff / 3600000);
-+      const m = Math.floor((diff % 3600000) / 60000);
-+      const s = Math.floor((diff % 60000) / 1000);
-+
-+      document.getElementById('daily-countdown').textContent =
-+        `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
-+    }
-+
-+    function setupTabs() {
-+      document.querySelectorAll('.tab-btn').forEach(btn => {
-+        btn.addEventListener('click', () => {
-+          document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-+          btn.classList.add('active');
-+          currentTab = btn.dataset.tab;
-+          renderCurrentBoard();
-+        });
-+      });
-     }
- 
--    // ==========================================
--    // 6. SWAG Iframe 通訊協議 (核心)
--    // ==========================================
-     function postIframeReady() {
-       window.parent.postMessage({ type: 'IFRAME_READY' }, '*');
-     }
- 
-     window.addEventListener('DOMContentLoaded', () => {
--      // 初始化語系
--      applyLang(langs[0]);
-+      setupTabs();
-+      updateDailyCountdown();
-+      setInterval(updateDailyCountdown, 1000);
- 
--      // Step 1: 載入後 100ms 立刻發送就緒
-       setTimeout(postIframeReady, 100);
--
--      // Step 2: 啟動 3 秒重試機制
-       handshakeRetryInterval = setInterval(() => {
-         if (!swagToken) postIframeReady();
-       }, 3000);
- 
--      // Dev Mode 偵測：若不在 iframe 內，且 2 秒後未取得 Token，即視為本地開發預覽
-       if (window.self === window.top) {
-         setTimeout(() => {
-           if (!swagToken) {
-             clearInterval(handshakeRetryInterval);
-             enableDevMode();
-           }
--        }, 2000);
-+        }, 1500);
-       }
-     });
- 
-     window.addEventListener('message', (event) => {
--      // 這裡為求安全可加入 event.origin 的判斷，但 SWAG Iframe 協議預設允許 '*'，
--      // 故這裡針對 type 攔截
-       const data = event.data;
-       if (!data) return;
- 
--      // 接收 API 網域配置 (若有需要)
--      if (data.type === 'SET_DOMAIN_CONFIG') {
--        apiUrlPrefix = data.apiUrlPrefix;
--      }
--
--      // Step 3: 接收 Token，清除重試，呼叫後端 API
-       if (data.type === 'SET_TOKEN') {
--        if (swagToken === data.token) return; // 防重複
-+        if (swagToken === data.token) return;
-         swagToken = data.token;
--        
-+
-         if (handshakeRetryInterval) {
-           clearInterval(handshakeRetryInterval);
-           handshakeRetryInterval = null;
-         }
--        
--        fetchApiData(swagToken);
--      }
--    });
- 
--    // ==========================================
--    // 7. PWA 跨視窗導航攔截 (Navigation Interceptor)
--    // ==========================================
--    document.addEventListener('click', (e) => {
--      // 如果不在 iframe 內，則不攔截（Dev Mode 情境）
--      if (window.self === window.top) return;
--
--      const link = e.target.closest('a[target="_blank"]');
--      if (link) {
--        try {
--          const url = new URL(link.href);
--          // 判斷是否為主站網域
--          if (url.hostname === 'swag.live' || url.hostname === 'www.swag.live') {
--            e.preventDefault(); // 阻擋原生開新分頁
--            window.parent.postMessage({ type: 'PWA_NAVIGATE', url: link.href }, '*');
--            console.log("已攔截跳轉並通知 PWA 父層:", link.href);
--          }
--          // 其餘網域 (如 creators.swag.live 或外部網域) 則放行原生行為
--        } catch(err) {
--          console.error("URL 解析失敗", err);
--        }
-+        fetchApiData(swagToken);
-       }
-     });
--
-   </script>
- </body>
- </html>
+    body {
+      background-color: var(--bg-dark);
+      background-image: radial-gradient(circle at top right, rgba(30, 58, 138, 0.2), transparent 40%),
+                        radial-gradient(circle at bottom left, rgba(88, 28, 135, 0.2), transparent 40%);
+      color: var(--text-main);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      min-height: 100vh;
+      padding-bottom: 50px;
+    }
+
+    body.pwa-mobile {
+      padding-top: env(safe-area-inset-top, 0);
+      padding-bottom: calc(50px + env(safe-area-inset-bottom, 0));
+    }
+
+    .header {
+      text-align: center;
+      padding: 38px 20px 18px;
+    }
+
+    .title {
+      font-size: 32px;
+      font-weight: 800;
+      background: linear-gradient(135deg, #fbbf24, #f59e0b, #d97706);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+    }
+
+    .countdown-wrap {
+      margin: 0 auto;
+      width: fit-content;
+      background: rgba(251, 191, 36, 0.1);
+      border: 1px solid rgba(251, 191, 36, 0.35);
+      border-radius: 999px;
+      padding: 8px 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .countdown-label { color: var(--text-muted); font-size: 13px; }
+    .countdown-time { color: var(--accent-gold); font-size: 15px; font-weight: 700; }
+
+    .container { max-width: 560px; margin: 0 auto; padding: 0 16px; }
+
+    .glass-card {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 16px;
+      padding: 20px;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      margin-bottom: 24px;
+    }
+
+    .leaderboard-title { font-size: 18px; font-weight: 700; margin-bottom: 14px; }
+
+    .tabs { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
+
+    .tab-btn {
+      border: 1px solid var(--glass-border);
+      background: rgba(255, 255, 255, 0.03);
+      color: var(--text-muted);
+      border-radius: 999px;
+      padding: 7px 12px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    .tab-btn.active {
+      color: #111827;
+      background: var(--accent-gold);
+      border-color: var(--accent-gold);
+      font-weight: 700;
+    }
+
+    .podium {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .podium-item {
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      padding: 10px 8px;
+      text-align: center;
+      background: rgba(255,255,255,0.03);
+      min-height: 126px;
+    }
+
+    .podium-item.rank-1 {
+      background: rgba(251, 191, 36, 0.12);
+      border-color: rgba(251, 191, 36, 0.35);
+    }
+
+    .podium-rank { font-size: 18px; margin-bottom: 6px; }
+
+    .avatar, .avatar-small {
+      object-fit: cover;
+      display: block;
+      background: #000;
+    }
+
+    .avatar {
+      width: 54px;
+      height: 54px;
+      border-radius: 50%;
+      border: 2px solid rgba(255,255,255,0.25);
+      margin: 0 auto 6px;
+    }
+
+    .avatar-small {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+
+    .podium-name, .user-id {
+      font-size: 13px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .podium-score, .score-val {
+      color: var(--accent-gold);
+      font-weight: 700;
+      font-size: 13px;
+    }
+
+    .list-item {
+      display: flex;
+      align-items: center;
+      padding: 11px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      gap: 10px;
+    }
+
+    .list-item:last-child { border-bottom: none; }
+    .rank-num { width: 28px; text-align: center; color: var(--text-muted); font-weight: 700; }
+
+    .user-block { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; }
+    .score-wrap { display: flex; align-items: center; gap: 4px; }
+
+    .diamond-icon { width: 16px; height: 16px; fill: var(--accent-gold); }
+
+    .empty-state {
+      text-align:center;
+      padding: 22px;
+      color: var(--text-muted);
+      border: 1px dashed rgba(255,255,255,0.15);
+      border-radius: 12px;
+    }
+
+    #dev-banner {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100%;
+      background: #ef4444;
+      color: #fff;
+      text-align: center;
+      padding: 8px;
+      font-size: 13px;
+      font-weight: 700;
+      z-index: 9999;
+    }
+  </style>
+</head>
+<body>
+  <div id="dev-banner">⚠️ [DEV MODE] 目前為本地預覽資料，請勿作為正式營運參考</div>
+
+  <div class="header">
+    <div class="title">2026 璀璨之星爭奪戰</div>
+    <div class="subtitle">活動時間：2026/04/07 ~ 2026/04/30</div>
+    <div class="countdown-wrap">
+      <span class="countdown-label" id="countdown-label">日榜結算倒數（GMT+8）</span>
+      <span class="countdown-time" id="countdown-time">--</span>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="glass-card">
+      <div class="leaderboard-title">排行榜</div>
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="daily">日榜</button>
+        <button class="tab-btn" data-tab="weekly">週榜</button>
+        <button class="tab-btn" data-tab="cumulative">累積榜</button>
+      </div>
+      <div id="podium" class="podium"></div>
+      <div id="leaderboard-list"></div>
+    </div>
+  </div>
+
+  <script>
+    const API_ENDPOINT = 'https://swag-campaign-api-905468082258.asia-east1.run.app/api/leaderboard';
+    const BLACK_IMG = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"><rect width="200" height="200" fill="black"/></svg>';
+    let swagToken = null;
+    let handshakeRetryInterval = null;
+    let currentTab = 'daily';
+
+    const boardData = {
+      daily: [],
+      weekly: [],
+      cumulative: []
+    };
+
+    function isMobileDevice() {
+      return /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent || '');
+    }
+
+    function setupPwaMode() {
+      if (isMobileDevice()) {
+        document.body.classList.add('pwa-mobile');
+        window.parent.postMessage({ type: 'PWA_MOBILE_MODE', enabled: true }, '*');
+      }
+    }
+
+    function getAvatarUrl(userId) {
+      const safeId = encodeURIComponent(String(userId || ''));
+      return `https://public.swag.live/users/${safeId}/picture.jpg?size=512x512&format=jpg`;
+    }
+
+    function normalizeUser(user, rankFallback = 0) {
+      const userId = user.user_id || user.userid || user.username || user.masked_user_id || user.id || 'unknown';
+      return {
+        user_id: userId,
+        rank: Number(user.rank ?? rankFallback),
+        total_diamonds: Number(user.total_diamonds || user.score || 0),
+        daily_first_count: Number(user.daily_first_count || user.daily_top1_count || 0),
+        weekly_first_count: Number(user.weekly_first_count || user.weekly_top1_count || 0)
+      };
+    }
+
+    function buildCumulativeBoard(dailyBoard, weeklyBoard) {
+      const map = new Map();
+      const ensure = (uid) => {
+        if (!map.has(uid)) {
+          map.set(uid, { user_id: uid, daily_first_count: 0, weekly_first_count: 0, total_first_count: 0 });
+        }
+        return map.get(uid);
+      };
+
+      dailyBoard.forEach((u) => {
+        const user = ensure(u.user_id);
+        user.daily_first_count += (u.daily_first_count || 0) + (u.rank === 1 ? 1 : 0);
+      });
+
+      weeklyBoard.forEach((u) => {
+        const user = ensure(u.user_id);
+        user.weekly_first_count += (u.weekly_first_count || 0) + (u.rank === 1 ? 1 : 0);
+      });
+
+      return [...map.values()]
+        .map((u) => ({ ...u, total_first_count: u.daily_first_count + u.weekly_first_count }))
+        .sort((a, b) => b.total_first_count - a.total_first_count || a.user_id.localeCompare(b.user_id))
+        .map((u, idx) => ({ ...u, rank: idx + 1 }));
+    }
+
+    function renderAvatar(userId, cls) {
+      return `<img class="${cls}" src="${getAvatarUrl(userId)}" alt="${userId}" referrerpolicy="no-referrer" loading="lazy" onerror="this.onerror=null;this.src='${BLACK_IMG}'"/>`;
+    }
+
+    function renderCurrentBoard() {
+      const listContainer = document.getElementById('leaderboard-list');
+      const podiumContainer = document.getElementById('podium');
+      const data = boardData[currentTab] || [];
+
+      listContainer.innerHTML = '';
+      podiumContainer.innerHTML = '';
+
+      if (!data.length) {
+        listContainer.innerHTML = '<div class="empty-state">暫無資料</div>';
+        return;
+      }
+
+      const topThree = data.slice(0, 3);
+      topThree.forEach((user) => {
+        const div = document.createElement('div');
+        div.className = `podium-item rank-${user.rank}`;
+        const scoreText = currentTab === 'cumulative'
+          ? `日榜#1 ${user.daily_first_count} / 週榜#1 ${user.weekly_first_count}`
+          : `${user.total_diamonds.toLocaleString()} 鑽`;
+        div.innerHTML = `
+          <div class="podium-rank">${['🥇', '🥈', '🥉'][user.rank - 1] || user.rank}</div>
+          ${renderAvatar(user.user_id, 'avatar')}
+          <div class="podium-name">${user.user_id}</div>
+          <div class="podium-score">${scoreText}</div>
+        `;
+        podiumContainer.appendChild(div);
+      });
+
+      data.slice(3).forEach((user) => {
+        const item = document.createElement('div');
+        const scoreBlock = currentTab === 'cumulative'
+          ? `<span class="score-val">${user.total_first_count} 次</span>`
+          : `<span class="score-val">${user.total_diamonds.toLocaleString()}</span><svg class="diamond-icon" viewBox="0 0 24 24"><path d="M12 2L2 9l10 13L22 9l-10-7zm0 2.8l6.3 4.4H5.7L12 4.8zM4.1 10h15.8L12 20.3 4.1 10z"/></svg>`;
+
+        item.className = 'list-item';
+        item.innerHTML = `
+          <div class="rank-num">${user.rank}</div>
+          <div class="user-block">
+            ${renderAvatar(user.user_id, 'avatar-small')}
+            <div class="user-id">${user.user_id}</div>
+          </div>
+          <div class="score-wrap">${scoreBlock}</div>
+        `;
+        listContainer.appendChild(item);
+      });
+    }
+
+    function toGmt8Date(now = new Date()) {
+      const utcMs = now.getTime() + now.getTimezoneOffset() * 60000;
+      return new Date(utcMs + 8 * 3600000);
+    }
+
+    function getCountdownTarget(tab, gmt8Now) {
+      const target = new Date(gmt8Now);
+      if (tab === 'weekly') {
+        const day = target.getDay();
+        const addDays = (7 - day) % 7;
+        target.setDate(target.getDate() + addDays);
+      }
+      target.setHours(23, 59, 59, 999);
+      return target;
+    }
+
+    function formatDuration(ms) {
+      const safeMs = Math.max(0, ms);
+      const totalSeconds = Math.floor(safeMs / 1000);
+      const days = Math.floor(totalSeconds / 86400);
+      const hours = Math.floor((totalSeconds % 86400) / 3600);
+      const mins = Math.floor((totalSeconds % 3600) / 60);
+      const secs = totalSeconds % 60;
+      return `${days}日 / ${hours}小時 / ${mins}分 / ${secs}秒`;
+    }
+
+    function updateCountdown() {
+      const labelEl = document.getElementById('countdown-label');
+      const timeEl = document.getElementById('countdown-time');
+      const gmt8Now = toGmt8Date();
+      if (currentTab === 'weekly') {
+        labelEl.textContent = '週榜結算倒數（至週日 23:59 GMT+8）';
+      } else if (currentTab === 'daily') {
+        labelEl.textContent = '日榜結算倒數（至今日 23:59 GMT+8）';
+      } else {
+        labelEl.textContent = '累積榜結算倒數（至活動結束）';
+      }
+
+      const target = getCountdownTarget(currentTab === 'cumulative' ? 'weekly' : currentTab, gmt8Now);
+      timeEl.textContent = formatDuration(target.getTime() - gmt8Now.getTime());
+    }
+
+    async function fetchPeriodBoard(token, period) {
+      const url = `${API_ENDPOINT}?period=${period}`;
+      const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+      if (!res.ok) throw new Error(`[${period}] API Response: ${res.status}`);
+      const data = await res.json();
+      const list = (data.leaderboard || data.data || []).map((u, idx) => normalizeUser(u, idx + 1));
+      if (list.length) return list;
+      if (period === 'daily') return (data.daily_leaderboard || []).map((u, idx) => normalizeUser(u, idx + 1));
+      if (period === 'weekly') return (data.weekly_leaderboard || []).map((u, idx) => normalizeUser(u, idx + 1));
+      return [];
+    }
+
+    async function fetchApiData(token) {
+      try {
+        const [daily, weekly] = await Promise.all([
+          fetchPeriodBoard(token, 'daily'),
+          fetchPeriodBoard(token, 'weekly')
+        ]);
+        boardData.daily = daily;
+        boardData.weekly = weekly;
+        boardData.cumulative = buildCumulativeBoard(daily, weekly);
+        renderCurrentBoard();
+      } catch (err) {
+        console.error('Fetch Data Error:', err);
+        document.getElementById('leaderboard-list').innerHTML = '<div class="empty-state">讀取排行榜失敗，請稍後重整</div>';
+      }
+    }
+
+    function enableDevMode() {
+      document.getElementById('dev-banner').style.display = 'block';
+      boardData.daily = [
+        { rank: 1, user_id: '100001', total_diamonds: 280000, daily_first_count: 4, weekly_first_count: 1 },
+        { rank: 2, user_id: '100002', total_diamonds: 230000, daily_first_count: 1, weekly_first_count: 0 },
+        { rank: 3, user_id: '100003', total_diamonds: 180000, daily_first_count: 0, weekly_first_count: 2 },
+        { rank: 4, user_id: '100004', total_diamonds: 90000, daily_first_count: 0, weekly_first_count: 0 },
+        { rank: 5, user_id: '100005', total_diamonds: 60000, daily_first_count: 0, weekly_first_count: 0 }
+      ];
+      boardData.weekly = [
+        { rank: 1, user_id: '100003', total_diamonds: 940000, daily_first_count: 0, weekly_first_count: 2 },
+        { rank: 2, user_id: '100001', total_diamonds: 820000, daily_first_count: 4, weekly_first_count: 1 },
+        { rank: 3, user_id: '100006', total_diamonds: 640000, daily_first_count: 0, weekly_first_count: 1 },
+        { rank: 4, user_id: '100002', total_diamonds: 580000, daily_first_count: 1, weekly_first_count: 0 }
+      ];
+      boardData.cumulative = buildCumulativeBoard(boardData.daily, boardData.weekly);
+      renderCurrentBoard();
+    }
+
+    function setupTabs() {
+      document.querySelectorAll('.tab-btn').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.tab-btn').forEach((b) => b.classList.remove('active'));
+          btn.classList.add('active');
+          currentTab = btn.dataset.tab;
+          renderCurrentBoard();
+          updateCountdown();
+        });
+      });
+    }
+
+    function postIframeReady() {
+      window.parent.postMessage({ type: 'IFRAME_READY' }, '*');
+    }
+
+    document.addEventListener('click', (e) => {
+      if (window.self === window.top || !isMobileDevice()) return;
+      const link = e.target.closest('a[href]');
+      if (!link) return;
+      e.preventDefault();
+      window.parent.postMessage({ type: 'PWA_NAVIGATE', url: link.href }, '*');
+    });
+
+    window.addEventListener('DOMContentLoaded', () => {
+      setupPwaMode();
+      setupTabs();
+      updateCountdown();
+      setInterval(updateCountdown, 1000);
+
+      setTimeout(postIframeReady, 100);
+      handshakeRetryInterval = setInterval(() => {
+        if (!swagToken) postIframeReady();
+      }, 3000);
+
+      if (window.self === window.top) {
+        setTimeout(() => {
+          if (!swagToken) {
+            clearInterval(handshakeRetryInterval);
+            enableDevMode();
+          }
+        }, 1500);
+      }
+    });
+
+    window.addEventListener('message', (event) => {
+      const data = event.data;
+      if (!data || data.type !== 'SET_TOKEN') return;
+      if (swagToken === data.token) return;
+
+      swagToken = data.token;
+      if (handshakeRetryInterval) {
+        clearInterval(handshakeRetryInterval);
+        handshakeRetryInterval = null;
+      }
+      fetchApiData(swagToken);
+    });
+  </script>
+</body>
+</html>
