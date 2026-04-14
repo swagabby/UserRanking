@@ -731,7 +731,7 @@
         weekly_first_count: Number(user.weekly_first_count || user.weekly_top1_count || 0)
       };
     }
-       function normalizeApiRecord(user) {
+
     function toNumberOrZero(...values) {
       for (const value of values) {
         if (value === undefined || value === null || value === '') continue;
