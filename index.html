@@ -523,7 +523,7 @@
     <div class="modal-content" onclick="event.stopPropagation()">
       <h2>活動規則</h2>
       <p>1. 日榜：依據當日累積消耗鑽石總額進行排名，每日 23:59 結算。</p>
-      <p>2. 週榜：依據當週累積消耗鑽石總額進行排名，每週日 23:59 結算。</p>
+      <p>2. 週榜：依據當週累積消耗鑽石總額進行排名，統計區間為每週一 00:00 至週日 23:59（GMT+8）。</p>
       <p>3. 累積榜：統計歷屆所有獲得冠軍的總次數排行。</p>
       <p>4. 系統每 5 分鐘同步一次最新數據。</p>
       <button class="modal-close-btn" onclick="closeModal()">我知道了</button>
@@ -682,17 +682,53 @@
 
     
     function normalizeUser(user, rankFallback = 0) {
-      const rawUserId = user.user_id || user.userid || user.username || user.masked_user_id || user.id || 'unknown';
+      const rawUserId = user.username
+        || user.user_name
+        || user.display_name
+        || user.nickname
+        || user.user_id
+        || user.userid
+        || user.masked_user_id
+        || 'unknown';
       const userId = sanitizeUserId(rawUserId) || 'unknown';
       return {
         user_id: userId,
         username: user.username || user.user_name || user.display_name || user.nickname || '',
         rank: Number(user.rank ?? rankFallback),
-        total_diamonds: Number(user.total_diamonds || user.score || 0),
+        total_diamonds: Number(user.total_diamonds || user.score || user.daily_diamond || user.weekly_diamond || 0),
         daily_first_count: Number(user.daily_first_count || user.daily_top1_count || 0),
         weekly_first_count: Number(user.weekly_first_count || user.weekly_top1_count || 0)
       };
     }
+       function normalizeApiRecord(user) {
+      const rawUserId = user.user_id || user.userid || user.username || user.masked_user_id || user.id || 'unknown';
+      const userId = sanitizeUserId(rawUserId) || 'unknown';
+      return {
+        user_id: userId,
+        username: user.username || user.user_name || user.display_name || user.nickname || '',
+        daily_rank: Number(user.daily_rank || 0),
+        weekly_rank: Number(user.weekly_rank || 0),
+        daily_diamond: Number(user.daily_diamond || user.daily_diamonds || 0),
+        weekly_diamond: Number(user.weekly_diamond || user.weekly_diamonds || 0)
+      };
+    }
+
+    function buildBoardFromRecords(records, period) {
+      const rankField = period === 'daily' ? 'daily_rank' : 'weekly_rank';
+      const diamondField = period === 'daily' ? 'daily_diamond' : 'weekly_diamond';
+      return records
+        .filter((user) => Number.isFinite(user[rankField]) && user[rankField] > 0)
+        .sort((a, b) => a[rankField] - b[rankField] || b[diamondField] - a[diamondField])
+        .map((user, idx) => ({
+          user_id: user.user_id,
+          username: user.username,
+          rank: user[rankField] || idx + 1,
+          total_diamonds: Number(user[diamondField] || 0),
+          daily_first_count: 0,
+          weekly_first_count: 0
+        }));
+    }
+
 
       function parseUserIdFromToken(token) {
       try {
@@ -763,7 +799,7 @@
 
     function renderAvatar(userId, cls) {
       const safeUserId = escapeHtml(userId);
-      return `<img class="${cls}" src="${getAvatarUrl(userId)}" alt="${safeUserId}" referrerpolicy="no-referrer" loading="lazy" onerror="this.onerror=null;this.src='${BLACK_IMG}';">`;
+      return `<img class="${cls}" src="${getAvatarUrl(userId)}" alt="${safeUserId}" referrerpolicy="no-referrer" loading="lazy" onerror="this.onerror=null;this.src='${BLACK_IMG}`;
     }
     function renderDiamondIcon() {
       return `<img class="diamond-icon" src="https://swag.live/static/img/ic_diamond_shop.7791be97.svg" alt="diamond" loading="lazy" referrerpolicy="no-referrer">`;
@@ -914,13 +950,34 @@
       if (period === 'weekly') return (data.weekly_leaderboard || []).map((u, idx) => normalizeUser(u, idx + 1));
       return [];
     }
+   async function fetchUnifiedBoard(token) {
+      const res = await fetch(API_ENDPOINT, { headers: { Authorization: `Bearer ${token}` } });
+      if (!res.ok) throw new Error(`[unified] API Response: ${res.status}`);
+      const data = await res.json();
+      const rows = (Array.isArray(data) ? data : (data.data || data.leaderboard || [])).map(normalizeApiRecord);
+      if (!rows.length) return null;
+
+      const daily = buildBoardFromRecords(rows, 'daily');
+      const weekly = buildBoardFromRecords(rows, 'weekly');
+      if (!daily.length && !weekly.length) return null;
+      return { daily, weekly };
+    }
 
     async function fetchApiData(token) {
       try {
-        const [daily, weekly] = await Promise.all([
-          fetchPeriodBoard(token, 'daily'),
-          fetchPeriodBoard(token, 'weekly')
-        ]);
+        const unifiedBoards = await fetchUnifiedBoard(token).catch(() => null);
+        let daily = [];
+        let weekly = [];
+
+        if (unifiedBoards) {
+          daily = unifiedBoards.daily;
+          weekly = unifiedBoards.weekly;
+        } else {
+          [daily, weekly] = await Promise.all([
+            fetchPeriodBoard(token, 'daily'),
+            fetchPeriodBoard(token, 'weekly')
+          ]);
+        }
         boardData.daily = daily;
         boardData.weekly = weekly;
         boardData.cumulative = buildCumulativeBoard(daily, weekly);
