@@ -512,6 +512,11 @@
       color: var(--text-primary);
       margin-top: 2px;
     }
+    .my-rank-id {
+      font-size: var(--font-body-s);
+      color: var(--text-secondary);
+      margin-top: 2px;
+    }
     .my-rank-value {
       margin-left: auto;
       color: var(--primary);
@@ -595,6 +600,7 @@
       <div>
         <div class="my-rank-title">我的排名</div>
         <div class="my-rank-main" id="myRankMain">尚未取得使用者資訊</div>
+        <div class="my-rank-id" id="myRankId">ID：--</div>
       </div>
       <div class="my-rank-value" id="myRankValue">--</div>
     </div>
@@ -766,9 +772,9 @@
     function renderMyRankBar(data = []) {
       const bar = document.getElementById('myRankBar');
       const main = document.getElementById('myRankMain');
+      const idText = document.getElementById('myRankId');
       const value = document.getElementById('myRankValue');
-      if (!bar || !main || !value) return;
-
+      if (!bar || !main || !idText || !value) return;
       if (!data.length || !currentUserId) {
         bar.classList.remove('show');
         return;
@@ -780,12 +786,14 @@
       });
       if (!myData) {
         main.textContent = '未進榜';
+        idText.textContent = `ID：${currentUserId || '--'}`;
         value.textContent = currentTab === 'cumulative' ? '0 次' : '0 💎';
         bar.classList.add('show');
         return;
       }
 
       main.textContent = `第 ${myData.rank} 名`;
+      idText.textContent = `ID：${sanitizeUserId(myData.user_id) || currentUserId || '--'}`;      
       value.textContent = currentTab === 'cumulative'
         ? `${myData.total_first_count || 0} 次`
         : `${Number(myData.total_diamonds || 0).toLocaleString()} 💎`;
