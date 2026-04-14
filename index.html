@@ -700,11 +700,13 @@
 
     
     function normalizeUser(user, rankFallback = 0) {
-    const rawUserId = user.user_id
+    const rawUserId = user.masked_user_id
+        || user.user_id
         || user.userid
         || user.id
         || user.uid
-        || user.masked_user_id
+        || user.receiver_id
+        || user?.receiver_details?.receiver_id
         || user.username
         || user.user_name
         || user.display_name
@@ -717,6 +719,8 @@
         rank: Number(user.rank ?? rankFallback),
        total_diamonds: Number(
           user.total_diamonds
+          || user.receiver_total_diamonds
+          || user?.receiver_details?.receiver_total_diamonds
           || user.total_diamond
           || user.diamond
           || user.diamonds
@@ -752,9 +756,12 @@
 
     function normalizeApiRecord(user) {
       const rawUserId = firstNonEmpty(
+        user.masked_user_id,
         user.user_id,
         user.userid,
         user.uid,
+        user.receiver_id,
+        user?.receiver_details?.receiver_id,
         user.username,
         user.user_name,
         user.display_name,
@@ -770,6 +777,9 @@
         daily_rank: toNumberOrZero(user.daily_rank, user.rank_daily, user.today_rank),
         weekly_rank: toNumberOrZero(user.weekly_rank, user.rank_weekly, user.this_week_rank),
         daily_diamond: toNumberOrZero(
+          user.total_diamonds,
+          user.receiver_total_diamonds,
+          user?.receiver_details?.receiver_total_diamonds,
           user.daily_diamond,
           user.daily_diamonds,
           user.today_diamond,
@@ -779,7 +789,15 @@
           user.daily_total_diamond,
           user.daily_total_diamonds
         ),
+          total_diamonds: toNumberOrZero(
+          user.total_diamonds,
+          user.receiver_total_diamonds,
+          user?.receiver_details?.receiver_total_diamonds
+        ),
         weekly_diamond: toNumberOrZero(
+          user.total_diamonds,
+          user.receiver_total_diamonds,
+          user?.receiver_details?.receiver_total_diamonds,
           user.weekly_diamond,
           user.weekly_diamonds,
           user.this_week_diamond,
@@ -802,7 +820,7 @@
           user_id: user.user_id,
           username: user.username,
           rank: user[rankField] || idx + 1,
-          total_diamonds: Number(user[diamondField] || 0),
+          total_diamonds: Number(user[diamondField] || user.total_diamonds || 0),
           daily_first_count: 0,
           weekly_first_count: 0
         }));
@@ -814,6 +832,8 @@
           u.user_id,
           u.userid,
           u.uid,
+          u.receiver_id,
+          u?.receiver_details?.receiver_id,
           u.username,
           u.user_name,
           u.display_name,
@@ -857,7 +877,7 @@
       }
 
       const myData = data.find((u) => {
-        const candidateIds = [u.user_id, u.userid, u.masked_user_id, u.username, u.user_name, u.display_name, u.nickname];
+        const candidateIds = [u.user_id, u.userid, u.masked_user_id, u.receiver_id, u?.receiver_details?.receiver_id, u.username, u.user_name, u.display_name, u.nickname];
         return candidateIds.some((id) => sanitizeUserId(id) === currentUserId);
       });
       if (!myData) {
