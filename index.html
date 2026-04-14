@@ -732,15 +732,63 @@
       };
     }
        function normalizeApiRecord(user) {
-      const rawUserId = user.user_id || user.userid || user.username || user.masked_user_id || user.id || 'unknown';
+    function toNumberOrZero(...values) {
+      for (const value of values) {
+        if (value === undefined || value === null || value === '') continue;
+        const normalized = Number(String(value).replaceAll(',', '').trim());
+        if (Number.isFinite(normalized)) return normalized;
+      }
+      return 0;
+    }
+
+    function firstNonEmpty(...values) {
+      for (const value of values) {
+        if (value === undefined || value === null) continue;
+        const text = String(value).trim();
+        if (text) return text;
+      }
+      return '';
+    }
+
+    function normalizeApiRecord(user) {
+      const rawUserId = firstNonEmpty(
+        user.user_id,
+        user.userid,
+        user.uid,
+        user.username,
+        user.user_name,
+        user.display_name,
+        user.masked_user_id,
+        user.id,
+        user.member_id,
+        'unknown'
+      );
       const userId = sanitizeUserId(rawUserId) || 'unknown';
       return {
         user_id: userId,
-        username: user.username || user.user_name || user.display_name || user.nickname || '',
-        daily_rank: Number(user.daily_rank || 0),
-        weekly_rank: Number(user.weekly_rank || 0),
-        daily_diamond: Number(user.daily_diamond || user.daily_diamonds || 0),
-        weekly_diamond: Number(user.weekly_diamond || user.weekly_diamonds || 0)
+        username: firstNonEmpty(user.username, user.user_name, user.display_name, user.nickname),
+        daily_rank: toNumberOrZero(user.daily_rank, user.rank_daily, user.today_rank),
+        weekly_rank: toNumberOrZero(user.weekly_rank, user.rank_weekly, user.this_week_rank),
+        daily_diamond: toNumberOrZero(
+          user.daily_diamond,
+          user.daily_diamonds,
+          user.today_diamond,
+          user.today_diamonds,
+          user.current_daily_diamond,
+          user.current_daily_diamonds,
+          user.daily_total_diamond,
+          user.daily_total_diamonds
+        ),
+        weekly_diamond: toNumberOrZero(
+          user.weekly_diamond,
+          user.weekly_diamonds,
+          user.this_week_diamond,
+          user.this_week_diamonds,
+          user.current_weekly_diamond,
+          user.current_weekly_diamonds,
+          user.weekly_total_diamond,
+          user.weekly_total_diamonds
+        )
       };
     }
 
@@ -761,7 +809,21 @@
     }
     function getMyStatsFromRecords(records = []) {
       if (!currentUserId) return { daily: null, weekly: null };
-      const me = records.find((u) => sanitizeUserId(u.user_id) === currentUserId);
+      const me = records.find((u) => {
+        const candidateIds = [
+          u.user_id,
+          u.userid,
+          u.uid,
+          u.username,
+          u.user_name,
+          u.display_name,
+          u.nickname,
+          u.masked_user_id,
+          u.id,
+          u.member_id
+        ];
+        return candidateIds.some((id) => sanitizeUserId(id) === currentUserId);
+      });
       if (!me) return { daily: null, weekly: null };
       return {
         daily: { total_diamonds: Number(me.daily_diamond || 0), rank: Number(me.daily_rank || 0) },
