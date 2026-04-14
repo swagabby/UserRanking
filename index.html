@@ -625,6 +625,11 @@
       weekly: [],
       cumulative: []
     };
+    const myStats = {
+      daily: null,
+      weekly: null
+    };
+    
 
     // Crown SVG
     const crownSVG = `<svg viewBox="0 0 24 24" fill="none" class="crown-icon"><path d="M2 19H22V21H2V19ZM3 5L7 12L12 3L17 12L21 5L19 17H5L3 5Z" fill="var(--gold)"/><path d="M12 9C12.5523 9 13 8.55228 13 8C13 7.44772 12.5523 7 12 7C11.4477 7 11 7.44772 11 8C11 8.55228 11.4477 9 12 9Z" fill="#FFF"/></svg>`;
@@ -754,6 +759,15 @@
           weekly_first_count: 0
         }));
     }
+    function getMyStatsFromRecords(records = []) {
+      if (!currentUserId) return { daily: null, weekly: null };
+      const me = records.find((u) => sanitizeUserId(u.user_id) === currentUserId);
+      if (!me) return { daily: null, weekly: null };
+      return {
+        daily: { total_diamonds: Number(me.daily_diamond || 0), rank: Number(me.daily_rank || 0) },
+        weekly: { total_diamonds: Number(me.weekly_diamond || 0), rank: Number(me.weekly_rank || 0) }
+      };
+    }
 
 
       function parseUserIdFromToken(token) {
@@ -785,9 +799,12 @@
         return candidateIds.some((id) => sanitizeUserId(id) === currentUserId);
       });
       if (!myData) {
-        main.textContent = '未進榜';
+        const myPeriodStats = currentTab === 'cumulative' ? null : myStats[currentTab];
+        main.textContent = myPeriodStats?.rank > 0 ? `第 ${myPeriodStats.rank} 名` : '未進榜';
         idText.textContent = `ID：${currentUserId || '--'}`;
-        value.textContent = currentTab === 'cumulative' ? '0 次' : '0 💎';
+        value.textContent = currentTab === 'cumulative'
+          ? '0 次'
+          : `${Number(myPeriodStats?.total_diamonds || 0).toLocaleString()} 💎`;
         bar.classList.add('show');
         return;
       }
@@ -980,7 +997,7 @@
       if (period === 'weekly') return (data.weekly_leaderboard || []).map((u, idx) => normalizeUser(u, idx + 1));
       return [];
     }
-   async function fetchUnifiedBoard(token) {
+    async function fetchUnifiedBoard(token) {
       const res = await fetch(API_ENDPOINT, { headers: { Authorization: `Bearer ${token}` } });
       if (!res.ok) throw new Error(`[unified] API Response: ${res.status}`);
       const data = await res.json();
@@ -989,8 +1006,9 @@
 
       const daily = buildBoardFromRecords(rows, 'daily');
       const weekly = buildBoardFromRecords(rows, 'weekly');
+      const myStatsFromRecords = getMyStatsFromRecords(rows);      
       if (!daily.length && !weekly.length) return null;
-      return { daily, weekly };
+      return { daily, weekly, myStatsFromRecords };
     }
 
     async function fetchApiData(token) {
@@ -1002,11 +1020,15 @@
         if (unifiedBoards) {
           daily = unifiedBoards.daily;
           weekly = unifiedBoards.weekly;
+          myStats.daily = unifiedBoards.myStatsFromRecords?.daily || null;
+          myStats.weekly = unifiedBoards.myStatsFromRecords?.weekly || null;          
         } else {
           [daily, weekly] = await Promise.all([
             fetchPeriodBoard(token, 'daily'),
             fetchPeriodBoard(token, 'weekly')
           ]);
+          myStats.daily = null;
+          myStats.weekly = null;         
         }
         boardData.daily = daily;
         boardData.weekly = weekly;
