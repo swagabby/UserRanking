@@ -353,11 +353,18 @@
       text-decoration: none;
     }
     .data-value {
+      margin-left: auto;
+      min-width: 88px;
       font-weight: 600;
       font-size: var(--font-body-m);
       text-align: right;
       padding-left: 8px;
       color: var(--primary);
+      display: inline-flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 4px;
+      white-space: nowrap;
     }
 
     /* Diamond Icon */
@@ -682,20 +689,33 @@
 
     
     function normalizeUser(user, rankFallback = 0) {
-      const rawUserId = user.username
+    const rawUserId = user.user_id
+        || user.userid
+        || user.id
+        || user.uid
+        || user.masked_user_id
+        || user.username
         || user.user_name
         || user.display_name
         || user.nickname
-        || user.user_id
-        || user.userid
-        || user.masked_user_id
         || 'unknown';
       const userId = sanitizeUserId(rawUserId) || 'unknown';
       return {
         user_id: userId,
         username: user.username || user.user_name || user.display_name || user.nickname || '',
         rank: Number(user.rank ?? rankFallback),
-        total_diamonds: Number(user.total_diamonds || user.score || user.daily_diamond || user.weekly_diamond || 0),
+       total_diamonds: Number(
+          user.total_diamonds
+          || user.total_diamond
+          || user.diamond
+          || user.diamonds
+          || user.score
+          || user.daily_diamond
+          || user.daily_diamonds
+          || user.weekly_diamond
+          || user.weekly_diamonds
+          || 0
+        ),
         daily_first_count: Number(user.daily_first_count || user.daily_top1_count || 0),
         weekly_first_count: Number(user.weekly_first_count || user.weekly_top1_count || 0)
       };
@@ -754,8 +774,10 @@
         return;
       }
 
-      const myData = data.find((u) => sanitizeUserId(u.user_id) === currentUserId);
-
+      const myData = data.find((u) => {
+        const candidateIds = [u.user_id, u.userid, u.masked_user_id, u.username, u.user_name, u.display_name, u.nickname];
+        return candidateIds.some((id) => sanitizeUserId(id) === currentUserId);
+      });
       if (!myData) {
         main.textContent = '未進榜';
         value.textContent = currentTab === 'cumulative' ? '0 次' : '0 💎';
@@ -802,7 +824,7 @@
       return `<img class="${cls}" src="${getAvatarUrl(userId)}" alt="${safeUserId}" referrerpolicy="no-referrer" loading="lazy" onerror="this.onerror=null;this.src='${BLACK_IMG}`;
     }
     function renderDiamondIcon() {
-      return `<img class="diamond-icon" src="https://swag.live/static/img/ic_diamond_shop.7791be97.svg" alt="diamond" loading="lazy" referrerpolicy="no-referrer">`;
+      return `<img class="diamond-icon" src="https://swag.live/static/img/ic_diamond_sm.cf6904ca.svg" alt="diamond" loading="lazy" referrerpolicy="no-referrer">`;
     }
  function renderUserLabel(user, className) {
       const safeId = escapeHtml(sanitizeUserId(user?.user_id));
