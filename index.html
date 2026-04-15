@@ -611,7 +611,7 @@
     // 1. 環境變數與狀態
     // ==========================================
     const API_ENDPOINT = 'https://swag-campaign-api-905468082258.asia-east1.run.app/api/leaderboard';
-    const BLACK_IMG = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"><rect width="200" height="200" fill="black"/></svg>';
+    const BLACK_IMG = 'data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20200%20200%22%3E%3Crect%20width%3D%22200%22%20height%3D%22200%22%20fill%3D%22black%22/%3E%3C/svg%3E';
     let swagToken = null;
         let currentUserId = '';
     let handshakeRetryInterval = null;
@@ -650,7 +650,8 @@
 
     function getAvatarUrl(userId) {
       const safeId = encodeURIComponent(String(userId || ''));
-      return `https://public.swag.live/users/${safeId}/picture.jpg?size=512x512&format=jpg`;
+      if (!safeId) return BLACK_IMG;
+      return `https://public.swag.live/users/${safeId}/picture.jpg`;
     }
 
     function sanitizeUserId(value) {
@@ -928,7 +929,7 @@
 
     function renderAvatar(userId, cls) {
       const safeUserId = escapeHtml(userId);
-      return `<img class="${cls}" src="${getAvatarUrl(userId)}" alt="${safeUserId}" referrerpolicy="no-referrer" loading="lazy" onerror="this.onerror=null;this.src='${BLACK_IMG}`;
+      return `<img class="${cls}" src="${getAvatarUrl(userId)}" alt="${safeUserId}" referrerpolicy="no-referrer" loading="lazy" onload="if((this.currentSrc||'').toLowerCase().includes('unreachable')){this.onerror=null;this.src='${BLACK_IMG}';}" onerror="this.onerror=null;this.src='${BLACK_IMG}'">`;
     }
     function renderDiamondIcon() {
       return `<img class="diamond-icon" src="https://swag.live/static/img/ic_diamond_sm.cf6904ca.svg" alt="diamond" loading="lazy" referrerpolicy="no-referrer">`;
