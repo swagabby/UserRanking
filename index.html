@@ -85,6 +85,8 @@
       --list-avatar-size: 44px;
       --podium-avatar-size: 64px;
       --podium-avatar-first: 84px;
+      --crown-size: 32px;
+      --crown-offset-y: -28px;
       --bottom-bar-height: 82px;
       --shadow-soft: 0 8px 24px rgba(0,0,0,0.32);
       --shadow-medium: 0 18px 42px rgba(0,0,0,0.42);
@@ -106,6 +108,8 @@
         --list-avatar-size: 48px;
         --podium-avatar-size: 72px;
         --podium-avatar-first: 96px;
+        --crown-size: 34px;
+        --crown-offset-y: -30px;
       }
     }
 
@@ -122,6 +126,9 @@
         --list-avatar-size: 52px;
         --podium-avatar-size: 80px;
         --podium-avatar-first: 108px;
+        --podium-avatar-first: 108px;
+        --crown-size: 38px;
+        --crown-offset-y: -34px;
       }
     }
 
@@ -360,37 +367,6 @@
     /* =========================================
        Main Tabs
        ========================================= */
-    .tabs-main {
-      display: flex;
-      align-items: center;
-      gap: var(--space-2);
-      padding: var(--space-2) var(--page-padding) var(--space-3);
-      background: transparent;
-      border-bottom: 1px solid var(--outline-variant);
-      overflow-x: auto;
-      scrollbar-width: none;
-      scroll-behavior: smooth;
-    }
-    .tabs-main::-webkit-scrollbar { display: none; }
-
-    .tab-item {
-      font-size: var(--font-body-m);
-      color: var(--text-secondary);
-      cursor: pointer;
-      white-space: nowrap;
-      padding: 0 14px;
-      min-width: calc((100% - 8px) / 3);
-      min-height: 40px;
-      display: inline-flex;
-      justify-content: center;
-      align-items: center;
-      position: relative;
-      flex-shrink: 0;
-      transition: color 0.2s ease, background 0.2s ease, border-color 0.2s ease;
-      border-radius: var(--radius-full);
-      border: 1px solid transparent;
-      background: transparent;
-    }
 
 .tabs-main {
   display: flex;
@@ -520,13 +496,14 @@
 
     .crown-icon {
       position: absolute;
-      top: -28px;
+      top: var(--crown-offset-y);
       left: 50%;
       transform: translateX(-50%);
-      width: 32px;
-      height: 32px;
+      width: var(--crown-size);
+      height: var(--crown-size);
       filter: drop-shadow(0 4px 8px rgba(0,0,0,0.5));
-      z-index: 1;
+      z-index: 2;
+      pointer-events: none;
     }
 
     .rank-badge {
@@ -830,8 +807,11 @@
        Bottom My Rank Bar
        ========================================= */
     .my-rank-bar {
-      position: sticky;
+      position: fixed;
       bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: min(100vw, var(--container-standard));
       z-index: 30;
       display: none;
       align-items: center;
@@ -870,6 +850,13 @@
       margin-top: 2px;
     }
 
+    .my-rank-gap {
+      font-size: var(--font-body-s);
+      color: var(--info);
+      margin-top: 2px;
+    }
+
+    
     .my-rank-value {
       margin-left: auto;
       color: var(--accent-gold);
@@ -1060,6 +1047,7 @@
         <div class="my-rank-title">我的排名</div>
         <div class="my-rank-main" id="myRankMain">尚未取得使用者資訊</div>
         <div class="my-rank-id" id="myRankId">ID：--</div>
+        <div class="my-rank-gap" id="myRankGap">距離上一名：--</div>      
       </div>
       <div class="my-rank-value" id="myRankValue">--</div>
     </div>
@@ -1091,8 +1079,8 @@
     
 
     // Crown SVG
-    const crownSVG = `<svg viewBox="0 0 24 24" fill="none" class="crown-icon"><path d="M2 19H22V21H2V19ZM3 5L7 12L12 3L17 12L21 5L19 17H5L3 5Z" fill="var(--gold)"/><path d="M12 9C12.5523 9 13 8.55228 13 8C13 7.44772 12.5523 7 12 7C11.4477 7 11 7.44772 11 8C11 8.55228 11.4477 9 12 9Z" fill="#FFF"/></svg>`;
-
+    const crownSVG = `<svg viewBox="0 0 24 24" fill="none" class="crown-icon" aria-hidden="true"><path d="M2 19H22V21H2V19ZM3 5L7 12L12 3L17 12L21 5L19 17H5L3 5Z" fill="var(--accent-gold)" stroke="rgba(0,0,0,0.35)" stroke-width="0.6"/><path d="M12 9C12.5523 9 13 8.55228 13 8C13 7.44772 12.5523 7 12 7C11.4477 7 11 7.44772 11 8C11 8.55228 11.4477 9 12 9Z" fill="#FFF"/></svg>`;
+    
     // ==========================================
     // 2. 工具函數
     // ==========================================
@@ -1329,8 +1317,9 @@
       const bar = document.getElementById('myRankBar');
       const main = document.getElementById('myRankMain');
       const idText = document.getElementById('myRankId');
+      const gapText = document.getElementById('myRankGap');      
       const value = document.getElementById('myRankValue');
-      if (!bar || !main || !idText || !value) return;
+      if (!bar || !main || !idText || !gapText || !value) return;
       if (!data.length || !currentUserId) {
         bar.classList.remove('show');
         return;
@@ -1342,8 +1331,21 @@
       });
       if (!myData) {
         const myPeriodStats = currentTab === 'cumulative' ? null : myStats[currentTab];
+        const myRank = Number(myPeriodStats?.rank || 0);
+        const myDiamonds = Number(myPeriodStats?.total_diamonds || 0);
+        const previousUser = myRank > 1 ? data.find((u) => Number(u.rank) === myRank - 1) : null;
+        const gap = previousUser ? Math.max(0, Number(previousUser.total_diamonds || 0) - myDiamonds) : null;       
         main.textContent = myPeriodStats?.rank > 0 ? `第 ${myPeriodStats.rank} 名` : '未進榜';
         idText.textContent = `ID：${currentUserId || '--'}`;
+          if (currentTab === 'cumulative') {
+          gapText.textContent = '距離上一名：--';
+        } else if (myRank <= 1) {
+          gapText.textContent = '距離上一名：目前為第 1 名';
+        } else if (gap !== null) {
+          gapText.textContent = `距離上一名：${gap.toLocaleString()} 💎`;
+        } else {
+          gapText.textContent = '距離上一名：--';
+        }
         value.textContent = currentTab === 'cumulative'
           ? '0 次'
           : `${Number(myPeriodStats?.total_diamonds || 0).toLocaleString()} 💎`;
