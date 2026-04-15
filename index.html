@@ -1334,13 +1334,15 @@
         const myRank = Number(myPeriodStats?.rank || 0);
         const myDiamonds = Number(myPeriodStats?.total_diamonds || 0);
         const previousUser = myRank > 1 ? data.find((u) => Number(u.rank) === myRank - 1) : null;
-        const gap = previousUser ? Math.max(0, Number(previousUser.total_diamonds || 0) - myDiamonds) : null;       
-        main.textContent = myPeriodStats?.rank > 0 ? `第 ${myPeriodStats.rank} 名` : '未進榜';
+        const gap = previousUser ? Math.max(0, Number(previousUser.total_diamonds || 0) - myDiamonds) : null;
+        main.textContent = myPeriodStats?.rank > 0 ? `第 ${myPeriodStats.rank} 名` : '目前未進榜';
         idText.textContent = `ID：${currentUserId || '--'}`;
-          if (currentTab === 'cumulative') {
+        if (currentTab === 'cumulative') {
+          gapText.textContent = '距離上一名：--';
+        } else if (myRank <= 0) {
           gapText.textContent = '距離上一名：--';
         } else if (myRank <= 1) {
-          gapText.textContent = '距離上一名：目前為第 1 名';
+          gapText.textContent = '距離上一名：--';
         } else if (gap !== null) {
           gapText.textContent = `距離上一名：${gap.toLocaleString()} 💎`;
         } else {
@@ -1355,6 +1357,17 @@
 
       main.textContent = `第 ${myData.rank} 名`;
       idText.textContent = `ID：${sanitizeUserId(myData.user_id) || currentUserId || '--'}`;      
+        if (currentTab === 'cumulative') {
+        gapText.textContent = '距離上一名：--';
+      } else {
+        const myRank = Number(myData.rank || 0);
+        const myDiamonds = Number(myData.total_diamonds || 0);
+        const previousUser = myRank > 1 ? data.find((u) => Number(u.rank) === myRank - 1) : null;
+        const gap = previousUser ? Math.max(0, Number(previousUser.total_diamonds || 0) - myDiamonds) : null;
+        gapText.textContent = myRank > 1 && gap !== null
+          ? `距離上一名：${gap.toLocaleString()} 💎`
+          : '距離上一名：--';
+      }    
       value.textContent = currentTab === 'cumulative'
         ? `${myData.total_first_count || 0} 次`
         : `${Number(myData.total_diamonds || 0).toLocaleString()} 💎`;
