@@ -733,8 +733,8 @@
       bottom: calc(24px + env(safe-area-inset-bottom, 0px)); 
       left: 50%; 
       transform: translateX(-50%) translateY(20px); 
-      width: calc(100% - 32px); 
-      max-width: 400px; 
+      width: min(100vw, var(--container-standard)); 
+      max-width: none; 
       z-index: 30; 
       display: none; 
       align-items: center; 
@@ -743,7 +743,7 @@
       background: rgba(30, 30, 32, 0.9); 
       backdrop-filter: blur(24px); 
       box-shadow: 0 16px 40px rgba(0,0,0,0.6); 
-      border-radius: 24px; 
+      border-radius: 0; 
       border: 1px solid rgba(255,255,255,0.1); 
       opacity: 0; 
       transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
@@ -756,7 +756,6 @@
     }
     
     .my-rank-main { font-size: 18px; font-weight: 800; color: #fff; }
-    .my-rank-id { font-size: 12px; color: var(--text-tertiary); margin-top: 2px; font-family: monospace; }
     .my-rank-gap { font-size: 12px; color: var(--brand-primary); margin-top: 2px; font-weight: 600; }
     .my-rank-value { margin-left: auto; color: #fff; font-weight: 800; font-size: 18px; display: flex; align-items: center; gap: 4px; }
 
@@ -882,7 +881,6 @@
       <div>
         <div style="font-size: 12px; color: #888;">我的排名</div>
         <div class="my-rank-main" id="myRankMain">--</div>
-        <div class="my-rank-id" id="myRankId">--</div>
         <div class="my-rank-gap" id="myRankGap">--</div>      
       </div>
       <div class="my-rank-value" id="myRankValue">--</div>
@@ -1078,7 +1076,6 @@
       
       const rankText = typeof myData.user_rank === 'number' ? `第 ${myData.user_rank} 名` : myData.user_rank;
       document.getElementById('myRankMain').textContent = rankText;
-      document.getElementById('myRankId').textContent = `ID：${currentUserId}`;
       document.getElementById('myRankGap').textContent = myData.gap_msg || '';
       
       const isCum = currentTab.startsWith('cumulative');
