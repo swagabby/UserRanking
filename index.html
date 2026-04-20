@@ -171,20 +171,35 @@
       gap: 6px; 
       padding: 10px 20px; 
       border-radius: var(--radius-full); 
-      border: 1px solid rgba(0,210,190,0.3); 
+      border: 1px solid var(--countdown-border, rgba(0,210,190,0.3));
       font-size: 12px; 
-      background: rgba(0,210,190,0.05); 
+      background: var(--countdown-bg, rgba(0,210,190,0.05));
       backdrop-filter: blur(8px); 
       box-shadow: 0 4px 16px rgba(0,210,190,0.1); 
     }
     
     .countdown-time { 
-      color: var(--brand-primary); 
+      color: var(--countdown-text, var(--brand-primary));
       font-weight: 800; 
       font-family: monospace; 
       font-size: 15px; 
     }
+.countdown-banner.daily {
+      --countdown-border: rgba(20, 184, 166, 0.4);
+      --countdown-bg: rgba(15, 118, 110, 0.15);
+      --countdown-shadow: rgba(20, 184, 166, 0.2);
+      --countdown-text: #5eead4;
+    }
 
+    .countdown-banner.weekly {
+      --countdown-border: rgba(59, 130, 246, 0.42);
+      --countdown-bg: rgba(30, 64, 175, 0.16);
+      --countdown-shadow: rgba(59, 130, 246, 0.22);
+      --countdown-text: #93c5fd;
+    }
+
+
+    
     /* =========================================
        4. Segmented Control (雙層導航)
        ========================================= */
@@ -1158,7 +1173,8 @@
       }
       banner.style.visibility = 'visible';
       
-      const isWeeklyBoard = currentTab === 'weekly' || currentTab === 'prev_weekly';
+      banner.classList.toggle('weekly', isWeeklyBoard);
+      banner.classList.toggle('daily', !isWeeklyBoard);
       document.getElementById('countdown-label').textContent = isWeeklyBoard ? '週榜倒數' : '日榜倒數';
       
       const now = new Date();
