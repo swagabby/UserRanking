@@ -164,25 +164,42 @@
       margin-top: 6px; 
     }
     
-    .countdown-banner { 
-      margin-top: 16px; 
-      display: inline-flex; 
-      align-items: center; 
-      gap: 6px; 
-      padding: 10px 20px; 
-      border-radius: var(--radius-full); 
-      border: 1px solid rgba(0,210,190,0.3); 
-      font-size: 12px; 
-      background: rgba(0,210,190,0.05); 
-      backdrop-filter: blur(8px); 
-      box-shadow: 0 4px 16px rgba(0,210,190,0.1); 
+    .countdown-banner {
+      margin-top: 16px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 20px;
+      border-radius: var(--radius-full);
+      border: 1px solid rgba(0,210,190,0.3);
+      font-size: 12px;
+      background: rgba(0,210,190,0.05);
+      backdrop-filter: blur(8px);
+      box-shadow: 0 4px 16px rgba(0,210,190,0.1);
+      color: #6ee8de;
+      transition: border-color 0.25s ease, background 0.25s ease, box-shadow 0.25s ease, color 0.25s ease;
     }
     
-    .countdown-time { 
-      color: var(--brand-primary); 
-      font-weight: 800; 
-      font-family: monospace; 
-      font-size: 15px; 
+    
+    .countdown-time {
+      color: inherit;
+      font-weight: 800;
+      font-family: monospace;
+      font-size: 15px;
+    }
+
+    .countdown-banner.daily-theme {
+      color: #6ee8de;
+      border-color: rgba(52, 211, 197, 0.45);
+      background: rgba(14, 116, 112, 0.16);
+      box-shadow: 0 4px 16px rgba(20, 184, 166, 0.2);
+    }
+
+    .countdown-banner.weekly-theme {
+      color: #93c5fd;
+      border-color: rgba(96, 165, 250, 0.45);
+      background: rgba(30, 64, 175, 0.16);
+      box-shadow: 0 4px 16px rgba(59, 130, 246, 0.2);
     }
 
     /* =========================================
@@ -1151,6 +1168,7 @@
 
     function updateCountdown() {
       const banner = document.getElementById('countdownBanner');
+      banner.classList.remove('daily-theme', 'weekly-theme');
       // 累積榜隱藏倒數；昨日/上週榜單也維持顯示倒數
       if (currentTab.startsWith('cumulative')) {
         banner.style.visibility = 'hidden';
@@ -1159,6 +1177,7 @@
       banner.style.visibility = 'visible';
       
       const isWeeklyBoard = currentTab === 'weekly' || currentTab === 'prev_weekly';
+      banner.classList.add(isWeeklyBoard ? 'weekly-theme' : 'daily-theme');
       document.getElementById('countdown-label').textContent = isWeeklyBoard ? '週榜倒數' : '日榜倒數';
       
       const now = new Date();
