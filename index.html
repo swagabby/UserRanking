@@ -1151,20 +1151,21 @@
 
     function updateCountdown() {
       const banner = document.getElementById('countdownBanner');
-      // 修改處：歷史榜單(prev_daily/prev_weekly) 與 累積榜 皆隱藏倒數計時
-      if (currentTab.startsWith('cumulative') || currentTab.startsWith('prev_')) { 
-        banner.style.visibility = 'hidden'; 
-        return; 
+      // 累積榜隱藏倒數；昨日/上週榜單也維持顯示倒數
+      if (currentTab.startsWith('cumulative')) {
+        banner.style.visibility = 'hidden';
+        return;
       }
       banner.style.visibility = 'visible';
       
-      document.getElementById('countdown-label').textContent = currentTab === 'weekly' ? '週榜倒數' : '日榜倒數';
+      const isWeeklyBoard = currentTab === 'weekly' || currentTab === 'prev_weekly';
+      document.getElementById('countdown-label').textContent = isWeeklyBoard ? '週榜倒數' : '日榜倒數';
       
       const now = new Date();
       const gmt8Now = new Date(now.getTime() + now.getTimezoneOffset() * 60000 + 8 * 3600000);
       const target = new Date(gmt8Now);
       
-      if (currentTab === 'weekly') {
+      if (isWeeklyBoard) {
         const diff = (7 - target.getDay()) % 7;
         target.setDate(target.getDate() + diff);
       }
