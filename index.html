@@ -754,10 +754,13 @@
       opacity: 1; 
       transform: translateX(-50%) translateY(0); 
     }
-    
+    .my-rank-left { display: flex; flex-direction: column; gap: 6px; }    
     .my-rank-main { font-size: 18px; font-weight: 800; color: #fff; }
-    .my-rank-gap { font-size: 12px; color: var(--brand-primary); margin-top: 2px; font-weight: 600; }
-    .my-rank-value { margin-left: auto; color: #fff; font-weight: 800; font-size: 18px; display: flex; align-items: center; gap: 4px; }
+    .my-rank-privacy-row { display: flex; align-items: center; gap: 8px; }
+    .my-rank-privacy-label { font-size: 12px; color: var(--text-secondary); }
+    .my-rank-right { margin-left: auto; text-align: right; }
+    .my-rank-value { color: #fff; font-weight: 800; font-size: 18px; display: flex; align-items: center; justify-content: flex-end; gap: 4px; }
+    .my-rank-gap { font-size: 12px; color: var(--brand-primary); margin-top: 4px; font-weight: 600; }
 
     #dev-banner { 
       display: none; 
@@ -801,24 +804,6 @@
     </div>
   </div>
 
-  <!-- 隱私設定 Modal -->
-  <div class="modal-overlay" id="settingsModal" onclick="closeModal('settingsModal', event)">
-    <div class="modal-content" onclick="event.stopPropagation()">
-      <h2>隱私設定</h2>
-      <div style="display: flex; justify-content: space-between; align-items: center; padding: 16px 0; border-top: 1px solid rgba(255,255,255,0.05); margin-top: 8px;">
-        <div>
-          <div style="font-size: 15px; color: #FFF; font-weight: 600;">排行榜隱身模式</div>
-          <div style="font-size: 12px; color: #888; margin-top: 4px;">開啟後，名稱與頭像將顯示為「神秘大佬」。</div>
-        </div>
-        <label class="switch">
-          <input type="checkbox" id="privacyToggle" onchange="togglePrivacy(this)">
-          <span class="slider"></span>
-        </label>
-      </div>
-      <button class="modal-close-btn" onclick="closeModal('settingsModal')">完成</button>
-    </div>
-  </div>
-
   <div class="device-container">
     <div class="top-fixed-section">
       
@@ -829,7 +814,6 @@
           <div class="icon-group">
             <div class="action-icon" onclick="openAchievementModal()">🏆</div>
             <div class="action-icon" onclick="openModal('ruleModal')">ⓘ</div>
-            <div class="action-icon" onclick="openSettingsModal()">⚙️</div>
           </div>
         </div>
         <div class="subtitle">活動時間：2026/04/07 ~ 2026/04/30</div>
@@ -878,12 +862,21 @@
 
     <!-- 底部個人排名膠囊 -->
     <div class="my-rank-bar" id="myRankBar">
-      <div>
+      <div class="my-rank-left">
         <div style="font-size: 12px; color: #888;">我的排名</div>
         <div class="my-rank-main" id="myRankMain">--</div>
-        <div class="my-rank-gap" id="myRankGap">--</div>      
+        <div class="my-rank-privacy-row">
+          <span class="my-rank-privacy-label">排行榜隱身</span>
+          <label class="switch">
+            <input type="checkbox" id="privacyToggle" onchange="togglePrivacy(this)">
+            <span class="slider"></span>
+          </label>
+        </div>
       </div>
-      <div class="my-rank-value" id="myRankValue">--</div>
+      <div class="my-rank-right">
+        <div class="my-rank-value" id="myRankValue">--</div>
+        <div class="my-rank-gap" id="myRankGap">--</div>
+      </div>
     </div>
   </div>
 
@@ -1272,12 +1265,9 @@
       }
     }
 
-    async function openSettingsModal() {
-      if (!swagToken || currentUserId === 'Visitor') {
-        return showToast("請先登入才能設定隱身模式哦！");
-      }
-      
-      openModal('settingsModal');
+    async function loadPrivacySetting() {
+      if (!swagToken || currentUserId === 'Visitor') return;
+
       
       try { 
         const res = await fetch(`${API_BASE}/settings/privacy`, { 
@@ -1350,7 +1340,8 @@
         if (handshakeRetryInterval) {
           clearInterval(handshakeRetryInterval);
         }
-        
+
+        loadPrivacySetting();
         fetchAllData(); 
       }
     });
