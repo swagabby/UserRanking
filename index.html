@@ -761,6 +761,20 @@
     .my-rank-right { margin-left: auto; text-align: right; }
     .my-rank-value { color: #fff; font-weight: 800; font-size: 18px; display: flex; align-items: center; justify-content: flex-end; gap: 4px; }
     .my-rank-gap { font-size: 12px; color: var(--brand-primary); margin-top: 4px; font-weight: 600; }
+        .achievement-btn {
+      margin-top: 4px;
+      padding: 6px 10px;
+      border: 1px solid rgba(255, 215, 0, 0.5);
+      border-radius: 999px;
+      background: rgba(255, 215, 0, 0.12);
+      color: #FFD86B;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .achievement-btn:hover {
+      background: rgba(255, 215, 0, 0.2);
+    }
 
     #dev-banner { 
       display: none; 
@@ -812,7 +826,6 @@
         <div class="header-title-row">
           <h1>2026 璀璨之星爭奪戰</h1>
           <div class="icon-group">
-            <div class="action-icon" onclick="openAchievementModal()">🏆</div>
             <div class="action-icon" onclick="openModal('ruleModal')">ⓘ</div>
           </div>
         </div>
@@ -876,6 +889,7 @@
       <div class="my-rank-right">
         <div class="my-rank-value" id="myRankValue">--</div>
         <div class="my-rank-gap" id="myRankGap">--</div>
+        <button class="achievement-btn" id="achievementBtn" onclick="openAchievementModal()" style="display:none;">🏆 我的榮耀殿堂</button>
       </div>
     </div>
   </div>
@@ -1068,10 +1082,13 @@
       }
       
       const rankText = typeof myData.user_rank === 'number' ? `第 ${myData.user_rank} 名` : myData.user_rank;
-      document.getElementById('myRankMain').textContent = rankText;
-      document.getElementById('myRankGap').textContent = myData.gap_msg || '';
-      
+      document.getElementById('myRankMain').textContent = rankText;      
       const isCum = currentTab.startsWith('cumulative');
+      const gapEl = document.getElementById('myRankGap');
+      const achievementBtn = document.getElementById('achievementBtn');
+      gapEl.textContent = myData.gap_msg || '';
+      gapEl.style.display = isCum ? 'none' : 'block';
+      achievementBtn.style.display = isCum ? 'inline-flex' : 'none';
       document.getElementById('myRankValue').innerHTML = `${(myData.total_diamonds || 0).toLocaleString()} ${isCum ? '次' : renderDiamondIcon()}`;
       
       bar.classList.add('show');
