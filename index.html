@@ -131,8 +131,8 @@
       min-height: 38px;
     }
     .header h1 { 
-      font-size: clamp(24px, 5vw, 30px); 
-      font-weight: 800; 
+      font-size: clamp(26px, 5.4vw, 34px); 
+		font-weight: 800; 
       letter-spacing: 0.5px; 
       text-shadow: 0 4px 16px rgba(0,0,0,0.5); 
       line-height: 1.2;
@@ -656,6 +656,10 @@
     
     /* Desktop spacing tuning for top 3 cards */
     @media (min-width: 1024px) {
+      .header h1 {
+        font-size: clamp(32px, 3.2vw, 40px);
+      }
+	
       #podiumView {
         padding: 28px 36px 30px;
       }
@@ -666,8 +670,8 @@
       }
 
       .podium-item {
-        width: min(100%, 156px);
-        padding: 18px 12px 16px;
+        width: min(100%, 176px);
+        padding: 20px 14px 18px;
         border-radius: 20px;
       }
 
