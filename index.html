@@ -117,10 +117,9 @@
     }
     
     .header-title-row { 
-      display: flex; 
-      align-items: center; 
-      gap: 12px; 
-      justify-content: center; 
+      display: block;
+      position: relative;
+      min-height: 44px;
     }
     
     .header h1 { 
@@ -128,6 +127,7 @@
       font-weight: 800; 
       letter-spacing: 0.5px; 
       text-shadow: 0 4px 16px rgba(0,0,0,0.5); 
+      text-align: center;
     }
     
     .header h1.title-shine {
@@ -158,6 +158,51 @@
       display: flex; 
       gap: 8px; 
     }
+      align-items: center;
+    }
+
+    .header-tools {
+      position: absolute;
+      right: 0;
+      top: 0;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .lang-switch {
+      display: inline-flex;
+      gap: 6px;
+      padding: 4px;
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 12px;
+      background: rgba(255,255,255,0.04);
+      backdrop-filter: blur(8px);
+    }
+
+    .lang-btn {
+      border: 1px solid rgba(255,255,255,0.22);
+      background: rgba(255,255,255,0.02);
+      color: #d4d4dc;
+      border-radius: 8px;
+      min-width: 32px;
+      height: 28px;
+      padding: 0 8px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .lang-btn.active {
+      background: linear-gradient(135deg, #facc15, #f59e0b);
+      color: #201907;
+      border-color: rgba(255, 226, 138, 0.95);
+      box-shadow: 0 4px 10px rgba(251, 191, 36, 0.35);
+    }
+
+    .lang-btn:hover {
+      border-color: rgba(255,255,255,0.45);
+      color: #ffffff;
     
     .action-icon { 
       display: inline-flex; 
@@ -893,9 +938,17 @@
       <!-- 頂部 Header -->
       <div class="header">
         <div class="header-title-row">
-          <h1 class="title-shine">璀璨之星爭奪戰</h1>
-          <div class="icon-group">
-            <div class="action-icon" onclick="openModal('ruleModal')">ⓘ</div>
+          <h1 class="title-shine" data-i18n="eventTitle">璀璨之星爭奪戰</h1>
+          <div class="header-tools">
+            <div class="lang-switch" aria-label="Language Switcher">
+              <button class="lang-btn active" data-lang="zh-TW" onclick="setLanguage('zh-TW')">繁</button>
+              <button class="lang-btn" data-lang="zh-CN" onclick="setLanguage('zh-CN')">简</button>
+              <button class="lang-btn" data-lang="en" onclick="setLanguage('en')">EN</button>
+              <button class="lang-btn" data-lang="ja" onclick="setLanguage('ja')">日</button>
+            </div>
+            <div class="icon-group">
+              <div class="action-icon" onclick="openModal('ruleModal')">ⓘ</div>
+            </div>
           </div>
         </div>
         <div class="countdown-banner" id="countdownBanner">
@@ -908,22 +961,22 @@
       <div class="nav-container">
         <div class="segmented-control">
           <input type="radio" name="mode" id="mode-current" value="current" checked onchange="switchMode('current')">
-          <label for="mode-current">🔥 當期爭霸</label>
+          <label for="mode-current" data-i18n="modeCurrent">🔥 當期爭霸</label>
           <input type="radio" name="mode" id="mode-hof" value="hof" onchange="switchMode('hof')">
-          <label for="mode-hof">👑 榮耀名人堂</label>
+          <label for="mode-hof" data-i18n="modeHof">👑 榮耀名人堂</label>
           <div class="glider"></div>
         </div>
         <div class="sub-tabs-wrapper">
           <!-- 修改處：加入昨日與上週 -->
           <div class="sub-tabs current-tabs active">
-            <div class="tab-item active" data-tab="daily">今日</div>
-            <div class="tab-item" data-tab="prev_daily">昨日</div>
-            <div class="tab-item" data-tab="weekly">本週</div>
-            <div class="tab-item" data-tab="prev_weekly">上週</div>
+            <div class="tab-item active" data-tab="daily" data-i18n="tabDaily">今日</div>
+            <div class="tab-item" data-tab="prev_daily" data-i18n="tabPrevDaily">昨日</div>
+            <div class="tab-item" data-tab="weekly" data-i18n="tabWeekly">本週</div>
+            <div class="tab-item" data-tab="prev_weekly" data-i18n="tabPrevWeekly">上週</div>
           </div>
           <div class="sub-tabs hof-tabs">
-            <div class="tab-item" data-tab="cumulative_daily">日冠累積</div>
-            <div class="tab-item" data-tab="cumulative_weekly">週冠累積</div>
+            <div class="tab-item" data-tab="cumulative_daily" data-i18n="tabCumDaily">日冠累積</div>
+            <div class="tab-item" data-tab="cumulative_weekly" data-i18n="tabCumWeekly">週冠累積</div>
           </div>
         </div>
       </div>
@@ -969,11 +1022,65 @@
     const API_BASE = 'https://swag-bff-api-905468082258.asia-east1.run.app/api';
     const DEFAULT_AVATAR = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iIzExMTExMSIvPjxjaXJjbGUgY3g9IjUwIiBjeT0iMzgiIHI9IjIyIiBmaWxsPSIjMjgyODI4Ii8+PHBhdGggZD0iTTE1IDEwMGEzNSAzNSAwIDAgMSA3MCAwIiBmaWxsPSIjMjgyODI4Ii8+PC9zdmc+';
     const CROWN_SVG = `<svg viewBox="0 0 24 24" fill="none" class="crown-icon"><path d="M2 19H22V21H2V19ZM3 5L7 12L12 3L17 12L21 5L19 17H5L3 5Z" fill="#FFF" stroke="rgba(0,0,0,0.1)" stroke-width="0.6"/><path d="M12 9C12.5523 9 13 8.55228 13 8C13 7.44772 12.5523 7 12 7C11.4477 7 11 7.44772 11 8C11 8.55228 11.4477 9 12 9Z" fill="#D4AF37"/></svg>`;
-
+   const I18N = {
+      'zh-TW': {
+        eventTitle: '璀璨之星爭奪戰',
+        modeCurrent: '🔥 當期爭霸',
+        modeHof: '👑 榮耀名人堂',
+        tabDaily: '今日',
+        tabPrevDaily: '昨日',
+        tabWeekly: '本週',
+        tabPrevWeekly: '上週',
+        tabCumDaily: '日冠累積',
+        tabCumWeekly: '週冠累積',
+        countdownDaily: '日榜倒數',
+        countdownWeekly: '週榜倒數'
+      },
+      'zh-CN': {
+        eventTitle: '璀璨之星争夺战',
+        modeCurrent: '🔥 当期争霸',
+        modeHof: '👑 荣耀名人堂',
+        tabDaily: '今日',
+        tabPrevDaily: '昨日',
+        tabWeekly: '本周',
+        tabPrevWeekly: '上周',
+        tabCumDaily: '日冠累计',
+        tabCumWeekly: '周冠累计',
+        countdownDaily: '日榜倒计时',
+        countdownWeekly: '周榜倒计时'
+      },
+      en: {
+        eventTitle: 'Battle for the Shining Star',
+        modeCurrent: '🔥 Current Battle',
+        modeHof: '👑 Hall of Fame',
+        tabDaily: 'Today',
+        tabPrevDaily: 'Yesterday',
+        tabWeekly: 'This Week',
+        tabPrevWeekly: 'Last Week',
+        tabCumDaily: 'Daily Wins',
+        tabCumWeekly: 'Weekly Wins',
+        countdownDaily: 'Daily Countdown',
+        countdownWeekly: 'Weekly Countdown'
+      },
+      ja: {
+        eventTitle: 'きらめきスター争奪戦',
+        modeCurrent: '🔥 今期バトル',
+        modeHof: '👑 栄誉の殿堂',
+        tabDaily: '今日',
+        tabPrevDaily: '昨日',
+        tabWeekly: '今週',
+        tabPrevWeekly: '先週',
+        tabCumDaily: '日間優勝累計',
+        tabCumWeekly: '週間優勝累計',
+        countdownDaily: '日次ランキング残り時間',
+        countdownWeekly: '週次ランキング残り時間'
+      }
+    };
     let swagToken = null;
     let currentUserId = 'Visitor';
     let currentTab = 'daily'; 
     let handshakeRetryInterval = null;
+    let currentLang = 'zh-TW';
 
     // 修改處：加入 prev_daily, prev_weekly 變數
     const boardData = { 
@@ -1014,7 +1121,29 @@
     function renderDiamondIcon() { 
       return `<img class="diamond-icon" src="https://swag.live/static/img/ic_diamond_sm.cf6904ca.svg" alt="diamond">`; 
     }
+  function t(key) {
+      return I18N[currentLang]?.[key] || I18N['zh-TW'][key] || key;
+    }
 
+    function setLanguage(lang) {
+      if (!I18N[lang]) return;
+      currentLang = lang;
+      document.documentElement.lang = lang;
+      document.title = t('eventTitle');
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.dataset.i18n;
+        el.textContent = t(key);
+      });
+      document.querySelectorAll('.lang-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.lang === lang);
+      });
+      updateCountdown();
+      try {
+        localStorage.setItem('leaderboard-lang', lang);
+      } catch (e) {}
+    }
+
+    
     function isMobileDevice() { 
       return /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent || ''); 
     }
@@ -1255,7 +1384,7 @@
       
       const isWeeklyBoard = currentTab === 'weekly' || currentTab === 'prev_weekly';
       banner.classList.add(isWeeklyBoard ? 'weekly-theme' : 'daily-theme');
-      document.getElementById('countdown-label').textContent = isWeeklyBoard ? '週榜倒數' : '日榜倒數';
+      document.getElementById('countdown-label').textContent = isWeeklyBoard ? t('countdownWeekly') : t('countdownDaily');
       
       const now = new Date();
       const gmt8Now = new Date(now.getTime() + now.getTimezoneOffset() * 60000 + 8 * 3600000);
@@ -1395,7 +1524,8 @@
       if (isMobileDevice()) {
         document.body.classList.add('pwa-mobile');
       }
-      
+      const savedLang = localStorage.getItem('leaderboard-lang');
+      setLanguage(savedLang && I18N[savedLang] ? savedLang : 'zh-TW');     
       updateCountdown(); 
       setInterval(updateCountdown, 1000); 
       
