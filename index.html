@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>2026 璀璨之星爭奪戰</title>
+  <title>璀璨之星爭奪戰</title>
   <style>
     /* =========================================
        1. UI Design Tokens (Apple Glassmorphism)
@@ -130,6 +130,30 @@
       text-shadow: 0 4px 16px rgba(0,0,0,0.5); 
     }
     
+    .header h1.title-shine {
+      background: linear-gradient(120deg, #fef08a 0%, #ffffff 28%, #67e8f9 55%, #fde68a 78%, #ffffff 100%);
+      background-size: 220% auto;
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      animation: titleShimmer 3.2s ease-in-out infinite, titlePulse 2.4s ease-in-out infinite;
+    }
+
+    @keyframes titleShimmer {
+      0%, 100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+    }
+
+    @keyframes titlePulse {
+      0%, 100% {
+        filter: drop-shadow(0 0 4px rgba(253, 224, 71, 0.45));
+        transform: translateY(0) scale(1);
+      }
+      50% {
+        filter: drop-shadow(0 0 14px rgba(34, 211, 238, 0.65));
+        transform: translateY(-1px) scale(1.02);
+      }
+    }
     .icon-group { 
       display: flex; 
       gap: 8px; 
@@ -158,11 +182,6 @@
       border-color: rgba(255,255,255,0.2); 
     }
     
-    .subtitle { 
-      font-size: 13px; 
-      color: var(--text-secondary); 
-      margin-top: 6px; 
-    }
     
     .countdown-banner {
       margin-top: 16px;
@@ -802,9 +821,24 @@
   <div class="modal-overlay" id="ruleModal" onclick="closeModal('ruleModal', event)">
     <div class="modal-content" onclick="event.stopPropagation()">
       <h2>活動規則</h2>
-      <p style="color: var(--text-secondary); font-size: 14px; line-height: 1.6; margin-bottom: 12px;">1. 日榜：依據當日消耗鑽石進行排名，每日 23:59 結算。</p>
-      <p style="color: var(--text-secondary); font-size: 14px; line-height: 1.6; margin-bottom: 12px;">2. 週榜：依據當週消耗鑽石進行排名，週日 23:59 結算。</p>
-      <p style="color: var(--text-secondary); font-size: 14px; line-height: 1.6;">3. 榮耀名人堂：獨立統計歷屆「日榜」與「週榜」獲得第一名的次數，同次數則以先達成者居前。</p>
+      <p style="color: #fff; font-size: 15px; font-weight: 700; line-height: 1.6; margin-bottom: 8px;">一、榜單規則</p>
+      <p style="color: var(--text-secondary); font-size: 14px; line-height: 1.6; margin-bottom: 8px;">1. 日榜：依據當日消耗鑽石進行排名，每日 23:59 結算。</p>
+      <p style="color: var(--text-secondary); font-size: 14px; line-height: 1.6; margin-bottom: 8px;">2. 週榜：依據當週消耗鑽石進行排名，每週週日 23:59 結算。</p>
+      <p style="color: var(--text-secondary); font-size: 14px; line-height: 1.6; margin-bottom: 12px;">3. 榮耀名人堂：統計歷屆日榜與週榜獲得第 1 名的次數；若次數相同，則以先達成者排名在前。</p>
+
+      <p style="color: #fff; font-size: 15px; font-weight: 700; line-height: 1.6; margin-bottom: 8px;">二、徽章獎勵</p>
+      <p style="color: var(--text-secondary); font-size: 14px; line-height: 1.6; margin-bottom: 8px;">1. 日榜徽章（共 5 款）</p>
+      <p style="color: var(--text-secondary); font-size: 14px; line-height: 1.6; margin-bottom: 4px;">・第 1 名冠軍徽章</p>
+      <p style="color: var(--text-secondary); font-size: 14px; line-height: 1.6; margin-bottom: 4px;">・第 2–10 名榮譽徽章</p>
+      <p style="color: var(--text-secondary); font-size: 14px; line-height: 1.6; margin-bottom: 8px;">・累積 7 / 30 / 90 次第 1 名成就徽章</p>
+      <p style="color: var(--text-secondary); font-size: 14px; line-height: 1.6; margin-bottom: 8px;">2. 週榜徽章（共 5 款）</p>
+      <p style="color: var(--text-secondary); font-size: 14px; line-height: 1.6; margin-bottom: 4px;">・第 1 名冠軍徽章</p>
+      <p style="color: var(--text-secondary); font-size: 14px; line-height: 1.6; margin-bottom: 4px;">・第 2–10 名榮譽徽章</p>
+      <p style="color: var(--text-secondary); font-size: 14px; line-height: 1.6; margin-bottom: 12px;">・累積 4 / 12 / 36 次第 1 名成就徽章</p>
+
+      <p style="color: #fff; font-size: 15px; font-weight: 700; line-height: 1.6; margin-bottom: 8px;">三、注意事項</p>
+      <p style="color: var(--text-secondary); font-size: 14px; line-height: 1.6; margin-bottom: 8px;">1. 活動資料更新約需 5 分鐘同步時間，請以系統最終顯示結果為準。</p>
+      <p style="color: var(--text-secondary); font-size: 14px; line-height: 1.6; margin-bottom: 12px;">2. 本活動主辦單位保留修改、變更或終止活動之權利。</p>
       <button class="modal-close-btn" onclick="closeModal('ruleModal')">我知道了</button>
     </div>
   </div>
@@ -826,12 +860,12 @@
       <!-- 頂部 Header -->
       <div class="header">
         <div class="header-title-row">
-          <h1>2026 璀璨之星爭奪戰</h1>
+          <h1>璀璨之星爭奪戰</h1>
+          <h1 class="title-shine">璀璨之星爭奪戰</h1>
           <div class="icon-group">
             <div class="action-icon" onclick="openModal('ruleModal')">ⓘ</div>
           </div>
         </div>
-        <div class="subtitle">活動時間：2026/04/07 ~ 2026/04/30</div>
         <div class="countdown-banner" id="countdownBanner">
           <span id="countdown-label">日榜倒數</span>
           <span class="countdown-time" id="countdown-time">--</span>
