@@ -609,7 +609,7 @@
     }
     
     .diamond-icon { width: 16px; height: 16px; }
-  @media (max-width: 640px) {
+    @media (max-width: 640px) {
       :root {
         --podium-avatar-size: 60px;
         --podium-avatar-first: 78px;
@@ -653,6 +653,39 @@
       }
     }
     
+    /* Desktop spacing tuning for top 3 cards */
+    @media (min-width: 1024px) {
+      #podiumView {
+        padding: 28px 36px 30px;
+      }
+
+      .podium {
+        padding-top: 66px;
+        gap: 24px;
+      }
+
+      .podium-item {
+        width: min(100%, 156px);
+        padding: 18px 12px 16px;
+        border-radius: 20px;
+      }
+
+      .podium-item.no1 {
+        transform: translateY(-28px);
+      }
+
+      .avatar-wrapper {
+        margin-bottom: 14px;
+      }
+
+      .nickname {
+        font-size: 15px;
+      }
+
+      .val-text {
+        margin-top: 8px;
+      }
+    }
     @keyframes slideUpFade { 
       from { opacity: 0; transform: translateY(16px); } 
       to { opacity: 1; transform: translateY(0); } 
