@@ -119,11 +119,17 @@
     .header-title-row { 
       display: flex;
       flex-direction: column;
-      align-items: center;
-      gap: 12px;
+      align-items: stretch;
+      gap: 10px;
       text-align: center;
     }
     
+    .header-top-row {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      min-height: 38px;
+    }
     .header h1 { 
       font-size: clamp(24px, 5vw, 30px); 
       font-weight: 800; 
@@ -166,10 +172,9 @@
       position: static;
       display: inline-flex;
       align-items: center;
-      justify-content: center;
+      justify-content: flex-end;
       gap: 8px;
-      flex-wrap: wrap;
-      width: 100%;
+      flex-wrap: nowrap;
     }
 
   .locale-switcher {
@@ -485,8 +490,8 @@
     
     .podium-item { 
       position: relative; 
-      padding: 14px 8px 14px;
-      width: min(100%, 124px);   
+      padding: 18px 10px 16px;
+      width: min(100%, 136px); 
       border-radius: 18px;
       border: 1px solid rgba(255,255,255,0.12);
       box-shadow: 0 10px 24px rgba(0,0,0,0.24), inset 0 1px 0 rgba(255,255,255,0.16);
@@ -611,15 +616,11 @@
     .diamond-icon { width: 16px; height: 16px; }
     @media (max-width: 640px) {
       :root {
-        --podium-avatar-size: 60px;
-        --podium-avatar-first: 78px;
+        --podium-avatar-size: 66px;
+        --podium-avatar-first: 86px;
       }
       .header {
         padding: 24px 12px 14px;
-      }
-
-      .header-title-row {
-        gap: 10px;
       }
 
       .locale-switcher {
@@ -639,8 +640,8 @@
 
       .podium-item {
         width: 100%;
-        max-width: 112px;
-        padding: 12px 6px;
+        max-width: 122px;
+        padding: 16px 8px 14px;
       }
 
       .nickname {
@@ -1018,21 +1019,23 @@
     <div class="top-fixed-section">
       
       <!-- 頂部 Header -->
-      <div class="header">
-        <div class="header-title-row">
-          <h1 class="title-shine" id="pageTitle">璀璨之星爭奪戰</h1>
-          <div class="header-controls">
-            <div class="locale-switcher" id="localeSwitcher" role="group" aria-label="Language">
-              <button type="button" class="locale-btn" data-locale="zh-TW">繁</button>
-              <button type="button" class="locale-btn" data-locale="zh-CN">简</button>
-              <button type="button" class="locale-btn" data-locale="en">EN</button>
-              <button type="button" class="locale-btn" data-locale="ja">日</button>
-            </div>
-            <div class="icon-group">
-            <div class="action-icon" onclick="openModal('ruleModal')">ⓘ</div>
-          </div>
-          </div>
-        </div>
+	      <div class="header">
+	        <div class="header-title-row">
+	          <div class="header-top-row">
+	            <div class="header-controls">
+	              <div class="locale-switcher" id="localeSwitcher" role="group" aria-label="Language">
+	                <button type="button" class="locale-btn" data-locale="zh-TW">繁</button>
+	                <button type="button" class="locale-btn" data-locale="zh-CN">简</button>
+	                <button type="button" class="locale-btn" data-locale="en">EN</button>
+	                <button type="button" class="locale-btn" data-locale="ja">日</button>
+	              </div>
+	              <div class="icon-group">
+	              <div class="action-icon" onclick="openModal('ruleModal')">ⓘ</div>
+	            </div>
+	            </div>
+	          </div>
+	          <h1 class="title-shine" id="pageTitle">璀璨之星爭奪戰</h1>
+	        </div>
         <div class="countdown-banner" id="countdownBanner">
           <span id="countdown-label">日榜倒數</span>
           <span class="countdown-time" id="countdown-time">--</span>
