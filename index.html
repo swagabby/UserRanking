@@ -167,20 +167,42 @@
       gap: 8px;
     }
 
-    .locale-select {
-      height: 36px;
-      min-width: 92px;
-      border-radius: 999px;
-      border: 1px solid var(--outline-variant);
-      background: rgba(255,255,255,0.05);
-      color: var(--text-primary);
-      padding: 0 12px;
-      font-size: 13px;
-      font-weight: 600;
-      outline: none;
-      cursor: pointer;
-      backdrop-filter: blur(8px);
+  .locale-switcher {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px;
+      border-radius: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      background: rgba(20, 22, 44, 0.72);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 6px 18px rgba(0,0,0,0.25);
     }
+
+    .locale-btn {
+      width: 30px;
+      height: 30px;
+      border-radius: 9px;
+      border: 1px solid rgba(255,255,255,0.26);
+      background: rgba(255,255,255,0.06);
+      color: rgba(255,255,255,0.92);
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+      transition: all 0.2s ease;
+    }
+
+    .locale-btn.active {
+      background: linear-gradient(180deg, #ffd978 0%, #f6b63f 100%);
+      color: #111;
+      border-color: rgba(252, 211, 77, 0.95);
+      box-shadow: 0 4px 12px rgba(246, 182, 63, 0.45);
+    }
+
+    .locale-btn:hover {
+      transform: translateY(-1px);
+      border-color: rgba(255,255,255,0.5);
     
     .action-icon { 
       display: inline-flex; 
@@ -950,10 +972,11 @@
         <div class="header-title-row">
           <h1 class="title-shine" id="pageTitle">璀璨之星爭奪戰</h1>
           <div class="header-controls">
-            <select id="localeSelect" class="locale-select" aria-label="Language">
-              <option value="zh-TW">繁中</option>
-              <option value="en">English</option>
-              <option value="ja">日本語</option>
+            <div class="locale-switcher" id="localeSwitcher" role="group" aria-label="Language">
+              <button type="button" class="locale-btn" data-locale="zh-TW">繁</button>
+              <button type="button" class="locale-btn" data-locale="zh-CN">简</button>
+              <button type="button" class="locale-btn" data-locale="en">EN</button>
+              <button type="button" class="locale-btn" data-locale="ja">日</button>
             </select>
             <div class="icon-group">
             <div class="action-icon" onclick="openModal('ruleModal')">ⓘ</div>
@@ -1078,6 +1101,26 @@
         countdownUnitSec: '秒',
         unitTimes: '次'
       },
+      'zh-CN': {
+        title: '璀璨之星争夺战',
+        modeCurrent: '🔥 当期争霸',
+        modeHof: '👑 荣耀名人堂',
+        tabDaily: '今日',
+        tabPrevDaily: '昨日',
+        tabWeekly: '本周',
+        tabPrevWeekly: '上周',
+        tabCumulativeDaily: '日冠累计',
+        tabCumulativeWeekly: '周冠累计',
+        noData: '暂无排名数据',
+        loading: '数据读取中...',
+        countdownDaily: '日榜倒数',
+        countdownWeekly: '周榜倒数',
+        countdownUnitDay: '日',
+        countdownUnitHour: '时',
+        countdownUnitMin: '分',
+        countdownUnitSec: '秒',
+        unitTimes: '次'
+      },      
       en: {
         title: 'Star Glory Showdown',
         modeCurrent: '🔥 Current Season',
@@ -1160,8 +1203,11 @@
         const el = document.getElementById(id);
         if (el) el.textContent = t(key);
       });
-      const localeSelect = document.getElementById('localeSelect');
-      if (localeSelect) localeSelect.value = currentLocale;
+      document.querySelectorAll('.locale-btn').forEach((button) => {
+        const isActive = button.dataset.locale === currentLocale;
+        button.classList.toggle('active', isActive);
+        button.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+      });
       if (!currentTab.startsWith('cumulative')) {
         const isWeeklyBoard = currentTab === 'weekly' || currentTab === 'prev_weekly';
         document.getElementById('countdown-label').textContent = isWeeklyBoard ? t('countdownWeekly') : t('countdownDaily');
@@ -1556,8 +1602,10 @@
       if (!I18N[currentLocale]) {
         currentLocale = 'zh-TW';
       }
-      document.getElementById('localeSelect').addEventListener('change', (event) => {
-        currentLocale = event.target.value;
+      document.getElementById('localeSwitcher').addEventListener('click', (event) => {
+        const localeButton = event.target.closest('.locale-btn');
+        if (!localeButton) return;
+        currentLocale = localeButton.dataset.locale;
         localStorage.setItem('leaderboard_locale', currentLocale);
         applyLocale();
       });
