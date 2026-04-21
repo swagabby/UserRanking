@@ -762,14 +762,16 @@
     .my-rank-value { color: #fff; font-weight: 800; font-size: 18px; display: flex; align-items: center; justify-content: flex-end; gap: 4px; }
     .my-rank-gap { font-size: 12px; color: var(--brand-primary); margin-top: 4px; font-weight: 600; }
         .achievement-btn {
-      margin-top: 4px;
-      padding: 6px 10px;
+      margin-top: 8px;
+      padding: 10px 18px;
+      border: 1px solid rgba(255, 215, 0, 0.58);
       border: 1px solid rgba(255, 215, 0, 0.5);
       border-radius: 999px;
-      background: rgba(255, 215, 0, 0.12);
-      color: #FFD86B;
-      font-size: 12px;
-      font-weight: 700;
+      background: rgba(255, 215, 0, 0.14);
+          color: #FFD86B;
+      font-size: 17px;
+      font-weight: 800;
+      line-height: 1;
       cursor: pointer;
     }
     .achievement-btn:hover {
@@ -1086,11 +1088,13 @@
       const isCum = currentTab.startsWith('cumulative');
       const gapEl = document.getElementById('myRankGap');
       const achievementBtn = document.getElementById('achievementBtn');
+      const myRankValue = document.getElementById('myRankValue');
+      const totalDiamonds = myData.total_diamonds || 0;      
       gapEl.textContent = myData.gap_msg || '';
       gapEl.style.display = isCum ? 'none' : 'block';
       achievementBtn.style.display = isCum ? 'inline-flex' : 'none';
-      document.getElementById('myRankValue').innerHTML = `${(myData.total_diamonds || 0).toLocaleString()} ${isCum ? '次' : renderDiamondIcon()}`;
-      
+      myRankValue.innerHTML = `${totalDiamonds.toLocaleString()} ${isCum ? '次' : renderDiamondIcon()}`;
+      myRankValue.style.display = isCum && totalDiamonds === 0 ? 'none' : 'flex';      
       bar.classList.add('show');
     }
 
