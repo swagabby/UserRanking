@@ -117,7 +117,10 @@
     }
     
     .header-title-row { 
-      display: block;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
       text-align: center;
     }
     
@@ -126,6 +129,7 @@
       font-weight: 800; 
       letter-spacing: 0.5px; 
       text-shadow: 0 4px 16px rgba(0,0,0,0.5); 
+      line-height: 1.2;
     }
     
     .header h1.title-shine {
@@ -159,12 +163,13 @@
 
 
     .header-controls {
-      position: absolute;
-      top: 28px;
-      right: 16px;
+      position: static;
       display: inline-flex;
       align-items: center;
+      justify-content: center;
       gap: 8px;
+      flex-wrap: wrap;
+      width: 100%;
     }
 
   .locale-switcher {
@@ -609,7 +614,20 @@
         --podium-avatar-size: 60px;
         --podium-avatar-first: 78px;
       }
+      .header {
+        padding: 24px 12px 14px;
+      }
 
+      .header-title-row {
+        gap: 10px;
+      }
+
+      .locale-switcher {
+        padding: 5px;
+        gap: 6px;
+      }
+
+    
       #podiumView {
         padding: 14px 10px 18px;
       }
@@ -976,7 +994,7 @@
               <button type="button" class="locale-btn" data-locale="zh-CN">简</button>
               <button type="button" class="locale-btn" data-locale="en">EN</button>
               <button type="button" class="locale-btn" data-locale="ja">日</button>
-            </select>
+            </div>
             <div class="icon-group">
             <div class="action-icon" onclick="openModal('ruleModal')">ⓘ</div>
           </div>
