@@ -252,10 +252,11 @@
     .countdown-banner {
       margin: 16px auto 0;
       display: flex;
-      flex-direction: column;     
       align-items: center;
-      gap: 2px;
-      padding: 10px 20px;
+      justify-content: space-between;
+      gap: 12px;
+      width: min(100%, 320px);
+      padding: 10px 12px 10px 18px;
       border-radius: var(--radius-full);
       border: 1px solid rgba(0,210,190,0.3);
       font-size: 12px;
@@ -266,12 +267,17 @@
       transition: border-color 0.25s ease, background 0.25s ease, box-shadow 0.25s ease, color 0.25s ease;
     }
     
-        #countdown-label,
+    .countdown-main {
+      min-width: 0;
+      flex: 1;
+    }
+
+    #countdown-label,
     .countdown-time {
       display: block;
       width: 100%;
-      text-align: center;
-    }
+      text-align: left;
+	}
 
     .countdown-time {
       color: inherit;
@@ -294,6 +300,24 @@
       background: rgba(30, 64, 175, 0.16);
       box-shadow: 0 4px 16px rgba(59, 130, 246, 0.2);
     }
+    .countdown-info-btn {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      border: 1px solid rgba(255,255,255,0.22);
+      background: linear-gradient(180deg, rgba(110, 232, 222, 0.36), rgba(20, 184, 166, 0.28));
+      color: #e6fffc;
+      font-size: 14px;
+      font-weight: 700;
+      box-shadow: 0 6px 14px rgba(13, 148, 136, 0.26);
+    }
+
+    .countdown-banner.weekly-theme .countdown-info-btn {
+      background: linear-gradient(180deg, rgba(147, 197, 253, 0.36), rgba(59, 130, 246, 0.28));
+      color: #eff6ff;
+      box-shadow: 0 6px 14px rgba(37, 99, 235, 0.28);
+    }
+
 
     /* =========================================
        4. Segmented Control (雙層導航)
@@ -1067,16 +1091,16 @@
 	                <button type="button" class="locale-btn" data-locale="en">EN</button>
 	                <button type="button" class="locale-btn" data-locale="ja">日</button>
 	              </div>
-		              <div class="icon-group">
-		              <div class="action-icon benefit-icon" onclick="openModal('ruleModal')">!</div>
-	            </div>
 	            </div>
 	          </div>
 	          <h1 class="title-shine" id="pageTitle">璀璨之星爭奪戰</h1>
 	        </div>
         <div class="countdown-banner" id="countdownBanner">
-          <span id="countdown-label">日榜倒數</span>
-          <span class="countdown-time" id="countdown-time">--</span>
+          <div class="countdown-main">
+            <span id="countdown-label">日榜倒數</span>
+            <span class="countdown-time" id="countdown-time">--</span>
+          </div>
+          <button type="button" class="action-icon countdown-info-btn" aria-label="活動資訊" onclick="openModal('ruleModal')">i</button>
         </div>
           
       </div>
@@ -1725,10 +1749,7 @@
 
     async function submitPrivacyUpdate(isHidden, previousValue, element) {
       if (isPrivacyToggleRateLimited()) {
-        element.checked = previousValue;
-        showToast("操作太頻繁，請五分鐘後再嘗試");
-        return;
-      }
+
 
       isPrivacyUpdating = true;
       element.disabled = true;
