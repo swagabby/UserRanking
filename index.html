@@ -241,7 +241,12 @@
       transform: scale(1.05); 
       border-color: rgba(255,255,255,0.2); 
     }
-    
+    .benefit-icon {
+      background: rgba(250, 204, 21, 0.2);
+      border-color: rgba(250, 204, 21, 0.58);
+      color: #fde047;
+      font-weight: 800;
+    }    
     
     .countdown-banner {
       margin: 16px auto 0;
@@ -527,9 +532,11 @@
     
     .podium-item.no1 { 
       transform: translateY(calc(var(--podium-no1-lift) * -1)); 
-	 z-index: 2; 
-    }
-    
+		 z-index: 2;
+      grid-column: 2;
+	}
+	.podium-item.no2 { grid-column: 1; }
+    .podium-item.no3 { grid-column: 3; }	  
     .avatar-wrapper { 
       position: relative; 
       margin-bottom: 12px; 
@@ -935,6 +942,31 @@
     .my-rank-main { font-size: 18px; font-weight: 800; color: #fff; }
     .my-rank-privacy-row { display: flex; align-items: center; gap: 8px; }
     .my-rank-privacy-label { font-size: 12px; color: var(--text-secondary); cursor: pointer; }
+   .privacy-confirm-inline {
+      margin-top: 8px;
+      display: none;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      padding: 8px 10px;
+      border-radius: 12px;
+      border: 1px solid rgba(252, 211, 77, 0.5);
+      background: rgba(251, 191, 36, 0.12);
+      color: #fde68a;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .privacy-confirm-inline.show { display: flex; }
+    .privacy-confirm-btn {
+      border: none;
+      border-radius: 999px;
+      padding: 4px 10px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .privacy-confirm-btn.confirm { background: #f59e0b; color: #111827; }
+    .privacy-confirm-btn.cancel { background: rgba(255, 255, 255, 0.14); color: #fff; }
 	.my-rank-right { margin-left: auto; text-align: right; }
     .my-rank-value { color: #fff; font-weight: 800; font-size: 18px; display: flex; align-items: center; justify-content: flex-end; gap: 4px; }
     .my-rank-gap { font-size: 12px; color: var(--brand-primary); margin-top: 4px; font-weight: 600; }
@@ -1027,8 +1059,8 @@
 	                <button type="button" class="locale-btn" data-locale="en">EN</button>
 	                <button type="button" class="locale-btn" data-locale="ja">日</button>
 	              </div>
-	              <div class="icon-group">
-	              <div class="action-icon" onclick="openModal('ruleModal')">ⓘ</div>
+		              <div class="icon-group">
+		              <div class="action-icon benefit-icon" onclick="openModal('ruleModal')">!</div>
 	            </div>
 	            </div>
 	          </div>
@@ -1083,14 +1115,19 @@
       <div class="my-rank-left">
         <div style="font-size: 12px; color: #888;">我的排名</div>
         <div class="my-rank-main" id="myRankMain">--</div>
-        <div class="my-rank-privacy-row">
-          <span class="my-rank-privacy-label" id="privacyToggleLabel">排行榜隱身</span>
-			<label class="switch">
-            <input type="checkbox" id="privacyToggle" onchange="togglePrivacy(this)">
-            <span class="slider"></span>
-          </label>
-        </div>
-      </div>
+	        <div class="my-rank-privacy-row">
+	          <span class="my-rank-privacy-label" id="privacyToggleLabel">排行榜隱身</span>
+				<label class="switch">
+	            <input type="checkbox" id="privacyToggle" onchange="togglePrivacy(this)">
+	            <span class="slider"></span>
+	          </label>
+	        </div>
+          <div class="privacy-confirm-inline" id="privacyConfirmBox">
+            <span>是否要隱身為神秘打佬？</span>
+            <button type="button" class="privacy-confirm-btn confirm" id="privacyConfirmYes">確認</button>
+            <button type="button" class="privacy-confirm-btn cancel" id="privacyConfirmNo">取消</button>
+          </div>
+	      </div>
       <div class="my-rank-right">
         <div class="my-rank-value" id="myRankValue">--</div>
         <div class="my-rank-gap" id="myRankGap">--</div>
@@ -1110,9 +1147,12 @@
     let swagToken = null;
     let currentUserId = 'Visitor';
     let currentTab = 'daily'; 
-let handshakeRetryInterval = null;
-	let isPrivacyUpdating = false;
-    let lastPrivacyToggleAt = 0;
+	let handshakeRetryInterval = null;
+		let isPrivacyUpdating = false;
+	    const PRIVACY_TOGGLE_WINDOW_MS = 5 * 60 * 1000;
+	    const PRIVACY_TOGGLE_LIMIT = 4;
+	    const privacyToggleHistory = [];
+	    let pendingPrivacyValue = null;
 
     // 修改處：加入 prev_daily, prev_weekly 變數
     const boardData = { 
@@ -1624,11 +1664,59 @@ let handshakeRetryInterval = null;
         console.error('Privacy fetch error', e);
       }
     }
-    
+    function hidePrivacyConfirm() {
+      const confirmBox = document.getElementById('privacyConfirmBox');
+      if (confirmBox) confirmBox.classList.remove('show');
+      pendingPrivacyValue = null;
+    }
+
+    function isPrivacyToggleRateLimited() {
+      const now = Date.now();
+      while (privacyToggleHistory.length && now - privacyToggleHistory[0] > PRIVACY_TOGGLE_WINDOW_MS) {
+        privacyToggleHistory.shift();
+      }
+      return privacyToggleHistory.length >= PRIVACY_TOGGLE_LIMIT;
+    }
+
+    async function submitPrivacyUpdate(isHidden, previousValue, element) {
+      if (isPrivacyToggleRateLimited()) {
+        element.checked = previousValue;
+        showToast("操作太頻繁，請五分鐘後再嘗試");
+        return;
+      }
+
+      isPrivacyUpdating = true;
+      element.disabled = true;
+
+      fetch(`${API_BASE}/settings/privacy`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${swagToken}`
+        },
+        body: JSON.stringify({ hide_info: isHidden })
+      })
+      .then(async (res) => {
+        if (!res.ok) throw new Error('Network response was not ok');
+        privacyToggleHistory.push(Date.now());
+        await fetchAllData();
+        element.checked = isHidden;
+        showToast(isHidden ? "✅ 已開啟排行榜隱身" : "✅ 已關閉排行榜隱身");
+      })
+      .catch(() => {
+        element.checked = previousValue;
+        showToast("設定失敗，請稍後再試");
+      })
+      .finally(() => {
+        isPrivacyUpdating = false;
+        element.disabled = false;
+      });
+    }
+
+	  
     async function togglePrivacy(element) {
       const isHidden = element.checked;
       const previousValue = !isHidden;
-      const now = Date.now();		
 
       if (!swagToken || currentUserId === 'Visitor') {
         element.checked = previousValue;
@@ -1641,21 +1729,19 @@ let handshakeRetryInterval = null;
         showToast("設定更新中，請稍候");
         return;
       }
-      if (now - lastPrivacyToggleAt < 1200) {
+
+      const nowConfirm = Date.now();
+      const shouldBypassConfirm = pendingPrivacyConfirm
+        && pendingPrivacyConfirm.value === isHidden
+        && nowConfirm - pendingPrivacyConfirm.at <= 5000;
+
+      if (!shouldBypassConfirm) {
+        pendingPrivacyConfirm = { value: isHidden, at: nowConfirm };
         element.checked = previousValue;
-        showToast("操作過於頻繁，請稍後再試");
+        showToast(isHidden ? '再點一次即可確認開啟「隱身大佬」' : '再點一次即可確認關閉「隱身大佬」');
         return;
       }
-
-      const confirmMessage = isHidden
-        ? '確定是否要開啟為「隱身大佬」？'
-        : '確定是否要關閉「隱身大佬」？';
-      const shouldUpdatePrivacy = window.confirm(confirmMessage);
-      if (!shouldUpdatePrivacy) {
-        element.checked = previousValue;
-        return;
-      }
-
+      pendingPrivacyConfirm = null;
 
       isPrivacyUpdating = true;
       lastPrivacyToggleAt = now;
