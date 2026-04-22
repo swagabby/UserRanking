@@ -1752,7 +1752,10 @@
 
     async function submitPrivacyUpdate(isHidden, previousValue, element) {
       if (isPrivacyToggleRateLimited()) {
-
+        element.checked = previousValue;
+        showToast("操作過於頻繁，請稍候再試");
+        return;
+      }
 
       isPrivacyUpdating = true;
       element.disabled = true;
