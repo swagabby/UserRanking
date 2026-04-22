@@ -256,7 +256,7 @@
       align-items: center;
       justify-content: space-between;
       gap: 12px;
-      width: min(100%, 400px);
+      width: 100%;
 	  padding: 10px 12px 10px 18px;
       border-radius: var(--radius-full);
       border: 1px solid rgba(0,210,190,0.3);
@@ -279,6 +279,7 @@
       display: block;
       width: 100%;
       text-align: left;
+      white-space: nowrap;
 	}
 
     .countdown-time {
@@ -813,8 +814,11 @@
     }
     
     .modal-content { 
+      position: relative;
       background: #121214; 
       width: min(100%, 340px); 
+      max-height: calc(100vh - 32px);
+      overflow-y: auto;
       border-radius: 28px; 
       padding: 32px 24px; 
       transform: translateY(20px); 
@@ -822,7 +826,30 @@
       border: 1px solid rgba(255,255,255,0.1); 
       box-shadow: 0 24px 80px rgba(0,0,0,0.8); 
     }
-    
+
+    .modal-x-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      border: 1px solid rgba(255,255,255,0.2);
+      background: rgba(255,255,255,0.08);
+      color: rgba(255,255,255,0.92);
+      font-size: 22px;
+      line-height: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .modal-x-btn:hover {
+      background: rgba(255,255,255,0.16);
+      color: #fff;
+    }    
     .modal-overlay.show .modal-content { 
       transform: translateY(0); 
     }
@@ -1034,6 +1061,7 @@
   <!-- 活動規則 Modal -->
   <div class="modal-overlay" id="ruleModal" onclick="closeModal('ruleModal', event)">
     <div class="modal-content" onclick="event.stopPropagation()">
+      <button class="modal-x-btn" type="button" aria-label="關閉視窗" onclick="closeModal('ruleModal')">×</button>
       <h2>活動規則</h2>
       <p style="color: #fff; font-size: 15px; font-weight: 700; line-height: 1.6; margin-bottom: 8px;">一、榜單規則</p>
       <p style="color: var(--text-secondary); font-size: 14px; line-height: 1.6; margin-bottom: 8px;">1. 日榜：依據當日消耗鑽石進行排名，每日 23:59 結算。</p>
@@ -1061,6 +1089,7 @@
   <!-- 成就殿堂 Modal -->
   <div class="modal-overlay" id="achievementModal" onclick="closeModal('achievementModal', event)">
     <div class="modal-content" onclick="event.stopPropagation()">
+      <button class="modal-x-btn" type="button" aria-label="關閉視窗" onclick="closeModal('achievementModal')">×</button>
       <h2>🏆 我的榮耀殿堂</h2>
       <div id="achievementContent">
         <div class="empty-state">讀取中...</div>
@@ -1071,6 +1100,7 @@
   <!-- 隱私設定確認 Modal -->
   <div class="modal-overlay" id="privacyConfirmModal" onclick="closePrivacyConfirmModal(event)">
     <div class="modal-content" onclick="event.stopPropagation()">
+      <button class="modal-x-btn" type="button" aria-label="關閉視窗" onclick="closePrivacyConfirmModal()">×</button>
       <h2 id="privacyConfirmTitle">確認變更</h2>
       <p class="privacy-modal-desc" id="privacyConfirmDesc">是否要隱身為神秘大佬？</p>
       <div class="privacy-modal-actions">
@@ -1609,7 +1639,9 @@
     // ==========================================
     function openModal(id) { 
       const modal = document.getElementById(id); 
+      const content = modal ? modal.querySelector('.modal-content') : null;
       modal.style.display = 'flex'; 
+      if (content) content.scrollTop = 0;
       void modal.offsetWidth; 
       modal.classList.add('show'); 
     }
