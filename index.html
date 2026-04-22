@@ -1110,8 +1110,9 @@
     let swagToken = null;
     let currentUserId = 'Visitor';
     let currentTab = 'daily'; 
-    let handshakeRetryInterval = null;
+let handshakeRetryInterval = null;
 	let isPrivacyUpdating = false;
+    let lastPrivacyToggleAt = 0;
 
     // 修改處：加入 prev_daily, prev_weekly 變數
     const boardData = { 
@@ -1408,8 +1409,9 @@
       const gapEl = document.getElementById('myRankGap');
       const achievementBtn = document.getElementById('achievementBtn');
       const myRankValue = document.getElementById('myRankValue');
-      const totalDiamonds = myData.total_diamonds || 0;      
-      gapEl.textContent = myData.gap_msg || '';
+      const totalDiamonds = myData.total_diamonds || 0;
+      const rawGapMessage = myData.gap_msg || '';
+      gapEl.textContent = rawGapMessage === '已是榜首！' ? '目前為今日榜首' : rawGapMessage;
       gapEl.style.display = isCum ? 'none' : 'block';
       achievementBtn.style.display = isCum ? 'inline-flex' : 'none';
       myRankValue.innerHTML = `${totalDiamonds.toLocaleString()} ${isCum ? t('unitTimes') : renderDiamondIcon()}`;
@@ -1626,6 +1628,7 @@
     async function togglePrivacy(element) {
       const isHidden = element.checked;
       const previousValue = !isHidden;
+      const now = Date.now();		
 
       if (!swagToken || currentUserId === 'Visitor') {
         element.checked = previousValue;
@@ -1638,9 +1641,24 @@
         showToast("設定更新中，請稍候");
         return;
       }
+      if (now - lastPrivacyToggleAt < 1200) {
+        element.checked = previousValue;
+        showToast("操作過於頻繁，請稍後再試");
+        return;
+      }
+
+      const confirmMessage = isHidden
+        ? '確定是否要開啟為「隱身大佬」？'
+        : '確定是否要關閉「隱身大佬」？';
+      const shouldUpdatePrivacy = window.confirm(confirmMessage);
+      if (!shouldUpdatePrivacy) {
+        element.checked = previousValue;
+        return;
+      }
 
 
       isPrivacyUpdating = true;
+      lastPrivacyToggleAt = now;
       element.disabled = true;
      
       fetch(`${API_BASE}/settings/privacy`, { 
