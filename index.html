@@ -32,6 +32,12 @@
       --podium-avatar-size: 68px;
       --podium-avatar-first: 92px;
       --list-avatar-size: 48px;
+      --podium-card-max-width: clamp(108px, 28vw, 172px);
+      --podium-card-padding-x: clamp(8px, 1.8vw, 14px);
+      --podium-card-padding-y: clamp(14px, 2.2vw, 20px);
+      --podium-gap: clamp(8px, 2.4vw, 24px);
+      --podium-top-offset: clamp(46px, 6.4vw, 66px);
+      --podium-no1-lift: clamp(14px, 2.6vw, 28px);		
     }
 
     /* =========================================
@@ -131,7 +137,7 @@
       min-height: 38px;
     }
     .header h1 { 
-      font-size: clamp(26px, 5.4vw, 34px); 
+      font-size: clamp(30px, 6.4vw, 40px); 
 		font-weight: 800; 
       letter-spacing: 0.5px; 
       text-shadow: 0 4px 16px rgba(0,0,0,0.5); 
@@ -478,11 +484,11 @@
       grid-template-columns: repeat(3, 1fr); 
       align-items: end; 
       justify-items: center;      
-      padding: 56px 0 8px; 
-      background: transparent;
+      padding: var(--podium-top-offset) 0 8px; 
+		background: transparent;
       border-radius: 0; 
       border: none; 
-      gap: 10px; 
+      gap: var(--podium-gap); 
       text-align: center; 
       box-shadow: none; 
       backdrop-filter: none; 
@@ -490,8 +496,8 @@
     
     .podium-item { 
       position: relative; 
-      padding: 18px 10px 16px;
-      width: min(100%, 136px); 
+      padding: var(--podium-card-padding-y) var(--podium-card-padding-x) calc(var(--podium-card-padding-y) - 2px);
+      width: min(100%, var(--podium-card-max-width)); 
       border-radius: 18px;
       border: 1px solid rgba(255,255,255,0.12);
       box-shadow: 0 10px 24px rgba(0,0,0,0.24), inset 0 1px 0 rgba(255,255,255,0.16);
@@ -520,8 +526,8 @@
 
     
     .podium-item.no1 { 
-      transform: translateY(-20px); 
-      z-index: 2; 
+      transform: translateY(calc(var(--podium-no1-lift) * -1)); 
+	 z-index: 2; 
     }
     
     .avatar-wrapper { 
@@ -618,6 +624,12 @@
       :root {
         --podium-avatar-size: 66px;
         --podium-avatar-first: 86px;
+        --podium-card-max-width: clamp(98px, 31vw, 122px);
+        --podium-card-padding-x: clamp(6px, 2.4vw, 10px);
+        --podium-card-padding-y: clamp(12px, 3.4vw, 16px);
+        --podium-gap: clamp(6px, 1.8vw, 12px);
+        --podium-top-offset: clamp(42px, 13vw, 52px);
+        --podium-no1-lift: clamp(10px, 4.8vw, 20px);
       }
       .header {
         padding: 24px 12px 14px;
@@ -633,17 +645,6 @@
         padding: 14px 10px 18px;
       }
 
-      .podium {
-        gap: 8px;
-        padding-top: 48px;
-      }
-
-      .podium-item {
-        width: 100%;
-        max-width: 122px;
-        padding: 16px 8px 14px;
-      }
-
       .nickname {
         font-size: 13px;
       }
@@ -656,6 +657,11 @@
     
     /* Desktop spacing tuning for top 3 cards */
     @media (min-width: 1024px) {
+	      :root {
+        --podium-card-max-width: clamp(152px, 15vw, 182px);
+        --podium-card-padding-x: clamp(12px, 1.2vw, 16px);
+        --podium-card-padding-y: clamp(18px, 1.8vw, 24px);
+      }
       .header h1 {
         font-size: clamp(32px, 3.2vw, 40px);
       }
@@ -664,20 +670,7 @@
         padding: 28px 36px 30px;
       }
 
-      .podium {
-        padding-top: 66px;
-        gap: 24px;
-      }
-
-      .podium-item {
-        width: min(100%, 176px);
-        padding: 20px 14px 18px;
-        border-radius: 20px;
-      }
-
-      .podium-item.no1 {
-        transform: translateY(-28px);
-      }
+      .podium-item { border-radius: 20px; }
 
       .avatar-wrapper {
         margin-bottom: 14px;
@@ -1002,7 +995,8 @@
       <p style="color: var(--text-secondary); font-size: 14px; line-height: 1.6; margin-bottom: 12px;">・累積 4 / 12 / 36 次第 1 名成就徽章</p>
 
       <p style="color: #fff; font-size: 15px; font-weight: 700; line-height: 1.6; margin-bottom: 8px;">三、注意事項</p>
-      <p style="color: var(--text-secondary); font-size: 14px; line-height: 1.6; margin-bottom: 8px;">1. 活動資料更新約需 5 分鐘同步時間，請以系統最終顯示結果為準。</p>
+      <p style="color: var(--text-secondary); font-size: 14px; line-height: 1.6; margin-bottom: 8px;">1. 活動資料更新約需 20 分鐘同步時間，請以系統最終顯示結果為準。</p>
+	  <p style="color: var(--text-secondary); font-size: 14px; line-height: 1.6; margin-bottom: 8px;">2. 前日日榜、上週週榜 將於 00:15 為最終數據。</p>
       <p style="color: var(--text-secondary); font-size: 14px; line-height: 1.6; margin-bottom: 12px;">2. 本活動主辦單位保留修改、變更或終止活動之權利。</p>
       <button class="modal-close-btn" onclick="closeModal('ruleModal')">我知道了</button>
     </div>
@@ -1117,6 +1111,7 @@
     let currentUserId = 'Visitor';
     let currentTab = 'daily'; 
     let handshakeRetryInterval = null;
+	let isPrivacyUpdating = false;
 
     // 修改處：加入 prev_daily, prev_weekly 變數
     const boardData = { 
@@ -1153,7 +1148,7 @@
         countdownDaily: '日榜倒數',
         countdownWeekly: '週榜倒數',
         countdownUnitDay: '日',
-        countdownUnitHour: '時',
+        countdownUnitHour: '小時',
         countdownUnitMin: '分',
         countdownUnitSec: '秒',
         unitTimes: '次'
@@ -1173,7 +1168,7 @@
         countdownDaily: '日榜倒数',
         countdownWeekly: '周榜倒数',
         countdownUnitDay: '日',
-        countdownUnitHour: '时',
+        countdownUnitHour: '小时',
         countdownUnitMin: '分',
         countdownUnitSec: '秒',
         unitTimes: '次'
@@ -1531,8 +1526,11 @@
       const m = Math.floor((sec % 3600) / 60);
       const s = sec % 60;
       
-      document.getElementById('countdown-time').textContent = `${d}${t('countdownUnitDay')} / ${h}${t('countdownUnitHour')} / ${m}${t('countdownUnitMin')} / ${s}${t('countdownUnitSec')}`;
-    }
+      const countdownText = isWeeklyBoard
+        ? `${d}${t('countdownUnitDay')} ${h}${t('countdownUnitHour')} ${m}${t('countdownUnitMin')} ${s}${t('countdownUnitSec')}`
+        : `${h}${t('countdownUnitHour')} ${m}${t('countdownUnitMin')} ${s}${t('countdownUnitSec')}`;
+      document.getElementById('countdown-time').textContent = countdownText;
+	}
 
     // ==========================================
     // 6. Modals & Settings API
@@ -1627,7 +1625,31 @@
     
     async function togglePrivacy(element) {
       const isHidden = element.checked;
-      
+      const previousValue = !isHidden;
+      const confirmMessage = isHidden
+        ? '確認開啟「排行榜隱身」嗎？開啟後將送出設定更新。'
+        : '確認關閉「排行榜隱身」嗎？關閉後將送出設定更新。';
+
+      if (!swagToken || currentUserId === 'Visitor') {
+        element.checked = previousValue;
+        showToast("登入驗證失效，請重新開啟頁面");
+        return;
+      }
+
+      if (isPrivacyUpdating) {
+        element.checked = previousValue;
+        showToast("設定更新中，請稍候");
+        return;
+      }
+
+      if (!window.confirm(confirmMessage)) {
+        element.checked = previousValue;
+        return;
+      }
+
+      isPrivacyUpdating = true;
+      element.disabled = true;
+     
       fetch(`${API_BASE}/settings/privacy`, { 
         method: 'POST', 
         headers: { 
@@ -1641,8 +1663,12 @@
         await fetchAllData(); 
       })
       .catch((e) => { 
-        element.checked = !isHidden; 
-        showToast("設定失敗，請稍後再試"); 
+        element.checked = previousValue;
+		  showToast("設定失敗，請稍後再試"); 
+	      })
+      .finally(() => {
+        isPrivacyUpdating = false;
+        element.disabled = false;
       });
     }
 
