@@ -943,31 +943,27 @@
     .my-rank-main { font-size: 18px; font-weight: 800; color: #fff; }
     .my-rank-privacy-row { display: flex; align-items: center; gap: 8px; }
     .my-rank-privacy-label { font-size: 12px; color: var(--text-secondary); cursor: pointer; }
-   .privacy-confirm-inline {
-      margin-top: 8px;
-      display: none;
-      align-items: center;
-      gap: 8px;
-      flex-wrap: wrap;
-      padding: 8px 10px;
-      border-radius: 12px;
-      border: 1px solid rgba(252, 211, 77, 0.5);
-      background: rgba(251, 191, 36, 0.12);
-      color: #fde68a;
-      font-size: 12px;
-      font-weight: 600;
+    .privacy-modal-desc {
+      color: var(--text-secondary);
+      font-size: 14px;
+      line-height: 1.7;
+      margin-bottom: 16px;
+      text-align: center;
     }
-    .privacy-confirm-inline.show { display: flex; }
-    .privacy-confirm-btn {
-      border: none;
-      border-radius: 999px;
-      padding: 4px 10px;
-      font-size: 12px;
-      font-weight: 700;
-      cursor: pointer;
+    .privacy-modal-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
     }
-    .privacy-confirm-btn.confirm { background: #f59e0b; color: #111827; }
-    .privacy-confirm-btn.cancel { background: rgba(255, 255, 255, 0.14); color: #fff; }
+    .privacy-modal-actions .modal-close-btn {
+      margin-top: 0;
+      min-width: 110px;
+    }
+    .privacy-modal-actions .cancel-btn {
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #fff;
+    }
 	.my-rank-right { margin-left: auto; text-align: right; }
     .my-rank-value { color: #fff; font-weight: 800; font-size: 18px; display: flex; align-items: center; justify-content: flex-end; gap: 4px; }
     .my-rank-gap { font-size: 12px; color: var(--brand-primary); margin-top: 4px; font-weight: 600; }
@@ -1043,6 +1039,17 @@
         <div class="empty-state">讀取中...</div>
       </div>
       <button class="modal-close-btn" onclick="closeModal('achievementModal')">關閉</button>
+    </div>
+  </div>
+  <!-- 隱私設定確認 Modal -->
+  <div class="modal-overlay" id="privacyConfirmModal" onclick="closePrivacyConfirmModal(event)">
+    <div class="modal-content" onclick="event.stopPropagation()">
+      <h2 id="privacyConfirmTitle">確認變更</h2>
+      <p class="privacy-modal-desc" id="privacyConfirmDesc">是否要隱身為神秘大佬？</p>
+      <div class="privacy-modal-actions">
+        <button class="modal-close-btn cancel-btn" id="privacyConfirmCancelBtn" type="button">取消</button>
+        <button class="modal-close-btn" id="privacyConfirmOkBtn" type="button">確認</button>
+      </div>
     </div>
   </div>
 
@@ -1123,11 +1130,6 @@
 	            <span class="slider"></span>
 	          </label>
 	        </div>
-          <div class="privacy-confirm-inline" id="privacyConfirmBox">
-            <span>是否要隱身為神秘大佬？</span>
-            <button type="button" class="privacy-confirm-btn confirm" id="privacyConfirmYes">確認</button>
-            <button type="button" class="privacy-confirm-btn cancel" id="privacyConfirmNo">取消</button>
-          </div>
 	      </div>
       <div class="my-rank-right">
         <div class="my-rank-value" id="myRankValue">--</div>
@@ -1153,8 +1155,8 @@
 	    const PRIVACY_TOGGLE_WINDOW_MS = 5 * 60 * 1000;
 	    const PRIVACY_TOGGLE_LIMIT = 4;
 	    const privacyToggleHistory = [];
-	    let pendingPrivacyValue = null;
-
+	    let pendingPrivacyConfirmResolver = null;
+	  
     // 修改處：加入 prev_daily, prev_weekly 變數
     const boardData = { 
       daily: [], 
@@ -1665,10 +1667,52 @@
         console.error('Privacy fetch error', e);
       }
     }
-    function hidePrivacyConfirm() {
-      const confirmBox = document.getElementById('privacyConfirmBox');
-      if (confirmBox) confirmBox.classList.remove('show');
-      pendingPrivacyValue = null;
+    function closePrivacyConfirmModal(event) {
+      if (event && event.target !== event.currentTarget) return;
+      const modal = document.getElementById('privacyConfirmModal');
+      if (modal) {
+        modal.classList.remove('show');
+        setTimeout(() => {
+          modal.style.display = 'none';
+        }, 300);
+      }
+      if (pendingPrivacyConfirmResolver) {
+        pendingPrivacyConfirmResolver(false);
+        pendingPrivacyConfirmResolver = null;
+      }
+    }
+
+    function openPrivacyConfirmModal(nextValue) {
+      const modal = document.getElementById('privacyConfirmModal');
+      const title = document.getElementById('privacyConfirmTitle');
+      const desc = document.getElementById('privacyConfirmDesc');
+      const confirmButton = document.getElementById('privacyConfirmOkBtn');
+      const cancelButton = document.getElementById('privacyConfirmCancelBtn');
+      if (!modal || !title || !desc || !confirmButton || !cancelButton) {
+        return Promise.resolve(false);
+      }
+
+      title.textContent = nextValue ? '開啟隱身確認' : '關閉隱身確認';
+      desc.textContent = nextValue
+        ? '確定要開啟排行榜隱身嗎？開啟後其他人將看不到你的資訊。'
+        : '確定要關閉排行榜隱身嗎？關閉後你的資訊會重新顯示在排行榜。';
+
+      modal.style.display = 'flex';
+      void modal.offsetWidth;
+      modal.classList.add('show');
+
+      return new Promise((resolve) => {
+        pendingPrivacyConfirmResolver = resolve;
+        const cleanupAndResolve = (value) => {
+          if (!pendingPrivacyConfirmResolver) return;
+          const resolver = pendingPrivacyConfirmResolver;
+          pendingPrivacyConfirmResolver = null;
+          resolver(value);
+          closePrivacyConfirmModal();
+        };
+        confirmButton.onclick = () => cleanupAndResolve(true);
+        cancelButton.onclick = () => cleanupAndResolve(false);
+      });
     }
 
     function isPrivacyToggleRateLimited() {
@@ -1732,10 +1776,11 @@
       }
 
       element.checked = previousValue;
-      pendingPrivacyValue = isHidden;
-		
-      const confirmBox = document.getElementById('privacyConfirmBox');
-      if (confirmBox) confirmBox.classList.add('show');
+      const isConfirmed = await openPrivacyConfirmModal(isHidden);
+      if (!isConfirmed) {
+        return;
+      }
+      await submitPrivacyUpdate(isHidden, previousValue, element);
 		
     }
 
@@ -1757,22 +1802,6 @@
       if (privacyToggle && privacyToggleLabel) {
         privacyToggleLabel.addEventListener('click', () => privacyToggle.click());
       }	
-     const privacyConfirmYes = document.getElementById('privacyConfirmYes');
-      const privacyConfirmNo = document.getElementById('privacyConfirmNo');
-      if (privacyConfirmYes && privacyToggle) {
-        privacyConfirmYes.addEventListener('click', async () => {
-          if (pendingPrivacyValue === null) return;
-          const nextValue = pendingPrivacyValue;
-          const previousValue = !nextValue;
-          hidePrivacyConfirm();
-          await submitPrivacyUpdate(nextValue, previousValue, privacyToggle);
-        });
-      }
-      if (privacyConfirmNo && privacyToggle) {
-        privacyConfirmNo.addEventListener('click', () => {
-          hidePrivacyConfirm();
-        });
-      }
       document.getElementById('localeSwitcher').addEventListener('click', (event) => {
         const localeButton = event.target.closest('.locale-btn');
         if (!localeButton) return;
