@@ -242,9 +242,10 @@
       border-color: rgba(255,255,255,0.2); 
     }
     .benefit-icon {
-      background: rgba(250, 204, 21, 0.2);
-      border-color: rgba(250, 204, 21, 0.58);
-      color: #fde047;
+      background: linear-gradient(180deg, rgba(250, 204, 21, 0.38), rgba(234, 179, 8, 0.28));
+      border-color: rgba(250, 204, 21, 0.75);
+      color: #fff8d2;
+      box-shadow: 0 6px 14px rgba(234, 179, 8, 0.28);
       font-weight: 800;
     }    
     
@@ -1123,7 +1124,7 @@
 	          </label>
 	        </div>
           <div class="privacy-confirm-inline" id="privacyConfirmBox">
-            <span>是否要隱身為神秘打佬？</span>
+            <span>是否要隱身為神秘大佬？</span>
             <button type="button" class="privacy-confirm-btn confirm" id="privacyConfirmYes">確認</button>
             <button type="button" class="privacy-confirm-btn cancel" id="privacyConfirmNo">取消</button>
           </div>
@@ -1730,44 +1731,12 @@
         return;
       }
 
-      const nowConfirm = Date.now();
-      const shouldBypassConfirm = pendingPrivacyConfirm
-        && pendingPrivacyConfirm.value === isHidden
-        && nowConfirm - pendingPrivacyConfirm.at <= 5000;
-
-      if (!shouldBypassConfirm) {
-        pendingPrivacyConfirm = { value: isHidden, at: nowConfirm };
-        element.checked = previousValue;
-        showToast(isHidden ? '再點一次即可確認開啟「隱身大佬」' : '再點一次即可確認關閉「隱身大佬」');
-        return;
-      }
-      pendingPrivacyConfirm = null;
-
-      isPrivacyUpdating = true;
-      lastPrivacyToggleAt = now;
-      element.disabled = true;
-     
-      fetch(`${API_BASE}/settings/privacy`, { 
-        method: 'POST', 
-        headers: { 
-          'Content-Type': 'application/json', 
-          'Authorization': `Bearer ${swagToken}` 
-        }, 
-        body: JSON.stringify({ hide_info: isHidden }) 
-      })
-      .then(async (res) => {
-        if (!res.ok) throw new Error('Network response was not ok');
-        await fetchAllData();
-        showToast(isHidden ? "✅ 已開啟排行榜隱身" : "✅ 已關閉排行榜隱身");
-	  })
-      .catch((e) => { 
-        element.checked = previousValue;
-		  showToast("設定失敗，請稍後再試"); 
-	      })
-      .finally(() => {
-        isPrivacyUpdating = false;
-        element.disabled = false;
-      });
+      element.checked = previousValue;
+      pendingPrivacyValue = isHidden;
+		
+      const confirmBox = document.getElementById('privacyConfirmBox');
+      if (confirmBox) confirmBox.classList.add('show');
+		
     }
 
     // ==========================================
@@ -1787,7 +1756,23 @@
       const privacyToggleLabel = document.getElementById('privacyToggleLabel');
       if (privacyToggle && privacyToggleLabel) {
         privacyToggleLabel.addEventListener('click', () => privacyToggle.click());
-      }		
+      }	
+     const privacyConfirmYes = document.getElementById('privacyConfirmYes');
+      const privacyConfirmNo = document.getElementById('privacyConfirmNo');
+      if (privacyConfirmYes && privacyToggle) {
+        privacyConfirmYes.addEventListener('click', async () => {
+          if (pendingPrivacyValue === null) return;
+          const nextValue = pendingPrivacyValue;
+          const previousValue = !nextValue;
+          hidePrivacyConfirm();
+          await submitPrivacyUpdate(nextValue, previousValue, privacyToggle);
+        });
+      }
+      if (privacyConfirmNo && privacyToggle) {
+        privacyConfirmNo.addEventListener('click', () => {
+          hidePrivacyConfirm();
+        });
+      }
       document.getElementById('localeSwitcher').addEventListener('click', (event) => {
         const localeButton = event.target.closest('.locale-btn');
         if (!localeButton) return;
