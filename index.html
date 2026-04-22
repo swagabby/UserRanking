@@ -272,10 +272,10 @@
       min-width: 0;
       flex: 1;
       max-width: 100%;
-      display: flex;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
       align-items: center;
-      justify-content: flex-start;
-	  gap: 8px;
+      column-gap: 8px;
     }
 
     #countdown-label,
@@ -286,8 +286,13 @@
 	}
     #countdown-label {
       text-align: left;
-	}
+      justify-self: start;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
     .countdown-time {
+      grid-column: 2;
+      justify-self: center;
       color: inherit;
       font-weight: 800;
       font-family: monospace;
@@ -1088,7 +1093,8 @@
       <p style="color: #fff; font-size: 15px; font-weight: 700; line-height: 1.6; margin-bottom: 8px;">三、注意事項</p>
       <p style="color: var(--text-secondary); font-size: 14px; line-height: 1.6; margin-bottom: 8px;">1. 活動資料更新約需 20 分鐘同步時間，請以系統最終顯示結果為準。</p>
 	  <p style="color: var(--text-secondary); font-size: 14px; line-height: 1.6; margin-bottom: 8px;">2. 前日日榜、上週週榜 將於 00:15 為最終數據。</p>
-      <p style="color: var(--text-secondary); font-size: 14px; line-height: 1.6; margin-bottom: 12px;">2. 本活動主辦單位保留修改、變更或終止活動之權利。</p>
+      <p style="color: var(--text-secondary); font-size: 14px; line-height: 1.6; margin-bottom: 8px;">3. 活動統計至 2026/12/31。</p>
+      <p style="color: var(--text-secondary); font-size: 14px; line-height: 1.6; margin-bottom: 12px;">4. 本活動主辦單位保留修改、變更或終止活動之權利。</p>
       <button class="modal-close-btn" onclick="closeModal('ruleModal')">我知道了</button>
     </div>
   </div>
