@@ -1516,8 +1516,10 @@
         return; 
       }
       
-      const rankText = typeof myData.user_rank === 'number' ? `第 ${myData.user_rank} 名` : myData.user_rank;
-      document.getElementById('myRankMain').textContent = rankText;      
+      const levelText = myData.current_level !== undefined && myData.current_level !== null && myData.current_level !== ''
+        ? `等級 ${myData.current_level}`
+        : (typeof myData.user_rank === 'number' ? `第 ${myData.user_rank} 名` : myData.user_rank);
+      document.getElementById('myRankMain').textContent = levelText;      
       const isCum = currentTab.startsWith('cumulative');
       const gapEl = document.getElementById('myRankGap');
       const achievementBtn = document.getElementById('achievementBtn');
